@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MedicalRecordController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\PrescriptionController;
 use App\Http\Controllers\Api\SlotController;
@@ -11,7 +12,10 @@ use App\Http\Controllers\Api\Admin\AttachmentController;
 use App\Http\Controllers\Api\Admin\ClinicSettingController;
 use App\Http\Controllers\Api\Admin\MedicalRecordController as AdminMedicalRecordController;
 use App\Http\Controllers\Api\Admin\PatientController as AdminPatientController;
+use App\Http\Controllers\Api\Admin\DashboardController;
+use App\Http\Controllers\Api\Admin\PaymentController;
 use App\Http\Controllers\Api\Admin\PrescriptionController as AdminPrescriptionController;
+use App\Http\Controllers\Api\Admin\ReportController;
 use App\Http\Controllers\Api\Admin\ScheduleController;
 use App\Http\Controllers\Api\Admin\VacationController;
 use Illuminate\Support\Facades\Route;
@@ -82,8 +86,34 @@ Route::middleware('auth:sanctum')->prefix('prescriptions')->group(function () {
     Route::get('/{prescription}', [PrescriptionController::class, 'show']);
 });
 
+// Patient notifications routes (requires authentication)
+Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
+    Route::get('/', [NotificationController::class, 'index']);
+    Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('/{notification}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/{notification}', [NotificationController::class, 'destroy']);
+});
+
 // Admin routes (requires authentication + admin role)
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    // Dashboard
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/dashboard/today', [DashboardController::class, 'today']);
+    Route::get('/dashboard/weekly', [DashboardController::class, 'weekly']);
+    Route::get('/dashboard/monthly', [DashboardController::class, 'monthly']);
+    Route::get('/dashboard/chart', [DashboardController::class, 'chart']);
+    Route::get('/dashboard/recent-activity', [DashboardController::class, 'recentActivity']);
+    Route::get('/dashboard/upcoming-appointments', [DashboardController::class, 'upcomingAppointments']);
+
+    // Reports
+    Route::get('/reports/appointments', [ReportController::class, 'appointments']);
+    Route::get('/reports/revenue', [ReportController::class, 'revenue']);
+    Route::get('/reports/patients', [ReportController::class, 'patients']);
+    Route::get('/reports/appointments/export', [ReportController::class, 'exportAppointments']);
+    Route::get('/reports/revenue/export', [ReportController::class, 'exportRevenue']);
+    Route::get('/reports/patients/export', [ReportController::class, 'exportPatients']);
+
     // Clinic Settings
     Route::get('/settings', [ClinicSettingController::class, 'show']);
     Route::put('/settings', [ClinicSettingController::class, 'update']);
@@ -154,4 +184,15 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/medical-records/{medicalRecord}/attachments/{attachment}', [AttachmentController::class, 'show']);
     Route::delete('/medical-records/{medicalRecord}/attachments/{attachment}', [AttachmentController::class, 'destroy']);
     Route::get('/medical-records/{medicalRecord}/attachments/{attachment}/download', [AttachmentController::class, 'download']);
+
+    // Payments
+    Route::get('/payments', [PaymentController::class, 'index']);
+    Route::get('/payments/statistics', [PaymentController::class, 'statistics']);
+    Route::get('/payments/report', [PaymentController::class, 'report']);
+    Route::post('/payments', [PaymentController::class, 'store']);
+    Route::get('/payments/{payment}', [PaymentController::class, 'show']);
+    Route::put('/payments/{payment}', [PaymentController::class, 'update']);
+    Route::post('/payments/{payment}/mark-paid', [PaymentController::class, 'markAsPaid']);
+    Route::post('/payments/{payment}/refund', [PaymentController::class, 'refund']);
+    Route::get('/appointments/{appointment}/payment', [PaymentController::class, 'byAppointment']);
 });
