@@ -35,13 +35,16 @@
 - [x] All tests passing (181 tests, 423 assertions)
 
 ## Phase 3: Booking System
-- [ ] Appointment model & migration
-- [ ] AppointmentService
-- [ ] Public Booking APIs
-- [ ] Admin Appointment APIs
-- [ ] Booking Blade views
-- [ ] Unit Tests
-- [ ] Feature Tests
+- [x] Appointment model & migration
+- [x] AppointmentStatus & CancelledBy Enums
+- [x] AppointmentFactory
+- [x] AppointmentService
+- [x] Updated SlotGeneratorService (slot availability check)
+- [x] Public Booking APIs (book, list, view, cancel, check)
+- [x] Admin Appointment APIs (list, today, upcoming, statistics, confirm, complete, cancel, no-show, notes)
+- [x] Unit Tests (AppointmentStatus, CancelledBy, Appointment, AppointmentService)
+- [x] Feature Tests (AppointmentApi, Admin/AppointmentApi)
+- [x] All tests passing (273 tests, 619 assertions)
 
 ## Phase 4: Patient Management
 - [ ] PatientProfile model & migration

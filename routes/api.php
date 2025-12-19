@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\SlotController;
+use App\Http\Controllers\Api\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Api\Admin\ClinicSettingController;
 use App\Http\Controllers\Api\Admin\ScheduleController;
 use App\Http\Controllers\Api\Admin\VacationController;
@@ -41,6 +43,16 @@ Route::prefix('slots')->group(function () {
     Route::get('/{date}', [SlotController::class, 'slots']);
 });
 
+// Patient appointment routes (requires authentication)
+Route::middleware('auth:sanctum')->prefix('appointments')->group(function () {
+    Route::get('/', [AppointmentController::class, 'index']);
+    Route::get('/upcoming', [AppointmentController::class, 'upcoming']);
+    Route::post('/', [AppointmentController::class, 'store']);
+    Route::post('/check', [AppointmentController::class, 'checkBooking']);
+    Route::get('/{appointment}', [AppointmentController::class, 'show']);
+    Route::post('/{appointment}/cancel', [AppointmentController::class, 'cancel']);
+});
+
 // Admin routes (requires authentication + admin role)
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // Clinic Settings
@@ -63,4 +75,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/vacations/{vacation}', [VacationController::class, 'show']);
     Route::put('/vacations/{vacation}', [VacationController::class, 'update']);
     Route::delete('/vacations/{vacation}', [VacationController::class, 'destroy']);
+
+    // Appointments
+    Route::get('/appointments', [AdminAppointmentController::class, 'index']);
+    Route::get('/appointments/today', [AdminAppointmentController::class, 'today']);
+    Route::get('/appointments/upcoming', [AdminAppointmentController::class, 'upcoming']);
+    Route::get('/appointments/for-date', [AdminAppointmentController::class, 'forDate']);
+    Route::get('/appointments/statistics', [AdminAppointmentController::class, 'statistics']);
+    Route::get('/appointments/{appointment}', [AdminAppointmentController::class, 'show']);
+    Route::post('/appointments/{appointment}/confirm', [AdminAppointmentController::class, 'confirm']);
+    Route::post('/appointments/{appointment}/complete', [AdminAppointmentController::class, 'complete']);
+    Route::post('/appointments/{appointment}/cancel', [AdminAppointmentController::class, 'cancel']);
+    Route::post('/appointments/{appointment}/no-show', [AdminAppointmentController::class, 'noShow']);
+    Route::put('/appointments/{appointment}/notes', [AdminAppointmentController::class, 'updateNotes']);
 });
