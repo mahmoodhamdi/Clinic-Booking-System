@@ -205,6 +205,18 @@ export interface DashboardStats {
   today_revenue: number;
 }
 
+export interface PatientDashboard {
+  upcoming_appointments: Appointment[];
+  recent_records: MedicalRecord[];
+  recent_prescriptions: Prescription[];
+  unread_notifications: number;
+  statistics: {
+    total_appointments: number;
+    completed_appointments: number;
+    cancelled_appointments: number;
+  };
+}
+
 // API Response types
 export interface ApiResponse<T> {
   success: boolean;
