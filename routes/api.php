@@ -2,11 +2,16 @@
 
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\MedicalRecordController;
 use App\Http\Controllers\Api\PatientController;
+use App\Http\Controllers\Api\PrescriptionController;
 use App\Http\Controllers\Api\SlotController;
 use App\Http\Controllers\Api\Admin\AppointmentController as AdminAppointmentController;
+use App\Http\Controllers\Api\Admin\AttachmentController;
 use App\Http\Controllers\Api\Admin\ClinicSettingController;
+use App\Http\Controllers\Api\Admin\MedicalRecordController as AdminMedicalRecordController;
 use App\Http\Controllers\Api\Admin\PatientController as AdminPatientController;
+use App\Http\Controllers\Api\Admin\PrescriptionController as AdminPrescriptionController;
 use App\Http\Controllers\Api\Admin\ScheduleController;
 use App\Http\Controllers\Api\Admin\VacationController;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +70,18 @@ Route::middleware('auth:sanctum')->prefix('patient')->group(function () {
     Route::get('/statistics', [PatientController::class, 'statistics']);
 });
 
+// Patient medical records routes (requires authentication)
+Route::middleware('auth:sanctum')->prefix('medical-records')->group(function () {
+    Route::get('/', [MedicalRecordController::class, 'index']);
+    Route::get('/{medicalRecord}', [MedicalRecordController::class, 'show']);
+});
+
+// Patient prescriptions routes (requires authentication)
+Route::middleware('auth:sanctum')->prefix('prescriptions')->group(function () {
+    Route::get('/', [PrescriptionController::class, 'index']);
+    Route::get('/{prescription}', [PrescriptionController::class, 'show']);
+});
+
 // Admin routes (requires authentication + admin role)
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // Clinic Settings
@@ -110,4 +127,31 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::put('/patients/{patient}/profile', [AdminPatientController::class, 'updateProfile']);
     Route::put('/patients/{patient}/status', [AdminPatientController::class, 'toggleStatus']);
     Route::post('/patients/{patient}/notes', [AdminPatientController::class, 'addNotes']);
+
+    // Medical Records
+    Route::get('/medical-records', [AdminMedicalRecordController::class, 'index']);
+    Route::get('/medical-records/follow-ups-due', [AdminMedicalRecordController::class, 'followUpsDue']);
+    Route::post('/medical-records', [AdminMedicalRecordController::class, 'store']);
+    Route::get('/medical-records/{medicalRecord}', [AdminMedicalRecordController::class, 'show']);
+    Route::put('/medical-records/{medicalRecord}', [AdminMedicalRecordController::class, 'update']);
+    Route::delete('/medical-records/{medicalRecord}', [AdminMedicalRecordController::class, 'destroy']);
+    Route::get('/patients/{patient}/medical-records', [AdminMedicalRecordController::class, 'byPatient']);
+
+    // Prescriptions
+    Route::get('/prescriptions', [AdminPrescriptionController::class, 'index']);
+    Route::post('/prescriptions', [AdminPrescriptionController::class, 'store']);
+    Route::get('/prescriptions/{prescription}', [AdminPrescriptionController::class, 'show']);
+    Route::put('/prescriptions/{prescription}', [AdminPrescriptionController::class, 'update']);
+    Route::delete('/prescriptions/{prescription}', [AdminPrescriptionController::class, 'destroy']);
+    Route::post('/prescriptions/{prescription}/dispense', [AdminPrescriptionController::class, 'markAsDispensed']);
+    Route::get('/prescriptions/{prescription}/pdf', [AdminPrescriptionController::class, 'streamPdf']);
+    Route::get('/prescriptions/{prescription}/download', [AdminPrescriptionController::class, 'downloadPdf']);
+    Route::get('/patients/{patient}/prescriptions', [AdminPrescriptionController::class, 'byPatient']);
+
+    // Attachments (nested under medical records)
+    Route::get('/medical-records/{medicalRecord}/attachments', [AttachmentController::class, 'index']);
+    Route::post('/medical-records/{medicalRecord}/attachments', [AttachmentController::class, 'store']);
+    Route::get('/medical-records/{medicalRecord}/attachments/{attachment}', [AttachmentController::class, 'show']);
+    Route::delete('/medical-records/{medicalRecord}/attachments/{attachment}', [AttachmentController::class, 'destroy']);
+    Route::get('/medical-records/{medicalRecord}/attachments/{attachment}/download', [AttachmentController::class, 'download']);
 });
