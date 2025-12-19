@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\DayOfWeek;
+use App\Models\Appointment;
 use App\Models\ClinicSetting;
 use App\Models\Schedule;
 use App\Models\Vacation;
@@ -89,12 +90,13 @@ class SlotGeneratorService
             });
         }
 
-        // Map to full slot info
+        // Map to full slot info with availability check
         return $slots->map(function ($time) use ($date) {
+            $isBooked = Appointment::isSlotBooked($date, $time);
             return [
                 'time' => $time,
                 'datetime' => $date->copy()->setTimeFromTimeString($time)->toIso8601String(),
-                'is_available' => true, // Will be updated in Phase 3 with appointment check
+                'is_available' => !$isBooked,
             ];
         })->values();
     }
@@ -125,10 +127,10 @@ class SlotGeneratorService
             return false;
         }
 
-        // TODO: In Phase 3, check if slot is already booked
-        // $isBooked = Appointment::where('appointment_time', $datetime)
-        //     ->whereIn('status', ['pending', 'confirmed'])
-        //     ->exists();
+        // Check if slot is already booked
+        if (Appointment::isSlotBooked($date, $time)) {
+            return false;
+        }
 
         return true;
     }
@@ -144,13 +146,15 @@ class SlotGeneratorService
             $date = now()->addDays($i);
             $slots = $this->getSlotsForDate($date);
 
-            if ($slots->isNotEmpty()) {
-                $firstSlot = $slots->first();
+            // Find first available slot (not booked)
+            $availableSlot = $slots->first(fn($slot) => $slot['is_available']);
+
+            if ($availableSlot) {
                 return [
                     'date' => $date->toDateString(),
                     'day_name' => DayOfWeek::fromDate($date)->labelAr(),
-                    'time' => $firstSlot['time'],
-                    'datetime' => $firstSlot['datetime'],
+                    'time' => $availableSlot['time'],
+                    'datetime' => $availableSlot['datetime'],
                 ];
             }
         }
@@ -165,6 +169,7 @@ class SlotGeneratorService
     {
         $days = $days ?? $this->settings->advance_booking_days;
         $totalSlots = 0;
+        $availableSlots = 0;
         $availableDates = 0;
 
         for ($i = 0; $i <= $days; $i++) {
@@ -172,7 +177,9 @@ class SlotGeneratorService
 
             if ($this->isDateAvailable($date)) {
                 $availableDates++;
-                $totalSlots += $this->getSlotsForDate($date)->count();
+                $slots = $this->getSlotsForDate($date);
+                $totalSlots += $slots->count();
+                $availableSlots += $slots->where('is_available', true)->count();
             }
         }
 
@@ -180,6 +187,7 @@ class SlotGeneratorService
             'total_days' => $days + 1,
             'available_dates' => $availableDates,
             'total_slots' => $totalSlots,
+            'available_slots' => $availableSlots,
             'next_available' => $this->getNextAvailableSlot(),
         ];
     }

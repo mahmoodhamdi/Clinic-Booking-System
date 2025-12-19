@@ -15,7 +15,8 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->isAdmin()) {
+        // Allow both admin and secretary (staff members)
+        if (!$request->user() || !$request->user()->isStaff()) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
