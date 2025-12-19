@@ -28,3 +28,6 @@ Thumbs.db
 
 # Prompt files (development only)
 clinic-booking-prompt.md
+
+# Google OAuth credentials
+client_secret_*.json
