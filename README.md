@@ -1,125 +1,174 @@
 # Clinic Booking System
 
-A comprehensive clinic management system for single-doctor private practices. Built with Laravel 12 and REST APIs.
+A comprehensive REST API for private medical clinic management built with Laravel 12.
 
 ## Features
 
-### Patient Features
-- Online appointment booking with slot selection
-- View appointment history and upcoming appointments
-- Access medical records and prescriptions
-- Download prescription PDFs
-- Receive notifications (appointment reminders, confirmations, cancellations)
-- Profile management
+### Authentication & User Management
+- Phone-based authentication with OTP verification
+- Role-based access control (Admin, Secretary, Patient)
+- Profile management with avatar upload
+- Secure password reset flow
 
-### Admin Features
-- Dashboard with real-time statistics and charts
-- Appointment management (confirm, complete, cancel, no-show)
-- Patient management with medical history
-- Medical records creation and management
-- Prescription generation with PDF export
-- Payment tracking with multiple payment methods
-- Revenue reports and PDF exports
-- Schedule management (working hours per day)
-- Vacation management
-- Clinic settings configuration
+### Appointment Booking
+- Real-time slot availability checking
+- Advanced booking with configurable lead time
+- Appointment status management (pending, confirmed, completed, cancelled, no-show)
+- Automated conflict detection
 
-## Requirements
+### Patient Management
+- Complete patient profiles with medical history
+- Blood type, allergies, chronic diseases tracking
+- Emergency contact information
+- Insurance details management
 
-- PHP 8.2+
-- Composer
-- MySQL 8.0+ or SQLite
-- Node.js 18+ (optional, for frontend assets)
+### Medical Records
+- Detailed examination documentation
+- Vital signs tracking (BP, heart rate, temperature, weight, height)
+- Follow-up scheduling
+- File attachments support (images, PDFs, documents)
+
+### Prescriptions
+- Digital prescription creation
+- Medication details with dosage and instructions
+- PDF generation and download
+- Dispensing status tracking
+
+### Payments
+- Multiple payment methods (Cash, Card, Wallet)
+- Discount management
+- Payment status tracking (pending, paid, refunded)
+- Revenue reporting
+
+### Dashboard & Reports
+- Real-time statistics
+- Appointment trends and charts
+- Revenue reports with date filtering
+- PDF export functionality
+
+### Notifications
+- In-app notification system
+- Appointment reminders
+- Status change alerts
+
+### Localization
+- Multi-language support (Arabic, English)
+- RTL layout support
+- Easily extensible for additional languages
+
+## Tech Stack
+
+- **Framework**: Laravel 12
+- **PHP Version**: 8.2+
+- **Authentication**: Laravel Sanctum
+- **Database**: MySQL / SQLite
+- **PDF Generation**: DomPDF
+- **Testing**: PHPUnit
 
 ## Installation
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/mahmoodhamdi/Clinic-Booking-System.git
-cd Clinic-Booking-System
-```
+### Prerequisites
+- PHP 8.2 or higher
+- Composer
+- MySQL or SQLite
+- Node.js & NPM (optional, for frontend assets)
 
-### 2. Install PHP dependencies
-```bash
-composer install
-```
+### Setup
 
-### 3. Configure environment
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/clinic-booking-system.git
+   cd clinic-booking-system
+   ```
 
-### 4. Configure database
-Edit `.env` file with your database credentials:
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=clinic_booking
-DB_USERNAME=root
-DB_PASSWORD=
-```
+2. **Install dependencies**
+   ```bash
+   composer install
+   ```
 
-### 5. Run migrations
-```bash
-php artisan migrate
-```
+3. **Environment configuration**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-### 6. Seed the database
-```bash
-php artisan db:seed
-```
+4. **Configure database**
 
-Default admin credentials:
-- Phone: `01000000000`
-- Password: `admin123`
+   Edit `.env` file with your database credentials:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=clinic_booking
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
 
-### 7. Start the development server
-```bash
-php artisan serve
-```
+5. **Run migrations and seeders**
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
 
-The API will be available at `http://localhost:8000/api`
+6. **Start the development server**
+   ```bash
+   php artisan serve
+   ```
+
+   The API will be available at `http://localhost:8000/api`
 
 ## API Documentation
 
-See [docs/API.md](docs/API.md) for complete API documentation.
-
-### Quick Start Examples
-
-#### Register a new patient
-```bash
-curl -X POST http://localhost:8000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Ahmed Mohamed",
-    "phone": "+201012345678",
-    "password": "password123",
-    "password_confirmation": "password123"
-  }'
+### Base URL
+```
+http://localhost:8000/api
 ```
 
-#### Login
-```bash
-curl -X POST http://localhost:8000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone": "+201012345678",
-    "password": "password123"
-  }'
+### Authentication
+All protected endpoints require a Bearer token:
+```
+Authorization: Bearer {token}
 ```
 
-#### Book an appointment
-```bash
-curl -X POST http://localhost:8000/api/appointments \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer {token}" \
-  -d '{
-    "appointment_date": "2025-12-25",
-    "appointment_time": "10:00"
-  }'
-```
+### Localization
+Set language via header or query parameter:
+- Header: `Accept-Language: ar` or `Accept-Language: en`
+- Query: `?lang=ar` or `?lang=en`
+
+### Main Endpoints
+
+| Category | Endpoint | Description |
+|----------|----------|-------------|
+| **Auth** | POST /api/auth/register | Register new patient |
+| | POST /api/auth/login | Login |
+| | POST /api/auth/logout | Logout |
+| | GET /api/auth/me | Get current user |
+| **Slots** | GET /api/slots/dates | Get available dates |
+| | GET /api/slots/{date} | Get slots for date |
+| **Appointments** | GET /api/appointments | List my appointments |
+| | POST /api/appointments | Book appointment |
+| | POST /api/appointments/{id}/cancel | Cancel appointment |
+| **Medical Records** | GET /api/medical-records | List my records |
+| **Prescriptions** | GET /api/prescriptions | List my prescriptions |
+| **Notifications** | GET /api/notifications | List notifications |
+| **Locales** | GET /api/locales | Get supported languages |
+
+### Admin Endpoints
+
+| Category | Endpoint | Description |
+|----------|----------|-------------|
+| **Dashboard** | GET /api/admin/dashboard/stats | Overview statistics |
+| **Appointments** | GET /api/admin/appointments | List all appointments |
+| **Patients** | GET /api/admin/patients | List all patients |
+| **Medical Records** | POST /api/admin/medical-records | Create record |
+| **Prescriptions** | POST /api/admin/prescriptions | Create prescription |
+| **Payments** | GET /api/admin/payments | List payments |
+| **Reports** | GET /api/admin/reports/revenue | Revenue report |
+| **Settings** | GET /api/admin/settings | Clinic settings |
+
+For complete API documentation, see:
+- [API Documentation](docs/API.md)
+- [OpenAPI Specification](docs/openapi.yaml)
 
 ## Testing
 
@@ -133,97 +182,80 @@ Run with coverage:
 php artisan test --coverage
 ```
 
-Run specific test files:
+Run specific test:
 ```bash
-php artisan test --filter=DashboardTest
+php artisan test --filter=AppointmentTest
 ```
 
-Run tests in parallel:
-```bash
-php artisan test --parallel
-```
+**Current Status**: 544 tests passing with 1615 assertions
 
 ## Project Structure
 
 ```
 app/
-├── Enums/              # PHP Enums (AppointmentStatus, PaymentMethod, etc.)
+├── Enums/              # Enumerations (UserRole, AppointmentStatus, etc.)
 ├── Http/
-│   ├── Controllers/
-│   │   ├── Api/        # Patient API controllers
-│   │   └── Admin/      # Admin API controllers
+│   ├── Controllers/    # API Controllers
+│   ├── Middleware/     # Custom middleware
 │   ├── Requests/       # Form request validation
-│   └── Resources/      # API resources
+│   └── Resources/      # API Resources
 ├── Models/             # Eloquent models
-├── Notifications/      # Notification classes
 └── Services/           # Business logic services
 
+config/
+├── localization.php    # Multi-language configuration
+
 database/
-├── factories/          # Model factories for testing
+├── factories/          # Model factories
 ├── migrations/         # Database migrations
 └── seeders/            # Database seeders
 
-tests/
-├── Feature/            # Feature/integration tests
-└── Unit/               # Unit tests
-
 docs/
 ├── API.md              # API documentation
-└── *.md                # Phase implementation plans
+├── openapi.yaml        # OpenAPI 3.0 specification
+└── PHASE*.md           # Implementation plans
+
+lang/
+├── ar.json             # Arabic translations
+└── en.json             # English translations
+
+tests/
+├── Feature/            # Feature tests
+└── Unit/               # Unit tests
 ```
 
-## API Endpoints Summary
+## Configuration
 
-| Category | Endpoints | Description |
-|----------|-----------|-------------|
-| Authentication | 12 | Register, login, logout, password reset, profile |
-| Slots (Public) | 4 | Available dates and times |
-| Patient Appointments | 6 | Book, view, cancel appointments |
-| Patient Profile | 6 | Dashboard, profile management |
-| Medical Records | 2 | View patient medical records |
-| Prescriptions | 2 | View patient prescriptions |
-| Notifications | 5 | View and manage notifications |
-| Admin Dashboard | 7 | Statistics, charts, activity |
-| Admin Reports | 6 | Reports with PDF export |
-| Admin Settings | 4 | Clinic settings management |
-| Admin Schedules | 6 | Working hours management |
-| Admin Vacations | 5 | Vacation days management |
-| Admin Appointments | 11 | Full appointment management |
-| Admin Patients | 8 | Patient management |
-| Admin Medical Records | 7 | Medical records management |
-| Admin Prescriptions | 9 | Prescription management |
-| Admin Attachments | 5 | File attachments |
-| Admin Payments | 9 | Payment tracking |
+### Clinic Settings
+Configure via API or directly in database:
+- Clinic name and contact info
+- Slot duration (default: 30 minutes)
+- Maximum patients per slot
+- Advance booking days
+- Cancellation hours limit
 
-**Total: 114 API endpoints**
+### Localization Settings
+Edit `config/localization.php`:
+```php
+'supported' => [
+    'ar' => ['name' => 'Arabic', 'direction' => 'rtl', ...],
+    'en' => ['name' => 'English', 'direction' => 'ltr', ...],
+],
+'default' => 'ar',
+'fallback' => 'en',
+```
 
-## Development Phases
+## Default Admin Credentials
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| 1 | Project Setup & Authentication | Completed |
-| 2 | Clinic Settings & Schedules | Completed |
-| 3 | Booking System | Completed |
-| 4 | Patient Management | Completed |
-| 5 | Medical Records & Prescriptions | Completed |
-| 6 | Payments | Completed |
-| 7 | Notifications | Completed |
-| 8 | Dashboard & Reports | Completed |
-| 9 | Final Testing & Polish | Completed |
-
-## Tech Stack
-
-- **Framework**: Laravel 12
-- **Authentication**: Laravel Sanctum
-- **PDF Generation**: Laravel DomPDF
-- **Phone Validation**: Laravel Phone
-- **Testing**: PHPUnit
+After running seeders:
+- **Phone**: 01000000000
+- **Password**: admin123
 
 ## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
@@ -233,4 +265,4 @@ This project is open-sourced software licensed under the [MIT license](LICENSE).
 
 ## Support
 
-For support, please open an issue in the GitHub repository.
+For support, email hmdy7486@gmail.com or open an issue on GitHub.
