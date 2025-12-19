@@ -11,6 +11,22 @@ All protected endpoints require a Bearer token in the Authorization header:
 Authorization: Bearer {token}
 ```
 
+## Localization
+The API supports multiple languages (Arabic and English). Set the desired language using:
+- **Header**: `Accept-Language: ar` or `Accept-Language: en`
+- **Query Parameter**: `?lang=ar` or `?lang=en`
+
+Response includes locale metadata:
+```json
+{
+  "meta": {
+    "locale": "ar",
+    "direction": "rtl",
+    "is_rtl": true
+  }
+}
+```
+
 ---
 
 ## Authentication APIs
@@ -433,6 +449,52 @@ GET /api/admin/payments/statistics
 
 ---
 
+## Localization APIs
+
+### Get Supported Locales
+```http
+GET /api/locales
+```
+Returns all supported languages.
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "code": "ar",
+      "name": "Arabic",
+      "native": "العربية",
+      "direction": "rtl",
+      "flag": "🇸🇦",
+      "is_current": true
+    },
+    {
+      "code": "en",
+      "name": "English",
+      "native": "English",
+      "direction": "ltr",
+      "flag": "🇺🇸",
+      "is_current": false
+    }
+  ]
+}
+```
+
+### Get Current Locale
+```http
+GET /api/locales/current
+```
+Returns current locale information.
+
+### Get Translations
+```http
+GET /api/locales/translations
+```
+Returns all translation strings for the current locale.
+
+---
+
 ## Status Codes
 
 | Code | Description |
@@ -446,3 +508,11 @@ GET /api/admin/payments/statistics
 | 404 | Not Found |
 | 422 | Validation Error |
 | 500 | Server Error |
+
+---
+
+## OpenAPI Documentation
+
+For complete API documentation with request/response schemas, see:
+- **OpenAPI Spec**: `docs/openapi.yaml`
+- **Swagger UI**: Configure with your preferred Swagger viewer
