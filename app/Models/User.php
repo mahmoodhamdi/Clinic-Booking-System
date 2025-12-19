@@ -4,7 +4,10 @@ namespace App\Models;
 
 use App\Enums\Gender;
 use App\Enums\UserRole;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -128,5 +131,98 @@ class User extends Authenticatable
         }
 
         return null;
+    }
+
+    /**
+     * Get the user's age.
+     */
+    public function getAgeAttribute(): ?int
+    {
+        if ($this->date_of_birth) {
+            return $this->date_of_birth->age;
+        }
+
+        return null;
+    }
+
+    // ==================== Relationships ====================
+
+    /**
+     * Get the patient profile.
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(PatientProfile::class);
+    }
+
+    /**
+     * Get the patient's appointments.
+     */
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    // ==================== Patient Statistics ====================
+
+    /**
+     * Get total appointments count.
+     */
+    public function getTotalAppointmentsAttribute(): int
+    {
+        return $this->appointments()->count();
+    }
+
+    /**
+     * Get completed appointments count.
+     */
+    public function getCompletedAppointmentsCountAttribute(): int
+    {
+        return $this->appointments()->completed()->count();
+    }
+
+    /**
+     * Get cancelled appointments count.
+     */
+    public function getCancelledAppointmentsCountAttribute(): int
+    {
+        return $this->appointments()->cancelled()->count();
+    }
+
+    /**
+     * Get no-show count.
+     */
+    public function getNoShowCountAttribute(): int
+    {
+        return $this->appointments()->noShow()->count();
+    }
+
+    /**
+     * Get upcoming appointments count.
+     */
+    public function getUpcomingAppointmentsCountAttribute(): int
+    {
+        return $this->appointments()->upcoming()->count();
+    }
+
+    /**
+     * Get last visit date.
+     */
+    public function getLastVisitAttribute(): ?Carbon
+    {
+        $lastAppointment = $this->appointments()
+            ->completed()
+            ->orderByDesc('appointment_date')
+            ->first();
+
+        return $lastAppointment?->appointment_date;
+    }
+
+    /**
+     * Check if patient has complete profile.
+     */
+    public function getHasCompleteProfileAttribute(): bool
+    {
+        return $this->profile !== null && $this->profile->is_complete;
     }
 }

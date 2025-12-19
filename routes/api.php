@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\SlotController;
 use App\Http\Controllers\Api\Admin\AppointmentController as AdminAppointmentController;
 use App\Http\Controllers\Api\Admin\ClinicSettingController;
+use App\Http\Controllers\Api\Admin\PatientController as AdminPatientController;
 use App\Http\Controllers\Api\Admin\ScheduleController;
 use App\Http\Controllers\Api\Admin\VacationController;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +55,16 @@ Route::middleware('auth:sanctum')->prefix('appointments')->group(function () {
     Route::post('/{appointment}/cancel', [AppointmentController::class, 'cancel']);
 });
 
+// Patient profile & dashboard routes (requires authentication)
+Route::middleware('auth:sanctum')->prefix('patient')->group(function () {
+    Route::get('/dashboard', [PatientController::class, 'dashboard']);
+    Route::get('/profile', [PatientController::class, 'profile']);
+    Route::post('/profile', [PatientController::class, 'createProfile']);
+    Route::put('/profile', [PatientController::class, 'updateProfile']);
+    Route::get('/history', [PatientController::class, 'history']);
+    Route::get('/statistics', [PatientController::class, 'statistics']);
+});
+
 // Admin routes (requires authentication + admin role)
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // Clinic Settings
@@ -88,4 +100,14 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/appointments/{appointment}/cancel', [AdminAppointmentController::class, 'cancel']);
     Route::post('/appointments/{appointment}/no-show', [AdminAppointmentController::class, 'noShow']);
     Route::put('/appointments/{appointment}/notes', [AdminAppointmentController::class, 'updateNotes']);
+
+    // Patients
+    Route::get('/patients', [AdminPatientController::class, 'index']);
+    Route::get('/patients/summary', [AdminPatientController::class, 'summary']);
+    Route::get('/patients/{patient}', [AdminPatientController::class, 'show']);
+    Route::get('/patients/{patient}/appointments', [AdminPatientController::class, 'appointments']);
+    Route::get('/patients/{patient}/statistics', [AdminPatientController::class, 'statistics']);
+    Route::put('/patients/{patient}/profile', [AdminPatientController::class, 'updateProfile']);
+    Route::put('/patients/{patient}/status', [AdminPatientController::class, 'toggleStatus']);
+    Route::post('/patients/{patient}/notes', [AdminPatientController::class, 'addNotes']);
 });
