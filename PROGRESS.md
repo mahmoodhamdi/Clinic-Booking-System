@@ -47,12 +47,15 @@
 - [x] All tests passing (273 tests, 619 assertions)
 
 ## Phase 4: Patient Management
-- [ ] PatientProfile model & migration
-- [ ] Patient APIs
-- [ ] Patient Portal Blade views
-- [ ] Admin Patient APIs
-- [ ] Unit Tests
-- [ ] Feature Tests
+- [x] PatientProfile model & migration
+- [x] BloodType Enum
+- [x] PatientProfileFactory
+- [x] User model relationships & statistics
+- [x] Patient APIs (dashboard, profile CRUD, history, statistics)
+- [x] Admin Patient APIs (list, search, filter, view, appointments, statistics, profile update, toggle status, notes)
+- [x] Unit Tests (BloodType, PatientProfile)
+- [x] Feature Tests (PatientApi, Admin/PatientApi)
+- [x] All tests passing (326 tests, 743 assertions)
 
 ## Phase 5: Medical Records & Prescriptions
 - [ ] MedicalRecord model & migration
