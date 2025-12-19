@@ -64,8 +64,38 @@ A comprehensive REST API for private medical clinic management built with Larave
 - **Database**: MySQL / SQLite
 - **PDF Generation**: DomPDF
 - **Testing**: PHPUnit
+- **Containerization**: Docker
 
-## Installation
+## Quick Start with Docker
+
+The easiest way to run this project:
+
+```bash
+# Clone and enter directory
+git clone https://github.com/mahmoodhamdi/Clinic-Booking-System.git
+cd Clinic-Booking-System
+
+# Windows
+docker-start.bat
+
+# Linux/Mac
+chmod +x docker-start.sh
+./docker-start.sh
+```
+
+Or manually:
+```bash
+cp .env.example .env
+docker-compose up -d --build
+```
+
+Access at: **http://localhost:8000**
+
+> If port 8000 is busy, change `APP_PORT` in `.env` to another port (e.g., 8001)
+
+For detailed Docker instructions, see [DOCKER.md](DOCKER.md)
+
+## Manual Installation
 
 ### Prerequisites
 - PHP 8.2 or higher

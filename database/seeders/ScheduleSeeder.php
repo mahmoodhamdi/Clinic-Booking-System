@@ -10,6 +10,11 @@ class ScheduleSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Schedule::count() > 0) {
+            $this->command->info('Schedules already exist, skipping.');
+            return;
+        }
+
         // Sunday to Thursday: 9 AM - 5 PM with lunch break
         $workDays = [
             DayOfWeek::SUNDAY,
@@ -45,5 +50,7 @@ class ScheduleSeeder extends Seeder
             'end_time' => '14:00',
             'is_active' => false,
         ]);
+
+        $this->command->info('Weekly schedules created (Sun-Thu active, Fri-Sat closed).');
     }
 }
