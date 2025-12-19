@@ -70,22 +70,57 @@ export default function AdminAppointmentsPage() {
       }),
   });
 
-  // Update status mutation
-  const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status, notes }: { id: number; status: string; notes?: string }) =>
-      adminApi.updateAppointmentStatus(id, status, notes),
+  // Status change mutations
+  const confirmMutation = useMutation({
+    mutationFn: (id: number) => adminApi.confirmAppointment(id),
     onSuccess: () => {
       toast.success(t('common.success'));
       queryClient.invalidateQueries({ queryKey: ['adminAppointments'] });
-      setStatusDialogOpen(false);
-      setSelectedAppointment(null);
-      setNewStatus('');
-      setStatusNotes('');
+      closeStatusDialog();
     },
-    onError: () => {
-      toast.error(t('common.error'));
-    },
+    onError: () => toast.error(t('common.error')),
   });
+
+  const completeMutation = useMutation({
+    mutationFn: (id: number) => adminApi.completeAppointment(id),
+    onSuccess: () => {
+      toast.success(t('common.success'));
+      queryClient.invalidateQueries({ queryKey: ['adminAppointments'] });
+      closeStatusDialog();
+    },
+    onError: () => toast.error(t('common.error')),
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
+      adminApi.cancelAppointment(id, reason),
+    onSuccess: () => {
+      toast.success(t('common.success'));
+      queryClient.invalidateQueries({ queryKey: ['adminAppointments'] });
+      closeStatusDialog();
+    },
+    onError: () => toast.error(t('common.error')),
+  });
+
+  const noShowMutation = useMutation({
+    mutationFn: (id: number) => adminApi.markNoShow(id),
+    onSuccess: () => {
+      toast.success(t('common.success'));
+      queryClient.invalidateQueries({ queryKey: ['adminAppointments'] });
+      closeStatusDialog();
+    },
+    onError: () => toast.error(t('common.error')),
+  });
+
+  const closeStatusDialog = () => {
+    setStatusDialogOpen(false);
+    setSelectedAppointment(null);
+    setNewStatus('');
+    setStatusNotes('');
+  };
+
+  const isPending = confirmMutation.isPending || completeMutation.isPending ||
+    cancelMutation.isPending || noShowMutation.isPending;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -137,11 +172,21 @@ export default function AdminAppointmentsPage() {
 
   const handleStatusConfirm = () => {
     if (!selectedAppointment) return;
-    updateStatusMutation.mutate({
-      id: selectedAppointment.id,
-      status: newStatus,
-      notes: statusNotes,
-    });
+
+    switch (newStatus) {
+      case 'confirmed':
+        confirmMutation.mutate(selectedAppointment.id);
+        break;
+      case 'completed':
+        completeMutation.mutate(selectedAppointment.id);
+        break;
+      case 'cancelled':
+        cancelMutation.mutate({ id: selectedAppointment.id, reason: statusNotes });
+        break;
+      case 'no_show':
+        noShowMutation.mutate(selectedAppointment.id);
+        break;
+    }
   };
 
   const filteredAppointments = appointments?.data?.filter((appointment: Appointment) => {
@@ -318,9 +363,9 @@ export default function AdminAppointmentsPage() {
             </Button>
             <Button
               onClick={handleStatusConfirm}
-              disabled={updateStatusMutation.isPending}
+              disabled={isPending}
             >
-              {updateStatusMutation.isPending ? t('common.loading') : t('common.confirm')}
+              {isPending ? t('common.loading') : t('common.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

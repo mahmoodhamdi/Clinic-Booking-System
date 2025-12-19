@@ -141,12 +141,12 @@ export default function AdminSettingsPage() {
   // Update schedule mutation
   const updateScheduleMutation = useMutation({
     mutationFn: ({
-      dayOfWeek,
+      scheduleId,
       data,
     }: {
-      dayOfWeek: number;
-      data: { is_working: boolean; start_time?: string; end_time?: string; slot_duration?: number };
-    }) => adminApi.updateSchedule(dayOfWeek, data),
+      scheduleId: number;
+      data: { is_working?: boolean; start_time?: string; end_time?: string; slot_duration?: number };
+    }) => adminApi.updateSchedule(scheduleId, data),
     onSuccess: () => {
       toast.success(t('common.success'));
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
@@ -191,25 +191,25 @@ export default function AdminSettingsPage() {
     createVacationMutation.mutate(data);
   };
 
-  const handleScheduleToggle = (dayOfWeek: number, isWorking: boolean) => {
+  const handleScheduleToggle = (scheduleId: number, isWorking: boolean) => {
     updateScheduleMutation.mutate({
-      dayOfWeek,
+      scheduleId,
       data: { is_working: isWorking },
     });
   };
 
   const handleScheduleTimeChange = (
-    dayOfWeek: number,
+    scheduleId: number,
+    schedule: { is_working: boolean; start_time: string; end_time: string },
     field: 'start_time' | 'end_time',
     value: string
   ) => {
-    const currentSchedule = schedules?.data?.find((s: any) => s.day_of_week === dayOfWeek);
     updateScheduleMutation.mutate({
-      dayOfWeek,
+      scheduleId,
       data: {
-        is_working: currentSchedule?.is_working ?? true,
-        start_time: field === 'start_time' ? value : currentSchedule?.start_time,
-        end_time: field === 'end_time' ? value : currentSchedule?.end_time,
+        is_working: schedule.is_working,
+        start_time: field === 'start_time' ? value : schedule.start_time,
+        end_time: field === 'end_time' ? value : schedule.end_time,
       },
     });
   };
@@ -355,6 +355,7 @@ export default function AdminSettingsPage() {
                     const schedule = schedules?.data?.find(
                       (s: any) => s.day_of_week === day.value
                     );
+                    if (!schedule) return null;
                     return (
                       <div
                         key={day.value}
@@ -362,24 +363,25 @@ export default function AdminSettingsPage() {
                       >
                         <div className="flex items-center gap-4">
                           <Switch
-                            checked={schedule?.is_working ?? false}
+                            checked={schedule.is_working ?? false}
                             onCheckedChange={(checked) =>
-                              handleScheduleToggle(day.value, checked)
+                              handleScheduleToggle(schedule.id, checked)
                             }
                           />
                           <span className="font-medium w-24">{day.label}</span>
                         </div>
-                        {schedule?.is_working && (
+                        {schedule.is_working && (
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                               <Label className="text-sm">{t('admin.settings.from')}</Label>
                               <Input
                                 type="time"
                                 className="w-32"
-                                value={schedule?.start_time || '09:00'}
+                                value={schedule.start_time || '09:00'}
                                 onChange={(e) =>
                                   handleScheduleTimeChange(
-                                    day.value,
+                                    schedule.id,
+                                    schedule,
                                     'start_time',
                                     e.target.value
                                   )
@@ -391,10 +393,11 @@ export default function AdminSettingsPage() {
                               <Input
                                 type="time"
                                 className="w-32"
-                                value={schedule?.end_time || '17:00'}
+                                value={schedule.end_time || '17:00'}
                                 onChange={(e) =>
                                   handleScheduleTimeChange(
-                                    day.value,
+                                    schedule.id,
+                                    schedule,
                                     'end_time',
                                     e.target.value
                                   )
