@@ -21,13 +21,18 @@
 - [x] All tests passing
 
 ## Phase 2: Clinic Settings & Schedules
-- [ ] ClinicSetting model & migration
-- [ ] Schedule model & migration
-- [ ] Vacation model & migration
-- [ ] Settings APIs (Admin)
-- [ ] SlotGeneratorService
-- [ ] Unit Tests
-- [ ] Feature Tests
+- [x] ClinicSetting model & migration
+- [x] Schedule model & migration
+- [x] Vacation model & migration
+- [x] DayOfWeek Enum
+- [x] Settings APIs (Admin) - GET, PUT, logo upload/delete
+- [x] Schedules APIs (Admin) - CRUD + toggle
+- [x] Vacations APIs (Admin) - CRUD
+- [x] SlotGeneratorService
+- [x] Public Slots APIs - dates, slots, check, next
+- [x] Unit Tests (DayOfWeek, ClinicSetting, Schedule, Vacation, SlotGeneratorService)
+- [x] Feature Tests (ClinicSettingsApi, ScheduleApi, VacationApi, SlotApi)
+- [x] All tests passing (181 tests, 423 assertions)
 
 ## Phase 3: Booking System
 - [ ] Appointment model & migration
