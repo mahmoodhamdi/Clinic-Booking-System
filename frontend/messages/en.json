@@ -28,7 +28,9 @@
     "noResults": "No results found",
     "add": "Add",
     "notes": "Notes",
-    "date": "Date"
+    "date": "Date",
+    "active": "Active",
+    "currency": "EGP"
   },
   "auth": {
     "login": "Login",

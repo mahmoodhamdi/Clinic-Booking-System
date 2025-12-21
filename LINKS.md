@@ -7,6 +7,8 @@
 | **Frontend** | http://localhost:3001 | ✅ Running |
 | **Backend API** | http://127.0.0.1:8000/api | ✅ Running |
 | **API Health** | http://127.0.0.1:8000/api/health | ✅ Available |
+| **Swagger API Docs** | http://127.0.0.1:8000/swagger-ui/ | ✅ Available |
+| **OpenAPI Spec (YAML)** | http://127.0.0.1:8000/swagger-ui/openapi.yaml | ✅ Available |
 
 ## Local Development (Laragon)
 

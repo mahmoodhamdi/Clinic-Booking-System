@@ -1,0 +1,2743 @@
+openapi: 3.0.3
+info:
+  title: Clinic Booking System API
+  description: |
+    A comprehensive REST API for clinic management system supporting:
+    - Patient appointment booking and management
+    - Medical records and prescriptions
+    - Payment tracking
+    - Admin dashboard and reports
+    - Multi-language support (Arabic/English with RTL)
+
+    ## Authentication
+    This API uses Bearer Token authentication via Laravel Sanctum.
+    Include the token in the Authorization header: `Authorization: Bearer {token}`
+
+    ## Localization
+    Set the `Accept-Language` header to `ar` or `en` for localized responses.
+    RTL direction is returned in the `X-Direction` response header.
+
+    ## Response Format
+    All responses follow a consistent format:
+    ```json
+    {
+      "data": { ... },
+      "message": "Success message",
+      "meta": { ... }
+    }
+    ```
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@clinic-booking.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000/api
+    description: Development Server
+  - url: https://api.clinic-booking.com/api
+    description: Production Server
+
+tags:
+  - name: Authentication
+    description: User authentication and profile management
+  - name: Slots
+    description: Available appointment slots (Public)
+  - name: Patient Appointments
+    description: Patient appointment management
+  - name: Patient Profile
+    description: Patient profile and dashboard
+  - name: Medical Records
+    description: Patient medical records
+  - name: Prescriptions
+    description: Patient prescriptions
+  - name: Notifications
+    description: Patient notifications
+  - name: Localization
+    description: Language and localization settings
+  - name: Admin Dashboard
+    description: Admin statistics and overview
+  - name: Admin Reports
+    description: Admin reports with PDF export
+  - name: Admin Settings
+    description: Clinic settings management
+  - name: Admin Schedules
+    description: Working hours management
+  - name: Admin Vacations
+    description: Vacation days management
+  - name: Admin Appointments
+    description: Full appointment management
+  - name: Admin Patients
+    description: Patient management
+  - name: Admin Medical Records
+    description: Medical records management
+  - name: Admin Prescriptions
+    description: Prescription management
+  - name: Admin Attachments
+    description: File attachments
+  - name: Admin Payments
+    description: Payment tracking
+
+paths:
+  # ==================== Authentication ====================
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new patient
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login with phone and password
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout current user
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user info
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User info retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /auth/profile:
+    put:
+      tags: [Authentication]
+      summary: Update user profile
+      operationId: updateProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /auth/change-password:
+    post:
+      tags: [Authentication]
+      summary: Change user password
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /auth/forgot-password:
+    post:
+      tags: [Authentication]
+      summary: Request password reset OTP
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone:
+                  type: string
+                  example: '+201012345678'
+      responses:
+        '200':
+          description: OTP sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /auth/verify-otp:
+    post:
+      tags: [Authentication]
+      summary: Verify OTP code
+      operationId: verifyOtp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, token]
+              properties:
+                phone:
+                  type: string
+                token:
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+      responses:
+        '200':
+          description: OTP verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /auth/reset-password:
+    post:
+      tags: [Authentication]
+      summary: Reset password with OTP
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  # ==================== Slots (Public) ====================
+  /slots/dates:
+    get:
+      tags: [Slots]
+      summary: Get available dates for booking
+      operationId: getAvailableDates
+      responses:
+        '200':
+          description: Available dates retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
+                      format: date
+
+  /slots/next:
+    get:
+      tags: [Slots]
+      summary: Get next available slot
+      operationId: getNextSlot
+      responses:
+        '200':
+          description: Next available slot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotResponse'
+
+  /slots/{date}:
+    get:
+      tags: [Slots]
+      summary: Get slots for specific date
+      operationId: getSlotsForDate
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Slots for date
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Slot'
+
+  /slots/check:
+    post:
+      tags: [Slots]
+      summary: Check slot availability
+      operationId: checkSlot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [date, time]
+              properties:
+                date:
+                  type: string
+                  format: date
+                time:
+                  type: string
+                  pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+      responses:
+        '200':
+          description: Slot availability status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      available:
+                        type: boolean
+
+  # ==================== Patient Appointments ====================
+  /appointments:
+    get:
+      tags: [Patient Appointments]
+      summary: List patient appointments
+      operationId: listPatientAppointments
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/per_page'
+        - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: Appointments list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentListResponse'
+
+    post:
+      tags: [Patient Appointments]
+      summary: Book new appointment
+      operationId: bookAppointment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookAppointmentRequest'
+      responses:
+        '201':
+          description: Appointment booked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+
+  /appointments/upcoming:
+    get:
+      tags: [Patient Appointments]
+      summary: Get upcoming appointments
+      operationId: getUpcomingAppointments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Upcoming appointments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentListResponse'
+
+  /appointments/{id}:
+    get:
+      tags: [Patient Appointments]
+      summary: Get appointment details
+      operationId: getAppointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Appointment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+
+  /appointments/{id}/cancel:
+    post:
+      tags: [Patient Appointments]
+      summary: Cancel appointment
+      operationId: cancelAppointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  maxLength: 500
+      responses:
+        '200':
+          description: Appointment cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+
+  # ==================== Patient Profile ====================
+  /patient/dashboard:
+    get:
+      tags: [Patient Profile]
+      summary: Get patient dashboard
+      operationId: getPatientDashboard
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientDashboardResponse'
+
+  /patient/profile:
+    get:
+      tags: [Patient Profile]
+      summary: Get patient profile
+      operationId: getPatientProfile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Patient profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientProfileResponse'
+
+    post:
+      tags: [Patient Profile]
+      summary: Create patient profile
+      operationId: createPatientProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientProfileRequest'
+      responses:
+        '201':
+          description: Profile created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientProfileResponse'
+
+    put:
+      tags: [Patient Profile]
+      summary: Update patient profile
+      operationId: updatePatientProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientProfileRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientProfileResponse'
+
+  /patient/history:
+    get:
+      tags: [Patient Profile]
+      summary: Get appointment history
+      operationId: getPatientHistory
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/per_page'
+        - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: Appointment history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentListResponse'
+
+  /patient/statistics:
+    get:
+      tags: [Patient Profile]
+      summary: Get patient statistics
+      operationId: getPatientStatistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Patient statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientStatisticsResponse'
+
+  # ==================== Medical Records ====================
+  /medical-records:
+    get:
+      tags: [Medical Records]
+      summary: List patient medical records
+      operationId: listMedicalRecords
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/per_page'
+        - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: Medical records list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalRecordListResponse'
+
+  /medical-records/{id}:
+    get:
+      tags: [Medical Records]
+      summary: Get medical record details
+      operationId: getMedicalRecord
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Medical record details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalRecordResponse'
+
+  # ==================== Prescriptions ====================
+  /prescriptions:
+    get:
+      tags: [Prescriptions]
+      summary: List patient prescriptions
+      operationId: listPrescriptions
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/per_page'
+        - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: Prescriptions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionListResponse'
+
+  /prescriptions/{id}:
+    get:
+      tags: [Prescriptions]
+      summary: Get prescription details
+      operationId: getPrescription
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Prescription details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionResponse'
+
+  # ==================== Notifications ====================
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications
+      operationId: listNotifications
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/per_page'
+        - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: Notifications list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationListResponse'
+
+  /notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: Get unread notifications count
+      operationId: getUnreadCount
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Unread count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      unread_count:
+                        type: integer
+
+  /notifications/{id}/read:
+    post:
+      tags: [Notifications]
+      summary: Mark notification as read
+      operationId: markAsRead
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /notifications/read-all:
+    post:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      operationId: markAllAsRead
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /notifications/{id}:
+    delete:
+      tags: [Notifications]
+      summary: Delete notification
+      operationId: deleteNotification
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Notification deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  # ==================== Localization ====================
+  /locales:
+    get:
+      tags: [Localization]
+      summary: Get supported locales
+      operationId: getLocales
+      responses:
+        '200':
+          description: Supported locales
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalesResponse'
+
+  /locales/current:
+    get:
+      tags: [Localization]
+      summary: Get current locale info
+      operationId: getCurrentLocale
+      responses:
+        '200':
+          description: Current locale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocaleResponse'
+
+  /locales/translations:
+    get:
+      tags: [Localization]
+      summary: Get translations for current locale
+      operationId: getTranslations
+      responses:
+        '200':
+          description: Translations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+
+  # ==================== Admin Dashboard ====================
+  /admin/dashboard/stats:
+    get:
+      tags: [Admin Dashboard]
+      summary: Get overview statistics
+      operationId: getDashboardStats
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardStatsResponse'
+
+  /admin/dashboard/today:
+    get:
+      tags: [Admin Dashboard]
+      summary: Get today's statistics
+      operationId: getTodayStats
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Today's statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodayStatsResponse'
+
+  /admin/dashboard/weekly:
+    get:
+      tags: [Admin Dashboard]
+      summary: Get weekly statistics
+      operationId: getWeeklyStats
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Weekly statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyStatsResponse'
+
+  /admin/dashboard/monthly:
+    get:
+      tags: [Admin Dashboard]
+      summary: Get monthly statistics
+      operationId: getMonthlyStats
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Monthly statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyStatsResponse'
+
+  /admin/dashboard/chart:
+    get:
+      tags: [Admin Dashboard]
+      summary: Get chart data
+      operationId: getChartData
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month]
+            default: week
+      responses:
+        '200':
+          description: Chart data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChartDataResponse'
+
+  /admin/dashboard/recent-activity:
+    get:
+      tags: [Admin Dashboard]
+      summary: Get recent activity
+      operationId: getRecentActivity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecentActivityResponse'
+
+  # ==================== Admin Reports ====================
+  /admin/reports/appointments:
+    get:
+      tags: [Admin Reports]
+      summary: Get appointments report
+      operationId: getAppointmentsReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+        - $ref: '#/components/parameters/status'
+      responses:
+        '200':
+          description: Appointments report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentsReportResponse'
+
+  /admin/reports/appointments/export:
+    get:
+      tags: [Admin Reports]
+      summary: Export appointments report as PDF
+      operationId: exportAppointmentsReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+        - $ref: '#/components/parameters/status'
+      responses:
+        '200':
+          description: PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /admin/reports/revenue:
+    get:
+      tags: [Admin Reports]
+      summary: Get revenue report
+      operationId: getRevenueReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+        - name: group_by
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: day
+      responses:
+        '200':
+          description: Revenue report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueReportResponse'
+
+  /admin/reports/revenue/export:
+    get:
+      tags: [Admin Reports]
+      summary: Export revenue report as PDF
+      operationId: exportRevenueReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+      responses:
+        '200':
+          description: PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /admin/reports/patients:
+    get:
+      tags: [Admin Reports]
+      summary: Get patients report
+      operationId: getPatientsReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+      responses:
+        '200':
+          description: Patients report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientsReportResponse'
+
+  /admin/reports/patients/export:
+    get:
+      tags: [Admin Reports]
+      summary: Export patients report as PDF
+      operationId: exportPatientsReport
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+      responses:
+        '200':
+          description: PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  # ==================== Admin Settings ====================
+  /admin/settings:
+    get:
+      tags: [Admin Settings]
+      summary: Get clinic settings
+      operationId: getSettings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Clinic settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsResponse'
+
+    put:
+      tags: [Admin Settings]
+      summary: Update clinic settings
+      operationId: updateSettings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSettingsRequest'
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsResponse'
+
+  /admin/settings/logo:
+    post:
+      tags: [Admin Settings]
+      summary: Upload clinic logo
+      operationId: uploadLogo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                logo:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Logo uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsResponse'
+
+    delete:
+      tags: [Admin Settings]
+      summary: Delete clinic logo
+      operationId: deleteLogo
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logo deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  # ==================== Admin Schedules ====================
+  /admin/schedules:
+    get:
+      tags: [Admin Schedules]
+      summary: List schedules
+      operationId: listSchedules
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Schedules list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleListResponse'
+
+    post:
+      tags: [Admin Schedules]
+      summary: Create schedule
+      operationId: createSchedule
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+      responses:
+        '201':
+          description: Schedule created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleResponse'
+
+  /admin/schedules/{id}:
+    get:
+      tags: [Admin Schedules]
+      summary: Get schedule
+      operationId: getSchedule
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Schedule details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleResponse'
+
+    put:
+      tags: [Admin Schedules]
+      summary: Update schedule
+      operationId: updateSchedule
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+      responses:
+        '200':
+          description: Schedule updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleResponse'
+
+    delete:
+      tags: [Admin Schedules]
+      summary: Delete schedule
+      operationId: deleteSchedule
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Schedule deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /admin/schedules/{id}/toggle:
+    put:
+      tags: [Admin Schedules]
+      summary: Toggle schedule active status
+      operationId: toggleSchedule
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Schedule toggled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleResponse'
+
+  # ==================== Admin Vacations ====================
+  /admin/vacations:
+    get:
+      tags: [Admin Vacations]
+      summary: List vacations
+      operationId: listVacations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Vacations list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationListResponse'
+
+    post:
+      tags: [Admin Vacations]
+      summary: Create vacation
+      operationId: createVacation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacationRequest'
+      responses:
+        '201':
+          description: Vacation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationResponse'
+
+  /admin/vacations/{id}:
+    get:
+      tags: [Admin Vacations]
+      summary: Get vacation
+      operationId: getVacation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Vacation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationResponse'
+
+    put:
+      tags: [Admin Vacations]
+      summary: Update vacation
+      operationId: updateVacation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VacationRequest'
+      responses:
+        '200':
+          description: Vacation updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VacationResponse'
+
+    delete:
+      tags: [Admin Vacations]
+      summary: Delete vacation
+      operationId: deleteVacation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Vacation deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  # ==================== Admin Appointments ====================
+  /admin/appointments:
+    get:
+      tags: [Admin Appointments]
+      summary: List all appointments
+      operationId: listAllAppointments
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+        - name: patient_id
+          in: query
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/per_page'
+        - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: Appointments list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentListResponse'
+
+  /admin/appointments/today:
+    get:
+      tags: [Admin Appointments]
+      summary: Get today's appointments
+      operationId: getTodayAppointments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Today's appointments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodayAppointmentsResponse'
+
+  /admin/appointments/statistics:
+    get:
+      tags: [Admin Appointments]
+      summary: Get appointment statistics
+      operationId: getAppointmentStatistics
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+      responses:
+        '200':
+          description: Appointment statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentStatisticsResponse'
+
+  /admin/appointments/{id}:
+    get:
+      tags: [Admin Appointments]
+      summary: Get appointment details
+      operationId: getAdminAppointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Appointment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+
+  /admin/appointments/{id}/confirm:
+    post:
+      tags: [Admin Appointments]
+      summary: Confirm appointment
+      operationId: confirmAppointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Appointment confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+
+  /admin/appointments/{id}/complete:
+    post:
+      tags: [Admin Appointments]
+      summary: Complete appointment
+      operationId: completeAppointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Appointment completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+
+  /admin/appointments/{id}/cancel:
+    post:
+      tags: [Admin Appointments]
+      summary: Cancel appointment (admin)
+      operationId: adminCancelAppointment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Appointment cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+
+  /admin/appointments/{id}/no-show:
+    post:
+      tags: [Admin Appointments]
+      summary: Mark as no-show
+      operationId: markNoShow
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Marked as no-show
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+
+  /admin/appointments/{id}/notes:
+    put:
+      tags: [Admin Appointments]
+      summary: Update appointment notes
+      operationId: updateAppointmentNotes
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                admin_notes:
+                  type: string
+      responses:
+        '200':
+          description: Notes updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+
+  # ==================== Admin Payments ====================
+  /admin/payments:
+    get:
+      tags: [Admin Payments]
+      summary: List payments
+      operationId: listPayments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, paid, refunded]
+        - name: method
+          in: query
+          schema:
+            type: string
+            enum: [cash, card, wallet]
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+        - $ref: '#/components/parameters/per_page'
+        - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: Payments list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentListResponse'
+
+    post:
+      tags: [Admin Payments]
+      summary: Create payment
+      operationId: createPayment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+  /admin/payments/statistics:
+    get:
+      tags: [Admin Payments]
+      summary: Get payment statistics
+      operationId: getPaymentStatistics
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/from_date'
+        - $ref: '#/components/parameters/to_date'
+      responses:
+        '200':
+          description: Payment statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStatisticsResponse'
+
+  /admin/payments/{id}:
+    get:
+      tags: [Admin Payments]
+      summary: Get payment details
+      operationId: getPayment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Payment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+    put:
+      tags: [Admin Payments]
+      summary: Update payment
+      operationId: updatePayment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Payment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+  /admin/payments/{id}/mark-paid:
+    post:
+      tags: [Admin Payments]
+      summary: Mark payment as paid
+      operationId: markPaymentPaid
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transaction_id:
+                  type: string
+      responses:
+        '200':
+          description: Payment marked as paid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+  /admin/payments/{id}/refund:
+    post:
+      tags: [Admin Payments]
+      summary: Refund payment
+      operationId: refundPayment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Payment refunded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+# ==================== Components ====================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Sanctum Bearer Token
+
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    per_page:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        default: 15
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+    status:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum: [pending, confirmed, completed, cancelled, no_show]
+    from_date:
+      name: from_date
+      in: query
+      schema:
+        type: string
+        format: date
+    to_date:
+      name: to_date
+      in: query
+      schema:
+        type: string
+        format: date
+
+  responses:
+    ValidationError:
+      description: Validation Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthenticated.
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Forbidden
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found
+
+  schemas:
+    # ==================== Request Schemas ====================
+    RegisterRequest:
+      type: object
+      required: [name, phone, password, password_confirmation]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+        phone:
+          type: string
+          example: '+201012345678'
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        password_confirmation:
+          type: string
+
+    LoginRequest:
+      type: object
+      required: [phone, password]
+      properties:
+        phone:
+          type: string
+        password:
+          type: string
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [male, female]
+        address:
+          type: string
+
+    ChangePasswordRequest:
+      type: object
+      required: [current_password, password, password_confirmation]
+      properties:
+        current_password:
+          type: string
+        password:
+          type: string
+          minLength: 8
+        password_confirmation:
+          type: string
+
+    ResetPasswordRequest:
+      type: object
+      required: [phone, token, password, password_confirmation]
+      properties:
+        phone:
+          type: string
+        token:
+          type: string
+        password:
+          type: string
+          minLength: 8
+        password_confirmation:
+          type: string
+
+    BookAppointmentRequest:
+      type: object
+      required: [appointment_date, appointment_time]
+      properties:
+        appointment_date:
+          type: string
+          format: date
+        appointment_time:
+          type: string
+          pattern: '^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+        notes:
+          type: string
+          maxLength: 500
+
+    PatientProfileRequest:
+      type: object
+      properties:
+        blood_type:
+          type: string
+          enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
+        allergies:
+          type: array
+          items:
+            type: string
+        chronic_diseases:
+          type: array
+          items:
+            type: string
+        current_medications:
+          type: array
+          items:
+            type: string
+        emergency_contact_name:
+          type: string
+        emergency_contact_phone:
+          type: string
+        insurance_provider:
+          type: string
+        insurance_number:
+          type: string
+        medical_notes:
+          type: string
+
+    ScheduleRequest:
+      type: object
+      required: [day_of_week, start_time, end_time]
+      properties:
+        day_of_week:
+          type: integer
+          minimum: 0
+          maximum: 6
+        start_time:
+          type: string
+        end_time:
+          type: string
+        break_start:
+          type: string
+        break_end:
+          type: string
+        is_active:
+          type: boolean
+
+    VacationRequest:
+      type: object
+      required: [start_date, end_date]
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+
+    PaymentRequest:
+      type: object
+      required: [appointment_id, amount, method]
+      properties:
+        appointment_id:
+          type: integer
+        amount:
+          type: number
+          minimum: 0
+        discount:
+          type: number
+          minimum: 0
+        method:
+          type: string
+          enum: [cash, card, wallet]
+        notes:
+          type: string
+        mark_as_paid:
+          type: boolean
+        transaction_id:
+          type: string
+
+    UpdateSettingsRequest:
+      type: object
+      properties:
+        clinic_name:
+          type: string
+        clinic_phone:
+          type: string
+        clinic_email:
+          type: string
+        clinic_address:
+          type: string
+        consultation_fee:
+          type: number
+        slot_duration:
+          type: integer
+        max_patients_per_slot:
+          type: integer
+        advance_booking_days:
+          type: integer
+        cancellation_hours:
+          type: integer
+
+    # ==================== Response Schemas ====================
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+        message:
+          type: string
+
+    UserResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [admin, secretary, patient]
+        date_of_birth:
+          type: string
+          format: date
+        gender:
+          type: string
+        address:
+          type: string
+        avatar_url:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    SlotResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Slot'
+
+    Slot:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+        available:
+          type: boolean
+
+    AppointmentResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Appointment'
+        message:
+          type: string
+
+    AppointmentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Appointment'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+        patient:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            phone:
+              type: string
+        date:
+          type: string
+        time:
+          type: string
+        datetime:
+          type: string
+          format: date-time
+        day_name:
+          type: string
+        status:
+          type: string
+        status_label:
+          type: string
+        status_color:
+          type: string
+        notes:
+          type: string
+        admin_notes:
+          type: string
+        can_cancel:
+          type: boolean
+        is_upcoming:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    PatientDashboardResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            profile:
+              $ref: '#/components/schemas/PatientProfile'
+            statistics:
+              $ref: '#/components/schemas/PatientStatistics'
+            upcoming_appointments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Appointment'
+
+    PatientProfileResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PatientProfile'
+
+    PatientProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        blood_type:
+          type: string
+        blood_type_label:
+          type: string
+        allergies:
+          type: array
+          items:
+            type: string
+        chronic_diseases:
+          type: array
+          items:
+            type: string
+        current_medications:
+          type: array
+          items:
+            type: string
+        emergency_contact_name:
+          type: string
+        emergency_contact_phone:
+          type: string
+        insurance_provider:
+          type: string
+        insurance_number:
+          type: string
+        is_complete:
+          type: boolean
+
+    PatientStatisticsResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PatientStatistics'
+
+    PatientStatistics:
+      type: object
+      properties:
+        total_appointments:
+          type: integer
+        completed_appointments:
+          type: integer
+        cancelled_appointments:
+          type: integer
+        no_show_count:
+          type: integer
+        upcoming_appointments:
+          type: integer
+        last_visit:
+          type: string
+          format: date
+
+    MedicalRecordListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalRecord'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    MedicalRecordResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MedicalRecord'
+
+    MedicalRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        diagnosis:
+          type: string
+        symptoms:
+          type: string
+        examination_notes:
+          type: string
+        treatment_plan:
+          type: string
+        follow_up_date:
+          type: string
+          format: date
+        vital_signs:
+          type: object
+          properties:
+            blood_pressure:
+              type: string
+            heart_rate:
+              type: integer
+            temperature:
+              type: number
+            weight:
+              type: number
+            height:
+              type: number
+        bmi:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+
+    PrescriptionListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Prescription'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    PrescriptionResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Prescription'
+
+    Prescription:
+      type: object
+      properties:
+        id:
+          type: integer
+        prescription_number:
+          type: string
+        notes:
+          type: string
+        valid_until:
+          type: string
+          format: date
+        is_valid:
+          type: boolean
+        is_dispensed:
+          type: boolean
+        dispensed_at:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrescriptionItem'
+        created_at:
+          type: string
+          format: date-time
+
+    PrescriptionItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        medication_name:
+          type: string
+        dosage:
+          type: string
+        frequency:
+          type: string
+        duration:
+          type: string
+        quantity:
+          type: integer
+        instructions:
+          type: string
+
+    NotificationListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        data:
+          type: object
+        read_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    LocalesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              name:
+                type: string
+              native:
+                type: string
+              direction:
+                type: string
+                enum: [ltr, rtl]
+              flag:
+                type: string
+              is_current:
+                type: boolean
+        meta:
+          type: object
+          properties:
+            locale:
+              type: string
+            direction:
+              type: string
+            is_rtl:
+              type: boolean
+
+    LocaleResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            code:
+              type: string
+            name:
+              type: string
+            native:
+              type: string
+            direction:
+              type: string
+            flag:
+              type: string
+            is_rtl:
+              type: boolean
+            date_format:
+              type: string
+            time_format:
+              type: string
+            datetime_format:
+              type: string
+
+    ScheduleListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schedule'
+
+    ScheduleResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Schedule'
+
+    Schedule:
+      type: object
+      properties:
+        id:
+          type: integer
+        day_of_week:
+          type: integer
+        day_name:
+          type: string
+        start_time:
+          type: string
+        end_time:
+          type: string
+        break_start:
+          type: string
+        break_end:
+          type: string
+        is_active:
+          type: boolean
+
+    VacationListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vacation'
+
+    VacationResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Vacation'
+
+    Vacation:
+      type: object
+      properties:
+        id:
+          type: integer
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        reason:
+          type: string
+        days_count:
+          type: integer
+        is_active:
+          type: boolean
+        is_future:
+          type: boolean
+
+    PaymentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    PaymentResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Payment'
+        message:
+          type: string
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        appointment_id:
+          type: integer
+        amount:
+          type: number
+        discount:
+          type: number
+        total:
+          type: number
+        method:
+          type: string
+        method_label:
+          type: string
+        status:
+          type: string
+        status_label:
+          type: string
+        transaction_id:
+          type: string
+        paid_at:
+          type: string
+          format: date-time
+        refunded_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    SettingsResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Settings'
+
+    Settings:
+      type: object
+      properties:
+        clinic_name:
+          type: string
+        clinic_phone:
+          type: string
+        clinic_email:
+          type: string
+        clinic_address:
+          type: string
+        consultation_fee:
+          type: number
+        slot_duration:
+          type: integer
+        max_patients_per_slot:
+          type: integer
+        advance_booking_days:
+          type: integer
+        cancellation_hours:
+          type: integer
+        logo_url:
+          type: string
+
+    DashboardStatsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            total_patients:
+              type: integer
+            total_appointments:
+              type: integer
+            total_revenue:
+              type: number
+            pending_appointments:
+              type: integer
+            today_appointments:
+              type: integer
+            this_week_appointments:
+              type: integer
+            this_month_revenue:
+              type: number
+            this_month_appointments:
+              type: integer
+
+    TodayStatsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            appointments:
+              type: object
+              properties:
+                total:
+                  type: integer
+                pending:
+                  type: integer
+                confirmed:
+                  type: integer
+                completed:
+                  type: integer
+                cancelled:
+                  type: integer
+                no_show:
+                  type: integer
+            revenue:
+              type: object
+              properties:
+                total:
+                  type: number
+                paid:
+                  type: number
+                pending:
+                  type: number
+            next_appointment:
+              type: object
+
+    WeeklyStatsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            appointments:
+              type: integer
+            completed:
+              type: integer
+            revenue:
+              type: number
+            new_patients:
+              type: integer
+
+    MonthlyStatsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            appointments:
+              type: integer
+            completed:
+              type: integer
+            cancelled:
+              type: integer
+            revenue:
+              type: number
+            new_patients:
+              type: integer
+            average_daily_appointments:
+              type: number
+
+    ChartDataResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            appointments_trend:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                  day:
+                    type: string
+                  count:
+                    type: integer
+            revenue_trend:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                  day:
+                    type: string
+                  amount:
+                    type: number
+            status_distribution:
+              type: object
+            payment_methods:
+              type: object
+
+    RecentActivityResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              id:
+                type: integer
+              description:
+                type: string
+              status:
+                type: string
+              date:
+                type: string
+
+    TodayAppointmentsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            appointments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Appointment'
+            summary:
+              type: object
+              properties:
+                total:
+                  type: integer
+                pending:
+                  type: integer
+                confirmed:
+                  type: integer
+                completed:
+                  type: integer
+
+    AppointmentStatisticsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            total:
+              type: integer
+            by_status:
+              type: object
+            completion_rate:
+              type: number
+            cancellation_rate:
+              type: number
+
+    AppointmentsReportResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            period:
+              type: object
+              properties:
+                from:
+                  type: string
+                to:
+                  type: string
+            summary:
+              type: object
+            completion_rate:
+              type: number
+            cancellation_rate:
+              type: number
+            appointments:
+              type: array
+              items:
+                type: object
+
+    RevenueReportResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            period:
+              type: object
+            summary:
+              type: object
+              properties:
+                total_revenue:
+                  type: number
+                total_discount:
+                  type: number
+                total_payments:
+                  type: integer
+                average_payment:
+                  type: number
+            by_method:
+              type: object
+            breakdown:
+              type: array
+              items:
+                type: object
+            payments:
+              type: array
+              items:
+                type: object
+
+    PatientsReportResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            period:
+              type: object
+            summary:
+              type: object
+              properties:
+                total_patients:
+                  type: integer
+                active_patients:
+                  type: integer
+                inactive_patients:
+                  type: integer
+            patients:
+              type: array
+              items:
+                type: object
+
+    PaymentStatisticsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            total_revenue:
+              type: number
+            total_pending:
+              type: number
+            total_refunded:
+              type: number
+            net_revenue:
+              type: number
+            total_payments:
+              type: integer
+            paid_count:
+              type: integer
+            pending_count:
+              type: integer
+            refunded_count:
+              type: integer
+            by_method:
+              type: object
+            period:
+              type: object
+
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        last_page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
