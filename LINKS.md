@@ -1,5 +1,13 @@
 # Clinic Booking System - All Links
 
+## Current Development Environment
+
+| Description | URL | Status |
+|-------------|-----|--------|
+| **Frontend** | http://localhost:3001 | ✅ Running |
+| **Backend API** | http://127.0.0.1:8000/api | ✅ Running |
+| **API Health** | http://127.0.0.1:8000/api/health | ✅ Available |
+
 ## Local Development (Laragon)
 
 | Description | URL |
@@ -16,6 +24,42 @@
 | **API Base** | http://localhost:8001/api |
 | **Health Check** | http://localhost:8001/api/health |
 | **phpMyAdmin** | http://localhost:8080 (with --profile tools) |
+
+---
+
+## Frontend Pages (Next.js 16)
+
+### Public Pages
+| Page | URL | Description |
+|------|-----|-------------|
+| **Home** | http://localhost:3001 | Landing page (redirects to login) |
+| **Login** | http://localhost:3001/login | User login page |
+| **Register** | http://localhost:3001/register | Patient registration |
+| **Forgot Password** | http://localhost:3001/forgot-password | Password reset request |
+| **Verify OTP** | http://localhost:3001/verify-otp | OTP verification |
+| **Reset Password** | http://localhost:3001/reset-password | Set new password |
+
+### Patient Pages (Authenticated)
+| Page | URL | Description |
+|------|-----|-------------|
+| **Dashboard** | http://localhost:3001/dashboard | Patient dashboard |
+| **Book Appointment** | http://localhost:3001/book | Book new appointment |
+| **My Appointments** | http://localhost:3001/appointments | View appointments |
+| **Medical Records** | http://localhost:3001/medical-records | View medical records |
+| **Prescriptions** | http://localhost:3001/prescriptions | View prescriptions |
+| **Notifications** | http://localhost:3001/notifications | View notifications |
+| **Profile** | http://localhost:3001/profile | Edit profile |
+
+### Admin Pages (Admin/Secretary Only)
+| Page | URL | Description |
+|------|-----|-------------|
+| **Admin Dashboard** | http://localhost:3001/admin/dashboard | Admin overview |
+| **Appointments** | http://localhost:3001/admin/appointments | Manage appointments |
+| **Patients** | http://localhost:3001/admin/patients | Manage patients |
+| **Medical Records** | http://localhost:3001/admin/medical-records | Manage records |
+| **Prescriptions** | http://localhost:3001/admin/prescriptions | Manage prescriptions |
+| **Payments** | http://localhost:3001/admin/payments | Manage payments |
+| **Settings** | http://localhost:3001/admin/settings | Clinic settings |
 
 ---
 
