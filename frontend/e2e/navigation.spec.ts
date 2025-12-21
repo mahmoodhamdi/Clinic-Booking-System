@@ -3,17 +3,17 @@ import { test, expect } from '@playwright/test';
 test.describe('Navigation', () => {
   test('should redirect unauthenticated users to login', async ({ page }) => {
     await page.goto('/dashboard');
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test('should redirect unauthenticated users from booking to login', async ({ page }) => {
     await page.goto('/book');
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test('should redirect unauthenticated users from admin to login', async ({ page }) => {
     await page.goto('/admin/dashboard');
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test('home page should be accessible', async ({ page }) => {

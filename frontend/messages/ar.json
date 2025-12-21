@@ -47,6 +47,7 @@
     "rememberMe": "تذكرني",
     "dontHaveAccount": "ليس لديك حساب؟",
     "alreadyHaveAccount": "لديك حساب بالفعل؟",
+    "submit": "إرسال",
     "loginSuccess": "تم تسجيل الدخول بنجاح",
     "registerSuccess": "تم إنشاء الحساب بنجاح",
     "logoutSuccess": "تم تسجيل الخروج بنجاح",

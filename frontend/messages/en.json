@@ -47,6 +47,7 @@
     "rememberMe": "Remember me",
     "dontHaveAccount": "Don't have an account?",
     "alreadyHaveAccount": "Already have an account?",
+    "submit": "Submit",
     "loginSuccess": "Login successful",
     "registerSuccess": "Registration successful",
     "logoutSuccess": "Logout successful",
