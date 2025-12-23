@@ -81,4 +81,14 @@ class MedicalRecordFactory extends Factory
             'vital_signs' => null,
         ]);
     }
+
+    /**
+     * Indicate that the medical record is soft deleted.
+     */
+    public function deleted(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'deleted_at' => now(),
+        ]);
+    }
 }

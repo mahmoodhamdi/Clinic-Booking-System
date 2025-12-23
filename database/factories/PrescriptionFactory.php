@@ -60,4 +60,14 @@ class PrescriptionFactory extends Factory
             'valid_until' => null,
         ]);
     }
+
+    /**
+     * Indicate that the prescription is soft deleted.
+     */
+    public function deleted(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'deleted_at' => now(),
+        ]);
+    }
 }

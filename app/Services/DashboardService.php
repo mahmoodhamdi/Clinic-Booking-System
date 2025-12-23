@@ -4,27 +4,52 @@ namespace App\Services;
 
 use App\Enums\AppointmentStatus;
 use App\Enums\PaymentStatus;
+use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use App\Models\Payment;
 use App\Models\User;
+use App\Traits\LogsActivity;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardService
 {
+    use LogsActivity;
+
+    protected int $cacheTtl;
+
+    public function __construct()
+    {
+        $this->cacheTtl = config('clinic.cache.dashboard_ttl', 600);
+    }
+
     public function getOverviewStatistics(): array
     {
-        return [
-            'total_patients' => $this->getTotalPatients(),
-            'total_appointments' => $this->getTotalAppointments(),
-            'total_revenue' => $this->getTotalRevenue(),
-            'pending_appointments' => $this->getPendingAppointmentsCount(),
-            'today_appointments' => $this->getTodayAppointmentsCount(),
-            'this_week_appointments' => $this->getThisWeekAppointmentsCount(),
-            'this_month_revenue' => $this->getThisMonthRevenue(),
-            'this_month_appointments' => $this->getThisMonthAppointmentsCount(),
-        ];
+        $this->logInfo('Fetching overview statistics');
+
+        return Cache::remember('dashboard_stats', $this->cacheTtl, function () {
+            return [
+                'total_patients' => $this->getTotalPatients(),
+                'total_appointments' => $this->getTotalAppointments(),
+                'total_revenue' => $this->getTotalRevenue(),
+                'pending_appointments' => $this->getPendingAppointmentsCount(),
+                'today_appointments' => $this->getTodayAppointmentsCount(),
+                'this_week_appointments' => $this->getThisWeekAppointmentsCount(),
+                'this_month_revenue' => $this->getThisMonthRevenue(),
+                'this_month_appointments' => $this->getThisMonthAppointmentsCount(),
+            ];
+        });
+    }
+
+    /**
+     * Invalidate dashboard cache.
+     */
+    public function invalidateCache(): void
+    {
+        Cache::forget('dashboard_stats');
+        $this->logInfo('Dashboard cache invalidated');
     }
 
     public function getTodayStatistics(): array
@@ -75,6 +100,27 @@ class DashboardService
         $month = $month ?? now()->month;
         $year = $year ?? now()->year;
 
+        // Validate month
+        if ($month < 1 || $month > 12) {
+            throw new BusinessLogicException(
+                __('الشهر غير صالح'),
+                'INVALID_MONTH',
+                ['month' => $month]
+            );
+        }
+
+        // Validate year (reasonable range)
+        $currentYear = now()->year;
+        if ($year < $currentYear - 10 || $year > $currentYear + 1) {
+            throw new BusinessLogicException(
+                __('السنة غير صالحة'),
+                'INVALID_YEAR',
+                ['year' => $year]
+            );
+        }
+
+        $this->logInfo('Fetching monthly statistics', ['month' => $month, 'year' => $year]);
+
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
@@ -99,6 +145,18 @@ class DashboardService
 
     public function getChartData(string $period = 'week'): array
     {
+        // Validate period
+        $validPeriods = ['week', 'month'];
+        if (!in_array($period, $validPeriods)) {
+            throw new BusinessLogicException(
+                __('الفترة غير صالحة'),
+                'INVALID_PERIOD',
+                ['period' => $period, 'valid_values' => $validPeriods]
+            );
+        }
+
+        $this->logInfo('Fetching chart data', ['period' => $period]);
+
         return [
             'appointments_trend' => $this->getAppointmentsTrend($period),
             'revenue_trend' => $this->getRevenueTrend($period),

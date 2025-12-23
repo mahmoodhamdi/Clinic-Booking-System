@@ -306,4 +306,102 @@ class AppointmentTest extends TestCase
 
         $this->assertFalse($appointment->can_cancel);
     }
+
+    // ==================== Soft Delete Tests ====================
+
+    /** @test */
+    public function appointment_can_be_soft_deleted(): void
+    {
+        $appointment = Appointment::factory()->create();
+        $appointment->delete();
+
+        $this->assertSoftDeleted('appointments', ['id' => $appointment->id]);
+        $this->assertNotNull($appointment->fresh()->deleted_at);
+    }
+
+    /** @test */
+    public function soft_deleted_appointments_are_excluded_by_default(): void
+    {
+        $active = Appointment::factory()->create();
+        $deleted = Appointment::factory()->create();
+        $deleted->delete();
+
+        $appointments = Appointment::all();
+
+        $this->assertCount(1, $appointments);
+        $this->assertTrue($appointments->contains($active));
+        $this->assertFalse($appointments->contains($deleted));
+    }
+
+    /** @test */
+    public function soft_deleted_appointments_can_be_included_with_trashed(): void
+    {
+        Appointment::factory()->create();
+        $deleted = Appointment::factory()->create();
+        $deleted->delete();
+
+        $allAppointments = Appointment::withTrashed()->get();
+
+        $this->assertCount(2, $allAppointments);
+    }
+
+    /** @test */
+    public function soft_deleted_appointment_can_be_restored(): void
+    {
+        $appointment = Appointment::factory()->create();
+        $appointment->delete();
+
+        $this->assertSoftDeleted('appointments', ['id' => $appointment->id]);
+
+        $appointment->restore();
+
+        $this->assertNull($appointment->fresh()->deleted_at);
+        $this->assertDatabaseHas('appointments', ['id' => $appointment->id, 'deleted_at' => null]);
+    }
+
+    // ==================== New Scope Tests ====================
+
+    /** @test */
+    public function has_for_date_range_scope(): void
+    {
+        $from = now()->addDays(5);
+        $to = now()->addDays(10);
+
+        // Inside range
+        Appointment::factory()->forDate($from->addDays(2)->toDateString())->count(2)->create();
+        // Outside range
+        Appointment::factory()->forDate(now()->addDays(15)->toDateString())->create();
+
+        $this->assertCount(2, Appointment::forDateRange($from, $to)->get());
+    }
+
+    /** @test */
+    public function has_not_cancelled_scope(): void
+    {
+        Appointment::factory()->pending()->create();
+        Appointment::factory()->confirmed()->create();
+        Appointment::factory()->cancelled()->create();
+
+        $this->assertCount(2, Appointment::notCancelled()->get());
+    }
+
+    /** @test */
+    public function has_awaiting_confirmation_scope(): void
+    {
+        Appointment::factory()->pending()->count(2)->create();
+        Appointment::factory()->confirmed()->create();
+        Appointment::factory()->completed()->create();
+
+        $this->assertCount(2, Appointment::awaitingConfirmation()->get());
+    }
+
+    /** @test */
+    public function patient_relationship_is_alias_for_user(): void
+    {
+        $patient = User::factory()->patient()->create();
+        $appointment = Appointment::factory()->forPatient($patient)->create();
+
+        $this->assertEquals($appointment->user->id, $appointment->patient->id);
+        $this->assertEquals($patient->id, $appointment->patient->id);
+    }
 }

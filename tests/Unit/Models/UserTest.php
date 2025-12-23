@@ -222,4 +222,15 @@ class UserTest extends TestCase
         $this->assertNotEquals('plainpassword', $user->password);
         $this->assertTrue(\Illuminate\Support\Facades\Hash::check('plainpassword', $user->password));
     }
+
+    /** @test */
+    public function scope_verified_returns_only_verified_users(): void
+    {
+        User::factory()->count(3)->create(['phone_verified_at' => now()]);
+        User::factory()->count(2)->create(['phone_verified_at' => null]);
+
+        $verifiedUsers = User::verified()->get();
+
+        $this->assertCount(3, $verifiedUsers);
+    }
 }

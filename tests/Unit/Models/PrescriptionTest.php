@@ -168,4 +168,40 @@ class PrescriptionTest extends TestCase
 
         $this->assertEquals($patient->id, $prescription->patient->id);
     }
+
+    // ==================== Soft Delete Tests ====================
+
+    public function test_prescription_can_be_soft_deleted(): void
+    {
+        $prescription = Prescription::factory()->create();
+        $prescription->delete();
+
+        $this->assertSoftDeleted('prescriptions', ['id' => $prescription->id]);
+        $this->assertNotNull($prescription->fresh()->deleted_at);
+    }
+
+    public function test_soft_deleted_prescriptions_are_excluded_by_default(): void
+    {
+        $active = Prescription::factory()->create();
+        $deleted = Prescription::factory()->create();
+        $deleted->delete();
+
+        $prescriptions = Prescription::all();
+
+        $this->assertCount(1, $prescriptions);
+        $this->assertTrue($prescriptions->contains($active));
+        $this->assertFalse($prescriptions->contains($deleted));
+    }
+
+    public function test_soft_deleted_prescription_can_be_restored(): void
+    {
+        $prescription = Prescription::factory()->create();
+        $prescription->delete();
+
+        $this->assertSoftDeleted('prescriptions', ['id' => $prescription->id]);
+
+        $prescription->restore();
+
+        $this->assertNull($prescription->fresh()->deleted_at);
+    }
 }

@@ -5,22 +5,62 @@ namespace App\Services;
 use App\Enums\AppointmentStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
+use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
 use App\Models\Payment;
 use App\Models\User;
+use App\Traits\LogsActivity;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class ReportService
 {
+    use LogsActivity;
+
+    protected int $maxReportDays = 365;
+
+    /**
+     * Validate date range for reports.
+     */
+    protected function validateDateRange(?string $fromDate, ?string $toDate): array
+    {
+        $from = $fromDate ? Carbon::parse($fromDate) : now()->startOfMonth();
+        $to = $toDate ? Carbon::parse($toDate) : now()->endOfMonth();
+
+        // Validate from is before to
+        if ($from->gt($to)) {
+            throw new BusinessLogicException(
+                __('تاريخ البداية يجب أن يكون قبل تاريخ النهاية'),
+                'INVALID_DATE_RANGE',
+                ['from' => $fromDate, 'to' => $toDate]
+            );
+        }
+
+        // Validate range is not too large
+        if ($from->diffInDays($to) > $this->maxReportDays) {
+            throw new BusinessLogicException(
+                __('نطاق التقرير لا يمكن أن يتجاوز :days يوم', ['days' => $this->maxReportDays]),
+                'DATE_RANGE_TOO_LARGE',
+                ['from' => $fromDate, 'to' => $toDate, 'max_days' => $this->maxReportDays]
+            );
+        }
+
+        return [$from, $to];
+    }
+
     public function getAppointmentsReport(
         ?string $fromDate = null,
         ?string $toDate = null,
         ?string $status = null
     ): array {
-        $from = $fromDate ? Carbon::parse($fromDate) : now()->startOfMonth();
-        $to = $toDate ? Carbon::parse($toDate) : now()->endOfMonth();
+        [$from, $to] = $this->validateDateRange($fromDate, $toDate);
+
+        $this->logInfo('Generating appointments report', [
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+            'status' => $status,
+        ]);
 
         $query = Appointment::with(['patient'])
             ->whereBetween('appointment_date', [$from->toDateString(), $to->toDateString()]);
@@ -73,8 +113,23 @@ class ReportService
         ?string $toDate = null,
         ?string $groupBy = 'day'
     ): array {
-        $from = $fromDate ? Carbon::parse($fromDate) : now()->startOfMonth();
-        $to = $toDate ? Carbon::parse($toDate) : now()->endOfMonth();
+        [$from, $to] = $this->validateDateRange($fromDate, $toDate);
+
+        // Validate groupBy parameter
+        $validGroupBy = ['day', 'week', 'month'];
+        if (!in_array($groupBy, $validGroupBy)) {
+            throw new BusinessLogicException(
+                __('نوع التجميع غير صالح'),
+                'INVALID_GROUP_BY',
+                ['group_by' => $groupBy, 'valid_values' => $validGroupBy]
+            );
+        }
+
+        $this->logInfo('Generating revenue report', [
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+            'group_by' => $groupBy,
+        ]);
 
         $payments = Payment::with(['appointment.patient'])
             ->paid()
@@ -127,8 +182,23 @@ class ReportService
         ?string $fromDate = null,
         ?string $toDate = null
     ): array {
+        // Use year boundaries for default if no dates provided
         $from = $fromDate ? Carbon::parse($fromDate) : now()->startOfYear();
         $to = $toDate ? Carbon::parse($toDate) : now()->endOfYear();
+
+        // Validate from is before to
+        if ($from->gt($to)) {
+            throw new BusinessLogicException(
+                __('تاريخ البداية يجب أن يكون قبل تاريخ النهاية'),
+                'INVALID_DATE_RANGE',
+                ['from' => $fromDate, 'to' => $toDate]
+            );
+        }
+
+        $this->logInfo('Generating patients report', [
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+        ]);
 
         $patients = User::where('role', UserRole::PATIENT)
             ->whereBetween('created_at', [$from->startOfDay(), $to->endOfDay()])

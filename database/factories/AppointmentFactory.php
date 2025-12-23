@@ -165,4 +165,14 @@ class AppointmentFactory extends Factory
             'admin_notes' => $notes ?? $this->faker->paragraph(),
         ]);
     }
+
+    /**
+     * Indicate that the appointment is soft deleted.
+     */
+    public function deleted(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'deleted_at' => now(),
+        ]);
+    }
 }

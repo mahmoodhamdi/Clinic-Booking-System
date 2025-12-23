@@ -162,7 +162,7 @@ class MedicalRecordTest extends TestCase
             ->deleteJson("/api/admin/medical-records/{$medicalRecord->id}");
 
         $response->assertOk();
-        $this->assertDatabaseMissing('medical_records', [
+        $this->assertSoftDeleted('medical_records', [
             'id' => $medicalRecord->id,
         ]);
     }

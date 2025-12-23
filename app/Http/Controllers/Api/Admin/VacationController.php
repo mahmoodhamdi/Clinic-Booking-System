@@ -7,11 +7,16 @@ use App\Http\Requests\StoreVacationRequest;
 use App\Http\Requests\UpdateVacationRequest;
 use App\Http\Resources\VacationResource;
 use App\Models\Vacation;
+use App\Services\SlotGeneratorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class VacationController extends Controller
 {
+    public function __construct(
+        protected SlotGeneratorService $slotService
+    ) {
+    }
     /**
      * List all vacations.
      */
@@ -49,6 +54,9 @@ class VacationController extends Controller
     {
         $vacation = Vacation::create($request->validated());
 
+        // Invalidate slot cache when vacation changes
+        $this->slotService->invalidateCache();
+
         return response()->json([
             'success' => true,
             'message' => 'تم إنشاء الإجازة بنجاح.',
@@ -74,6 +82,9 @@ class VacationController extends Controller
     {
         $vacation->update($request->validated());
 
+        // Invalidate slot cache when vacation changes
+        $this->slotService->invalidateCache();
+
         return response()->json([
             'success' => true,
             'message' => 'تم تحديث الإجازة بنجاح.',
@@ -87,6 +98,9 @@ class VacationController extends Controller
     public function destroy(Vacation $vacation): JsonResponse
     {
         $vacation->delete();
+
+        // Invalidate slot cache when vacation changes
+        $this->slotService->invalidateCache();
 
         return response()->json([
             'success' => true,

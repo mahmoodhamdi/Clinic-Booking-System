@@ -2,14 +2,20 @@
 
 namespace App\Services;
 
+use App\Enums\AppointmentStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Exceptions\PaymentException;
 use App\Models\Appointment;
 use App\Models\Payment;
+use App\Traits\LogsActivity;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PaymentService
 {
+    use LogsActivity;
+
     public function createPayment(
         Appointment $appointment,
         float $amount,
@@ -17,61 +23,135 @@ class PaymentService
         float $discount = 0,
         ?string $notes = null
     ): Payment {
-        $total = Payment::calculateTotal($amount, $discount);
-
-        return Payment::create([
+        $this->logInfo('Creating payment', [
             'appointment_id' => $appointment->id,
             'amount' => $amount,
-            'discount' => $discount,
-            'total' => $total,
-            'method' => $method,
-            'status' => PaymentStatus::PENDING,
-            'notes' => $notes,
+            'method' => $method->value,
         ]);
+
+        // Validate appointment can accept payment
+        if ($appointment->status === AppointmentStatus::CANCELLED) {
+            throw new PaymentException('appointment_cancelled', $appointment->id, $amount);
+        }
+
+        // Check if appointment already has a paid payment
+        $existingPayment = $appointment->payment;
+        if ($existingPayment && $existingPayment->status === PaymentStatus::PAID) {
+            throw new PaymentException('already_paid', $appointment->id, $amount);
+        }
+
+        // Validate amount
+        if ($amount <= 0) {
+            throw new PaymentException('invalid_amount', $appointment->id, $amount);
+        }
+
+        return DB::transaction(function () use ($appointment, $amount, $method, $discount, $notes) {
+            $total = Payment::calculateTotal($amount, $discount);
+
+            $payment = Payment::create([
+                'appointment_id' => $appointment->id,
+                'amount' => $amount,
+                'discount' => $discount,
+                'total' => $total,
+                'method' => $method,
+                'status' => PaymentStatus::PENDING,
+                'notes' => $notes,
+            ]);
+
+            $this->logInfo('Payment created successfully', [
+                'payment_id' => $payment->id,
+                'appointment_id' => $appointment->id,
+            ]);
+
+            return $payment;
+        });
     }
 
     public function updatePayment(
         Payment $payment,
         array $data
     ): Payment {
-        $updateData = [];
+        $this->logInfo('Updating payment', [
+            'payment_id' => $payment->id,
+            'data' => $data,
+        ]);
 
-        if (isset($data['amount'])) {
-            $updateData['amount'] = $data['amount'];
+        // Cannot update paid or refunded payments
+        if ($payment->status !== PaymentStatus::PENDING) {
+            throw new PaymentException('already_paid', $payment->appointment_id, $payment->amount);
         }
 
-        if (isset($data['discount'])) {
-            $updateData['discount'] = $data['discount'];
-        }
+        return DB::transaction(function () use ($payment, $data) {
+            $updateData = [];
 
-        if (isset($data['method'])) {
-            $updateData['method'] = $data['method'];
-        }
+            if (isset($data['amount'])) {
+                if ($data['amount'] <= 0) {
+                    throw new PaymentException('invalid_amount', $payment->appointment_id, $data['amount']);
+                }
+                $updateData['amount'] = $data['amount'];
+            }
 
-        if (isset($data['notes'])) {
-            $updateData['notes'] = $data['notes'];
-        }
+            if (isset($data['discount'])) {
+                $updateData['discount'] = $data['discount'];
+            }
 
-        // Recalculate total if amount or discount changed
-        if (isset($updateData['amount']) || isset($updateData['discount'])) {
-            $amount = $updateData['amount'] ?? $payment->amount;
-            $discount = $updateData['discount'] ?? $payment->discount;
-            $updateData['total'] = Payment::calculateTotal($amount, $discount);
-        }
+            if (isset($data['method'])) {
+                $updateData['method'] = $data['method'];
+            }
 
-        $payment->update($updateData);
+            if (isset($data['notes'])) {
+                $updateData['notes'] = $data['notes'];
+            }
 
-        return $payment;
+            // Recalculate total if amount or discount changed
+            if (isset($updateData['amount']) || isset($updateData['discount'])) {
+                $amount = $updateData['amount'] ?? $payment->amount;
+                $discount = $updateData['discount'] ?? $payment->discount;
+                $updateData['total'] = Payment::calculateTotal($amount, $discount);
+            }
+
+            $payment->update($updateData);
+
+            $this->logInfo('Payment updated successfully', ['payment_id' => $payment->id]);
+
+            return $payment;
+        });
     }
 
     public function markAsPaid(Payment $payment, ?string $transactionId = null): Payment
     {
-        return $payment->markAsPaid($transactionId);
+        $this->logInfo('Marking payment as paid', [
+            'payment_id' => $payment->id,
+            'transaction_id' => $transactionId,
+        ]);
+
+        if ($payment->status === PaymentStatus::PAID) {
+            throw new PaymentException('already_paid', $payment->appointment_id, $payment->amount);
+        }
+
+        return DB::transaction(function () use ($payment, $transactionId) {
+            $result = $payment->markAsPaid($transactionId);
+            $this->logInfo('Payment marked as paid', ['payment_id' => $payment->id]);
+            return $result;
+        });
     }
 
     public function refund(Payment $payment, ?string $reason = null): Payment
     {
-        return $payment->refund($reason);
+        $this->logInfo('Processing refund', [
+            'payment_id' => $payment->id,
+            'reason' => $reason,
+        ]);
+
+        if ($payment->status !== PaymentStatus::PAID) {
+            throw new PaymentException('refund_failed', $payment->appointment_id, $payment->amount);
+        }
+
+        return DB::transaction(function () use ($payment, $reason) {
+            $result = $payment->refund($reason);
+            $this->logInfo('Payment refunded', ['payment_id' => $payment->id]);
+            return $result;
+        });
     }
 
     public function getStatistics(?string $from = null, ?string $to = null): array

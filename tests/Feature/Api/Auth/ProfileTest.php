@@ -111,13 +111,13 @@ class ProfileTest extends TestCase
     /** @test */
     public function user_can_change_password(): void
     {
-        $user = User::factory()->create(['password' => 'oldpassword']);
+        $user = User::factory()->create(['password' => 'OldPassword1!']);
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/auth/change-password', [
-            'current_password' => 'oldpassword',
-            'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123',
+            'current_password' => 'OldPassword1!',
+            'password' => 'NewPassword1!',
+            'password_confirmation' => 'NewPassword1!',
         ]);
 
         $response->assertOk()
@@ -126,19 +126,19 @@ class ProfileTest extends TestCase
             ]);
 
         // Verify new password works
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('newpassword123', $user->fresh()->password));
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NewPassword1!', $user->fresh()->password));
     }
 
     /** @test */
     public function password_change_requires_current_password(): void
     {
-        $user = User::factory()->create(['password' => 'oldpassword']);
+        $user = User::factory()->create(['password' => 'OldPassword1!']);
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/auth/change-password', [
-            'current_password' => 'wrongpassword',
-            'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123',
+            'current_password' => 'WrongPassword1!',
+            'password' => 'NewPassword1!',
+            'password_confirmation' => 'NewPassword1!',
         ]);
 
         $response->assertStatus(422)
@@ -153,7 +153,8 @@ class ProfileTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        $file = UploadedFile::fake()->image('avatar.jpg');
+        // Create image with valid dimensions (min 50x50 required)
+        $file = UploadedFile::fake()->image('avatar.jpg', 100, 100);
 
         $response = $this->postJson('/api/auth/avatar', [
             'avatar' => $file,

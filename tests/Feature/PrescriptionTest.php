@@ -211,7 +211,7 @@ class PrescriptionTest extends TestCase
             ->deleteJson("/api/admin/prescriptions/{$prescription->id}");
 
         $response->assertOk();
-        $this->assertDatabaseMissing('prescriptions', [
+        $this->assertSoftDeleted('prescriptions', [
             'id' => $prescription->id,
         ]);
     }

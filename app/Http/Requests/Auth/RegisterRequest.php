@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
@@ -25,7 +26,16 @@ class RegisterRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'phone:EG', 'unique:users,phone'],
             'email' => ['nullable', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
         ];
     }
 
@@ -40,7 +50,6 @@ class RegisterRequest extends FormRequest
             'phone.phone' => 'رقم الهاتف غير صالح. يجب أن يكون رقم هاتف مصري.',
             'phone.unique' => 'رقم الهاتف مسجل بالفعل.',
             'email.unique' => 'البريد الإلكتروني مسجل بالفعل.',
-            'password.min' => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.',
             'password.confirmed' => 'كلمة المرور غير متطابقة.',
         ];
     }

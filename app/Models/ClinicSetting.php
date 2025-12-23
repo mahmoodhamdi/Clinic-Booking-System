@@ -87,4 +87,30 @@ class ClinicSetting extends Model
     {
         return now()->lt($this->getCancellationDeadline($appointmentTime));
     }
+
+    /**
+     * Get a setting value with a default fallback.
+     * Maps between getSetting keys and model attributes.
+     */
+    public function getSetting(string $key, mixed $default = null): mixed
+    {
+        // Map common getSetting keys to model attributes
+        $keyMap = [
+            'clinic_name' => 'clinic_name',
+            'clinic_address' => 'address',
+            'clinic_phone' => 'phone',
+            'clinic_email' => 'email',
+            'doctor_name' => 'doctor_name',
+            'specialization' => 'specialization',
+            'logo' => 'logo',
+            'slot_duration' => 'slot_duration',
+            'max_patients_per_slot' => 'max_patients_per_slot',
+            'advance_booking_days' => 'advance_booking_days',
+            'cancellation_hours' => 'cancellation_hours',
+        ];
+
+        $attribute = $keyMap[$key] ?? $key;
+
+        return $this->getAttribute($attribute) ?? $default;
+    }
 }

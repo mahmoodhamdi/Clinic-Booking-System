@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\CancelledBy;
+use App\Exceptions\BusinessLogicException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BookAppointmentRequest;
 use App\Http\Requests\CancelAppointmentRequest;
@@ -61,6 +62,12 @@ class AppointmentController extends Controller
                 'message' => __('تم حجز الموعد بنجاح'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ], 201);
+        } catch (BusinessLogicException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'error_code' => $e->getErrorCode(),
+            ], $e->getCode());
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
@@ -116,6 +123,12 @@ class AppointmentController extends Controller
                 'message' => __('تم إلغاء الحجز بنجاح'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
+        } catch (BusinessLogicException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'error_code' => $e->getErrorCode(),
+            ], $e->getCode());
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,

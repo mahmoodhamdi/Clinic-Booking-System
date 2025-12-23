@@ -139,7 +139,14 @@ class AuthController extends Controller
     public function uploadAvatar(Request $request): JsonResponse
     {
         $request->validate([
-            'avatar' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'avatar' => [
+                'required',
+                'image',
+                'mimes:jpeg,png,jpg',
+                'mimetypes:image/jpeg,image/png',
+                'max:2048',
+                'dimensions:min_width=50,min_height=50,max_width=2000,max_height=2000',
+            ],
         ]);
 
         $user = $request->user();
@@ -149,7 +156,10 @@ class AuthController extends Controller
             Storage::disk('public')->delete($user->avatar);
         }
 
-        $path = $request->file('avatar')->store('avatars', 'public');
+        // Generate a secure random filename to prevent path traversal
+        $extension = $request->file('avatar')->getClientOriginalExtension();
+        $filename = Str::uuid() . '.' . $extension;
+        $path = $request->file('avatar')->storeAs('avatars', $filename, 'public');
         $user->update(['avatar' => $path]);
 
         return response()->json([
@@ -193,8 +203,9 @@ class AuthController extends Controller
             ]
         );
 
-        // TODO: Send OTP via SMS (currently logging for development)
-        \Log::info("Password reset OTP for {$request->phone}: {$token}");
+        // TODO: Implement SMS gateway integration to send OTP
+        // In production, use a service like Twilio, Vonage, or local SMS provider
+        // NotificationService::sendPasswordResetSms($request->phone, $token);
 
         return response()->json([
             'success' => true,

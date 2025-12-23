@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'secretary' => \App\Http\Middleware\SecretaryMiddleware::class,
         ]);
+
+        // Add security headers to all API responses
+        $middleware->api(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
