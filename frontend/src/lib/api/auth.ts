@@ -93,11 +93,8 @@ export const authApi = {
   uploadAvatar: async (file: File): Promise<ApiResponse<{ avatar: string }>> => {
     const formData = new FormData();
     formData.append('avatar', file);
-    const response = await api.post<ApiResponse<{ avatar: string }>>('/auth/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // Note: Content-Type is handled by request interceptor for FormData
+    const response = await api.post<ApiResponse<{ avatar: string }>>('/auth/avatar', formData);
     return response.data;
   },
 

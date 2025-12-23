@@ -205,6 +205,44 @@ export interface DashboardStats {
   today_revenue: number;
 }
 
+// Report types
+export interface AppointmentsReport {
+  total: number;
+  by_status: Record<AppointmentStatus, number>;
+  by_day: Array<{ date: string; count: number }>;
+  completion_rate: number;
+  cancellation_rate: number;
+  no_show_rate: number;
+}
+
+export interface RevenueReport {
+  total_revenue: number;
+  total_paid: number;
+  total_pending: number;
+  total_refunded: number;
+  by_method: Record<PaymentMethod, number>;
+  by_day: Array<{ date: string; amount: number }>;
+  average_per_appointment: number;
+}
+
+export interface PatientsReport {
+  total_patients: number;
+  new_patients: number;
+  returning_patients: number;
+  by_gender: Record<string, number>;
+  by_age_group: Record<string, number>;
+  most_frequent: Array<{ patient_id: number; name: string; visit_count: number }>;
+}
+
+// Activity types
+export interface Activity {
+  id: number;
+  type: 'appointment' | 'payment' | 'medical_record' | 'prescription';
+  description: string;
+  user_name: string;
+  created_at: string;
+}
+
 export interface PatientDashboard {
   upcoming_appointments: Appointment[];
   recent_records: MedicalRecord[];

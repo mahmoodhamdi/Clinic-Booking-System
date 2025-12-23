@@ -1,5 +1,21 @@
 import api from './client';
-import { ApiResponse, PaginatedResponse, MedicalRecord, Prescription, Notification, PatientProfile, PatientDashboard } from '@/types';
+import { ApiResponse, PaginatedResponse, MedicalRecord, Prescription, Notification, PatientProfile, PatientDashboard, Appointment } from '@/types';
+
+// Types for patient-specific responses
+interface PatientHistory {
+  appointments: Appointment[];
+  medical_records: MedicalRecord[];
+  prescriptions: Prescription[];
+}
+
+interface PatientStatistics {
+  total_appointments: number;
+  completed_appointments: number;
+  cancelled_appointments: number;
+  upcoming_appointments: number;
+  total_medical_records: number;
+  total_prescriptions: number;
+}
 
 export const patientApi = {
   // Dashboard
@@ -41,14 +57,14 @@ export const patientApi = {
   },
 
   // History
-  getHistory: async (): Promise<ApiResponse<unknown>> => {
-    const response = await api.get<ApiResponse<unknown>>('/patient/history');
+  getHistory: async (): Promise<ApiResponse<PatientHistory>> => {
+    const response = await api.get<ApiResponse<PatientHistory>>('/patient/history');
     return response.data;
   },
 
   // Statistics
-  getStatistics: async (): Promise<ApiResponse<unknown>> => {
-    const response = await api.get<ApiResponse<unknown>>('/patient/statistics');
+  getStatistics: async (): Promise<ApiResponse<PatientStatistics>> => {
+    const response = await api.get<ApiResponse<PatientStatistics>>('/patient/statistics');
     return response.data;
   },
 
