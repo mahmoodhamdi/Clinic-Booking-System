@@ -12,12 +12,34 @@ jest.mock('next/navigation', () => ({
   }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams(),
+  redirect: jest.fn(),
+  notFound: jest.fn(),
 }));
 
 // Mock next-intl
 jest.mock('next-intl', () => ({
   useTranslations: () => (key) => key,
   useLocale: () => 'ar',
+  useMessages: () => ({}),
+  useNow: () => new Date(),
+  useTimeZone: () => 'UTC',
+  useFormatter: () => ({
+    dateTime: () => '',
+    number: () => '',
+    relativeTime: () => '',
+  }),
+}));
+
+// Mock next-themes
+jest.mock('next-themes', () => ({
+  useTheme: () => ({
+    theme: 'light',
+    setTheme: jest.fn(),
+    resolvedTheme: 'light',
+    themes: ['light', 'dark'],
+    systemTheme: 'light',
+  }),
+  ThemeProvider: ({ children }) => children,
 }));
 
 // Mock localStorage
@@ -51,13 +73,37 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
+// Mock IntersectionObserver
+global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+  root: null,
+  rootMargin: '',
+  thresholds: [],
+}));
+
+// Mock scrollTo
+window.scrollTo = jest.fn();
+
+// Reset all mocks before each test
+beforeEach(() => {
+  jest.clearAllMocks();
+  localStorageMock.getItem.mockReset();
+  localStorageMock.setItem.mockReset();
+  localStorageMock.removeItem.mockReset();
+  localStorageMock.clear.mockReset();
+});
+
 // Suppress console errors in tests
 const originalError = console.error;
 beforeAll(() => {
   console.error = (...args) => {
     if (
       typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render is no longer supported')
+      (args[0].includes('Warning: ReactDOM.render is no longer supported') ||
+        args[0].includes('Warning: An update to') ||
+        args[0].includes('act(...)'))
     ) {
       return;
     }
