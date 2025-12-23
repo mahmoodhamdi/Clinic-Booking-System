@@ -7,10 +7,30 @@ const publicRoutes = ['/login', '/register', '/forgot-password', '/verify-otp', 
 // Routes that require admin role
 const adminRoutes = ['/admin'];
 
+interface UserCookie {
+  id: number;
+  name: string;
+  role: 'admin' | 'secretary' | 'patient';
+  avatar: string | null;
+}
+
+function parseUserCookie(cookieValue: string | undefined): UserCookie | null {
+  if (!cookieValue) return null;
+  try {
+    return JSON.parse(cookieValue) as UserCookie;
+  } catch {
+    return null;
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('token')?.value;
+
+  // auth_token is HttpOnly, so we check the 'user' cookie for auth status
+  // The user cookie is set by the server alongside auth_token
+  const authToken = request.cookies.get('auth_token')?.value;
   const userCookie = request.cookies.get('user')?.value;
+  const user = parseUserCookie(userCookie);
 
   // Check if it's an API route or static file
   if (
@@ -24,25 +44,15 @@ export function middleware(request: NextRequest) {
   // Check if route is public
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
 
-  // If no token and trying to access protected route
-  if (!token && !isPublicRoute && pathname !== '/') {
+  // If no auth token and trying to access protected route
+  if (!authToken && !isPublicRoute && pathname !== '/') {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // If has token and trying to access auth pages
-  if (token && isPublicRoute) {
-    // Parse user to check role
-    let user = null;
-    try {
-      if (userCookie) {
-        user = JSON.parse(userCookie);
-      }
-    } catch {
-      // Invalid user cookie
-    }
-
+  // If has auth token and trying to access auth pages
+  if (authToken && isPublicRoute) {
     // Redirect based on role
     if (user?.role === 'admin' || user?.role === 'secretary') {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
@@ -52,15 +62,6 @@ export function middleware(request: NextRequest) {
 
   // Check admin routes
   if (pathname.startsWith('/admin')) {
-    let user = null;
-    try {
-      if (userCookie) {
-        user = JSON.parse(userCookie);
-      }
-    } catch {
-      // Invalid user cookie
-    }
-
     if (!user || (user.role !== 'admin' && user.role !== 'secretary')) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }

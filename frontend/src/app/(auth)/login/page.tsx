@@ -43,16 +43,8 @@ export default function LoginPage() {
       toast.success(t('loginSuccess'));
 
       // Get user from store to check role
+      // Token is set via HttpOnly cookie by the server
       const user = useAuthStore.getState().user;
-      const token = useAuthStore.getState().token;
-
-      // Set cookies for middleware
-      if (token) {
-        document.cookie = `token=${token};path=/;max-age=86400`;
-      }
-      if (user) {
-        document.cookie = `user=${JSON.stringify(user)};path=/;max-age=86400`;
-      }
 
       // Redirect based on role
       if (user?.role === 'admin' || user?.role === 'secretary') {

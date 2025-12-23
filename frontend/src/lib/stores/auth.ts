@@ -5,7 +5,6 @@ import { authApi, LoginCredentials, RegisterData } from '@/lib/api/auth';
 
 interface AuthState {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -16,15 +15,13 @@ interface AuthState {
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
   setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
   clearError: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -33,14 +30,11 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authApi.login(credentials);
-          const { user, token } = response.data;
-
-          // Store token in localStorage for API client
-          localStorage.setItem('token', token);
+          const { user } = response.data;
+          // Token is now set via HttpOnly cookie by the server
 
           set({
             user,
-            token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -60,14 +54,11 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authApi.register(data);
-          const { user, token } = response.data;
-
-          // Store token in localStorage for API client
-          localStorage.setItem('token', token);
+          const { user } = response.data;
+          // Token is now set via HttpOnly cookie by the server
 
           set({
             user,
-            token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
@@ -87,13 +78,12 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           await authApi.logout();
+          // Server will clear the HttpOnly cookie
         } catch {
           // Ignore logout errors
         } finally {
-          localStorage.removeItem('token');
           set({
             user: null,
-            token: null,
             isAuthenticated: false,
             isLoading: false,
             error: null,
@@ -102,9 +92,6 @@ export const useAuthStore = create<AuthState>()(
       },
 
       fetchUser: async () => {
-        const token = get().token;
-        if (!token) return;
-
         set({ isLoading: true });
         try {
           const response = await authApi.me();
@@ -114,33 +101,22 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
         } catch {
-          // Token invalid, clear auth state
-          localStorage.removeItem('token');
+          // Token invalid or not present, clear auth state
           set({
             user: null,
-            token: null,
             isAuthenticated: false,
             isLoading: false,
           });
         }
       },
 
-      setUser: (user: User | null) => set({ user }),
-      setToken: (token: string | null) => {
-        if (token) {
-          localStorage.setItem('token', token);
-        } else {
-          localStorage.removeItem('token');
-        }
-        set({ token, isAuthenticated: !!token });
-      },
+      setUser: (user: User | null) => set({ user, isAuthenticated: !!user }),
       clearError: () => set({ error: null }),
     }),
     {
       name: 'auth-storage',
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
     }

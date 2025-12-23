@@ -36,14 +36,18 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        // Set HttpOnly cookie for browser clients
+        $authCookie = $this->createAuthCookie($token);
+        $userCookie = $this->createUserCookie($user);
+
         return response()->json([
             'success' => true,
             'message' => 'تم التسجيل بنجاح.',
             'data' => [
                 'user' => new UserResource($user),
-                'token' => $token,
+                'token' => $token, // Still returned for mobile apps
             ],
-        ], 201);
+        ], 201)->withCookie($authCookie)->withCookie($userCookie);
     }
 
     /**
@@ -69,14 +73,18 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        // Set HttpOnly cookie for browser clients
+        $authCookie = $this->createAuthCookie($token);
+        $userCookie = $this->createUserCookie($user);
+
         return response()->json([
             'success' => true,
             'message' => 'تم تسجيل الدخول بنجاح.',
             'data' => [
                 'user' => new UserResource($user),
-                'token' => $token,
+                'token' => $token, // Still returned for mobile apps
             ],
-        ]);
+        ])->withCookie($authCookie)->withCookie($userCookie);
     }
 
     /**
@@ -89,7 +97,8 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم تسجيل الخروج بنجاح.',
-        ]);
+        ])->withCookie(cookie()->forget('auth_token'))
+          ->withCookie(cookie()->forget('user'));
     }
 
     /**
@@ -301,12 +310,64 @@ class AuthController extends Controller
         // Create new token
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        // Set HttpOnly cookie for browser clients
+        $authCookie = $this->createAuthCookie($token);
+        $userCookie = $this->createUserCookie($user);
+
         return response()->json([
             'success' => true,
             'message' => 'تم تحديث التوكن بنجاح.',
             'data' => [
                 'token' => $token,
             ],
-        ]);
+        ])->withCookie($authCookie)->withCookie($userCookie);
+    }
+
+    /**
+     * Create HttpOnly auth cookie.
+     */
+    protected function createAuthCookie(string $token): \Symfony\Component\HttpFoundation\Cookie
+    {
+        $secure = app()->environment('production');
+
+        return cookie(
+            'auth_token',
+            $token,
+            60 * 24, // 24 hours in minutes
+            '/',
+            null,
+            $secure, // secure (HTTPS only in production)
+            true, // httpOnly - not accessible via JavaScript
+            false,
+            'lax' // SameSite - lax for better compatibility
+        );
+    }
+
+    /**
+     * Create user info cookie (readable by JavaScript for UI purposes).
+     */
+    protected function createUserCookie(User $user): \Symfony\Component\HttpFoundation\Cookie
+    {
+        $secure = app()->environment('production');
+
+        // Only include non-sensitive user info
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'role' => $user->role->value,
+            'avatar' => $user->avatar,
+        ];
+
+        return cookie(
+            'user',
+            json_encode($userData),
+            60 * 24, // 24 hours
+            '/',
+            null,
+            $secure,
+            false, // NOT httpOnly - accessible by JavaScript for UI
+            false,
+            'lax'
+        );
     }
 }

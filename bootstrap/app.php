@@ -17,7 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'secretary' => \App\Http\Middleware\SecretaryMiddleware::class,
         ]);
 
-        // Add security headers and request ID to all API responses
+        // Add cookie authentication, security headers and request ID to all API responses
+        $middleware->api(prepend: [
+            \App\Http\Middleware\AuthenticateFromCookie::class,
+        ]);
+
         $middleware->api(append: [
             \App\Http\Middleware\AddRequestId::class,
             \App\Http\Middleware\SecurityHeaders::class,

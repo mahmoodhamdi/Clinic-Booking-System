@@ -8,19 +8,14 @@ export const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  withCredentials: true, // IMPORTANT: Send cookies with requests
 });
 
-// Request interceptor - add auth token and locale
+// Request interceptor - add locale (token is now handled via HttpOnly cookie)
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Add auth token
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-
-      // Add locale
+      // Add locale from localStorage (safe, not sensitive)
       const locale = localStorage.getItem('locale') || 'ar';
       config.headers['Accept-Language'] = locale;
     }
@@ -37,10 +32,9 @@ api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
+      // Unauthorized - redirect to login
+      // Cookie will be cleared by the backend logout response
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
         window.location.href = '/login';
       }
     }
