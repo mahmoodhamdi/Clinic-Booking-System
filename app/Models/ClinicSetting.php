@@ -4,11 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class ClinicSetting extends Model
 {
     use HasFactory;
+
+    /**
+     * Cache key for clinic settings.
+     */
+    public const CACHE_KEY = 'clinic_settings';
+
+    /**
+     * Cache TTL in seconds (1 hour).
+     */
+    public const CACHE_TTL = 3600;
 
     protected $fillable = [
         'clinic_name',
@@ -32,24 +43,60 @@ class ClinicSetting extends Model
     ];
 
     /**
-     * Get the singleton instance of clinic settings.
+     * Boot the model and set up cache invalidation.
+     */
+    protected static function booted(): void
+    {
+        // Clear cache when settings are updated
+        static::updated(function () {
+            static::clearCache();
+        });
+
+        // Clear cache when settings are deleted (unlikely but for completeness)
+        static::deleted(function () {
+            static::clearCache();
+        });
+    }
+
+    /**
+     * Get the singleton instance of clinic settings (cached).
      */
     public static function getInstance(): self
     {
-        $settings = self::first();
+        return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
+            $settings = self::first();
 
-        if (!$settings) {
-            $settings = self::create([
-                'clinic_name' => 'العيادة',
-                'doctor_name' => 'الدكتور',
-                'slot_duration' => 30,
-                'max_patients_per_slot' => 1,
-                'advance_booking_days' => 30,
-                'cancellation_hours' => 24,
-            ]);
-        }
+            if (!$settings) {
+                $settings = self::create([
+                    'clinic_name' => 'العيادة',
+                    'doctor_name' => 'الدكتور',
+                    'slot_duration' => 30,
+                    'max_patients_per_slot' => 1,
+                    'advance_booking_days' => 30,
+                    'cancellation_hours' => 24,
+                ]);
+            }
 
-        return $settings;
+            return $settings;
+        });
+    }
+
+    /**
+     * Clear the cached settings.
+     */
+    public static function clearCache(): void
+    {
+        Cache::forget(self::CACHE_KEY);
+    }
+
+    /**
+     * Get fresh instance (bypassing cache).
+     */
+    public static function getFreshInstance(): self
+    {
+        self::clearCache();
+
+        return self::getInstance();
     }
 
     /**
