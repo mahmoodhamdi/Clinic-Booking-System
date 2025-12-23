@@ -8,7 +8,7 @@ class StoreMedicalRecordRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->isStaff() ?? false;
     }
 
     public function rules(): array

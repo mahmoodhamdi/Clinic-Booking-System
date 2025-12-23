@@ -17,11 +17,33 @@ return Application::configure(basePath: dirname(__DIR__))
             'secretary' => \App\Http\Middleware\SecretaryMiddleware::class,
         ]);
 
-        // Add security headers to all API responses
+        // Add security headers and request ID to all API responses
         $middleware->api(append: [
+            \App\Http\Middleware\AddRequestId::class,
             \App\Http\Middleware\SecurityHeaders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\App\Exceptions\BusinessLogicException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'error_code' => $e->getErrorCode(),
+                    'context' => $e->getContext(),
+                ], $e->getCode());
+            }
+        });
+
+        $exceptions->render(function (\App\Exceptions\PaymentException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'error_code' => $e->getErrorCode(),
+                    'appointment_id' => $e->getAppointmentId(),
+                    'amount' => $e->getAmount(),
+                ], $e->getCode());
+            }
+        });
     })->create();
