@@ -35,13 +35,13 @@ Route::get('/health', function () {
     ]);
 });
 
-// Public auth routes
+// Public auth routes with rate limiting
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
-    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:5,1');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 });
 
 // Protected auth routes

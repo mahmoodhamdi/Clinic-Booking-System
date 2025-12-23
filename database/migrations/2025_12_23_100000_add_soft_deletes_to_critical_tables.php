@@ -1,0 +1,55 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * Add soft deletes to critical tables for audit/compliance.
+     * Medical and financial data should never be permanently deleted.
+     */
+    public function up(): void
+    {
+        Schema::table('appointments', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+
+        Schema::table('medical_records', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+
+        Schema::table('prescriptions', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+
+        Schema::table('payments', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('appointments', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+
+        Schema::table('medical_records', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+
+        Schema::table('prescriptions', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+
+        Schema::table('payments', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+    }
+};

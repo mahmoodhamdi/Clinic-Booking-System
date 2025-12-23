@@ -24,7 +24,16 @@ class ChangePasswordRequest extends FormRequest
     {
         return [
             'current_password' => ['required', 'string', 'current_password'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
         ];
     }
 
@@ -37,7 +46,6 @@ class ChangePasswordRequest extends FormRequest
     {
         return [
             'current_password.current_password' => 'كلمة المرور الحالية غير صحيحة.',
-            'password.min' => 'كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل.',
             'password.confirmed' => 'كلمة المرور غير متطابقة.',
         ];
     }

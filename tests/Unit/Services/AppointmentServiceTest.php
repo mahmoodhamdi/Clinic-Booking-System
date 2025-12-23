@@ -5,6 +5,8 @@ namespace Tests\Unit\Services;
 use App\Enums\AppointmentStatus;
 use App\Enums\CancelledBy;
 use App\Enums\DayOfWeek;
+use App\Exceptions\BusinessLogicException;
+use App\Exceptions\SlotNotAvailableException;
 use App\Models\Appointment;
 use App\Models\ClinicSetting;
 use App\Models\Schedule;
@@ -69,7 +71,7 @@ class AppointmentServiceTest extends TestCase
         $this->service->book($patient1, $tomorrow);
 
         // Second booking should fail
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(SlotNotAvailableException::class);
         $this->service->book($patient2, $tomorrow);
     }
 
@@ -89,7 +91,7 @@ class AppointmentServiceTest extends TestCase
                 'appointment_date' => now()->subDays(5)->toDateString(),
             ]);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(BusinessLogicException::class);
         $this->service->book($patient, $tomorrow);
     }
 
@@ -122,7 +124,7 @@ class AppointmentServiceTest extends TestCase
     {
         $appointment = Appointment::factory()->confirmed()->create();
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(BusinessLogicException::class);
         $this->service->confirm($appointment);
     }
 
@@ -143,7 +145,7 @@ class AppointmentServiceTest extends TestCase
     {
         $appointment = Appointment::factory()->pending()->create();
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(BusinessLogicException::class);
         $this->service->complete($appointment);
     }
 
@@ -164,7 +166,7 @@ class AppointmentServiceTest extends TestCase
     {
         $appointment = Appointment::factory()->completed()->create();
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(BusinessLogicException::class);
         $this->service->cancel($appointment, 'سبب', CancelledBy::ADMIN);
     }
 
@@ -183,7 +185,7 @@ class AppointmentServiceTest extends TestCase
     {
         $appointment = Appointment::factory()->pending()->create();
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(BusinessLogicException::class);
         $this->service->markNoShow($appointment);
     }
 

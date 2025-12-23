@@ -4,15 +4,21 @@ namespace App\Services;
 
 use App\Enums\AppointmentStatus;
 use App\Enums\CancelledBy;
+use App\Exceptions\BusinessLogicException;
+use App\Exceptions\SlotNotAvailableException;
 use App\Models\Appointment;
 use App\Models\ClinicSetting;
 use App\Models\User;
+use App\Traits\LogsActivity;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class AppointmentService
 {
+    use LogsActivity;
+
     protected SlotGeneratorService $slotService;
     protected ClinicSetting $settings;
 
@@ -29,16 +35,47 @@ class AppointmentService
         $date = $datetime->copy()->startOfDay();
         $time = $datetime->format('H:i');
 
-        // Validate booking
-        $this->validateBooking($patient, $datetime);
-
-        return Appointment::create([
-            'user_id' => $patient->id,
-            'appointment_date' => $date->toDateString(),
-            'appointment_time' => $time,
-            'status' => AppointmentStatus::PENDING,
-            'notes' => $notes,
+        $this->logInfo('Attempting to book appointment', [
+            'patient_id' => $patient->id,
+            'date' => $date->toDateString(),
+            'time' => $time,
         ]);
+
+        return DB::transaction(function () use ($patient, $datetime, $date, $time, $notes) {
+            // Lock check for existing appointments at this slot
+            $existingAppointment = Appointment::where('appointment_date', $date->toDateString())
+                ->where('appointment_time', $time)
+                ->active()
+                ->lockForUpdate()
+                ->first();
+
+            if ($existingAppointment) {
+                $this->logWarning('Slot already booked during transaction', [
+                    'patient_id' => $patient->id,
+                    'date' => $date->toDateString(),
+                    'time' => $time,
+                ]);
+                throw new SlotNotAvailableException($date->toDateString(), $time, 'slot_taken');
+            }
+
+            // Validate booking
+            $this->validateBooking($patient, $datetime);
+
+            $appointment = Appointment::create([
+                'user_id' => $patient->id,
+                'appointment_date' => $date->toDateString(),
+                'appointment_time' => $time,
+                'status' => AppointmentStatus::PENDING,
+                'notes' => $notes,
+            ]);
+
+            $this->logInfo('Appointment booked successfully', [
+                'appointment_id' => $appointment->id,
+                'patient_id' => $patient->id,
+            ]);
+
+            return $appointment;
+        });
     }
 
     protected function validateBooking(User $patient, Carbon $datetime): void
@@ -46,20 +83,25 @@ class AppointmentService
         $date = $datetime->copy()->startOfDay();
         $time = $datetime->format('H:i');
 
-        // Check if slot is available
+        // Check if slot is available (working hours, vacation, etc.)
         if (!$this->slotService->isSlotAvailable($datetime)) {
-            throw new \InvalidArgumentException(__('هذا الموعد غير متاح'));
+            throw new SlotNotAvailableException($date->toDateString(), $time, 'outside_hours');
         }
 
         // Check if slot is already booked
         if (Appointment::isSlotBooked($date, $time)) {
-            throw new \InvalidArgumentException(__('هذا الموعد محجوز بالفعل'));
+            throw new SlotNotAvailableException($date->toDateString(), $time, 'slot_taken');
         }
 
         // Check if patient has too many no-shows
         $noShowCount = Appointment::getNoShowCountForPatient($patient->id);
-        if ($noShowCount >= 3) {
-            throw new \InvalidArgumentException(__('لا يمكنك الحجز بسبب عدم الحضور المتكرر'));
+        $maxNoShows = config('clinic.appointments.max_no_shows', 3);
+        if ($noShowCount >= $maxNoShows) {
+            throw new BusinessLogicException(
+                __('لا يمكنك الحجز بسبب عدم الحضور المتكرر'),
+                'TOO_MANY_NO_SHOWS',
+                ['no_show_count' => $noShowCount, 'max_allowed' => $maxNoShows]
+            );
         }
 
         // Check if patient already has an active appointment at this time
@@ -70,7 +112,11 @@ class AppointmentService
             ->exists();
 
         if ($hasConflict) {
-            throw new \InvalidArgumentException(__('لديك حجز بالفعل في هذا الموعد'));
+            throw new BusinessLogicException(
+                __('لديك حجز بالفعل في هذا الموعد'),
+                'DUPLICATE_BOOKING',
+                ['patient_id' => $patient->id, 'date' => $date->toDateString(), 'time' => $time]
+            );
         }
     }
 
@@ -79,8 +125,8 @@ class AppointmentService
         try {
             $this->validateBooking($patient, $datetime);
             return ['can_book' => true, 'reason' => null];
-        } catch (\InvalidArgumentException $e) {
-            return ['can_book' => false, 'reason' => $e->getMessage()];
+        } catch (BusinessLogicException $e) {
+            return ['can_book' => false, 'reason' => $e->getMessage(), 'error_code' => $e->getErrorCode()];
         }
     }
 
@@ -89,37 +135,73 @@ class AppointmentService
     public function confirm(Appointment $appointment): Appointment
     {
         if (!$appointment->isPending()) {
-            throw new \InvalidArgumentException(__('لا يمكن تأكيد هذا الحجز'));
+            throw new BusinessLogicException(
+                __('لا يمكن تأكيد هذا الحجز'),
+                'INVALID_STATUS_TRANSITION',
+                ['current_status' => $appointment->status->value, 'expected' => 'pending']
+            );
         }
 
-        return $appointment->confirm();
+        return DB::transaction(function () use ($appointment) {
+            $result = $appointment->confirm();
+            $this->logInfo('Appointment confirmed', ['appointment_id' => $appointment->id]);
+            return $result;
+        });
     }
 
     public function complete(Appointment $appointment, ?string $adminNotes = null): Appointment
     {
         if (!$appointment->isConfirmed()) {
-            throw new \InvalidArgumentException(__('لا يمكن إتمام هذا الحجز'));
+            throw new BusinessLogicException(
+                __('لا يمكن إتمام هذا الحجز'),
+                'INVALID_STATUS_TRANSITION',
+                ['current_status' => $appointment->status->value, 'expected' => 'confirmed']
+            );
         }
 
-        return $appointment->complete($adminNotes);
+        return DB::transaction(function () use ($appointment, $adminNotes) {
+            $result = $appointment->complete($adminNotes);
+            $this->logInfo('Appointment completed', ['appointment_id' => $appointment->id]);
+            return $result;
+        });
     }
 
     public function cancel(Appointment $appointment, string $reason, CancelledBy $cancelledBy): Appointment
     {
         if (!$appointment->isActive()) {
-            throw new \InvalidArgumentException(__('لا يمكن إلغاء هذا الحجز'));
+            throw new BusinessLogicException(
+                __('لا يمكن إلغاء هذا الحجز'),
+                'INVALID_STATUS_TRANSITION',
+                ['current_status' => $appointment->status->value, 'expected' => 'active']
+            );
         }
 
-        return $appointment->cancel($reason, $cancelledBy);
+        return DB::transaction(function () use ($appointment, $reason, $cancelledBy) {
+            $result = $appointment->cancel($reason, $cancelledBy);
+            $this->logInfo('Appointment cancelled', [
+                'appointment_id' => $appointment->id,
+                'cancelled_by' => $cancelledBy->value,
+                'reason' => $reason,
+            ]);
+            return $result;
+        });
     }
 
     public function markNoShow(Appointment $appointment): Appointment
     {
         if (!$appointment->isConfirmed()) {
-            throw new \InvalidArgumentException(__('لا يمكن تسجيل عدم الحضور لهذا الحجز'));
+            throw new BusinessLogicException(
+                __('لا يمكن تسجيل عدم الحضور لهذا الحجز'),
+                'INVALID_STATUS_TRANSITION',
+                ['current_status' => $appointment->status->value, 'expected' => 'confirmed']
+            );
         }
 
-        return $appointment->markNoShow();
+        return DB::transaction(function () use ($appointment) {
+            $result = $appointment->markNoShow();
+            $this->logInfo('Appointment marked as no-show', ['appointment_id' => $appointment->id]);
+            return $result;
+        });
     }
 
     // ==================== Cancellation Validation ====================

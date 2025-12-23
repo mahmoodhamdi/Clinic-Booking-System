@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Gender;
 use App\Enums\UserRole;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -119,6 +120,14 @@ class User extends Authenticatable
     public function scopeStaff($query)
     {
         return $query->whereIn('role', [UserRole::ADMIN, UserRole::SECRETARY]);
+    }
+
+    /**
+     * Scope a query to only include verified users.
+     */
+    public function scopeVerified(Builder $query): Builder
+    {
+        return $query->whereNotNull('phone_verified_at');
     }
 
     /**

@@ -6,14 +6,16 @@ use App\Enums\AppointmentStatus;
 use App\Enums\CancelledBy;
 use App\Enums\DayOfWeek;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appointment extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -41,14 +43,17 @@ class Appointment extends Model
 
     // ==================== Relationships ====================
 
-    public function patient(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Alias for user() - for backwards compatibility and semantic clarity.
+     */
+    public function patient(): BelongsTo
+    {
+        return $this->user();
     }
 
     public function payment(): HasOne
@@ -150,6 +155,21 @@ class Appointment extends Model
         $fromDate = $from instanceof Carbon ? $from->toDateString() : $from;
         $toDate = $to instanceof Carbon ? $to->toDateString() : $to;
         return $query->whereBetween('appointment_date', [$fromDate, $toDate]);
+    }
+
+    public function scopeForDateRange(Builder $query, Carbon $from, Carbon $to): Builder
+    {
+        return $query->whereBetween('appointment_date', [$from->toDateString(), $to->toDateString()]);
+    }
+
+    public function scopeNotCancelled(Builder $query): Builder
+    {
+        return $query->where('status', '!=', AppointmentStatus::CANCELLED);
+    }
+
+    public function scopeAwaitingConfirmation(Builder $query): Builder
+    {
+        return $query->where('status', AppointmentStatus::PENDING);
     }
 
     // ==================== Accessors ====================

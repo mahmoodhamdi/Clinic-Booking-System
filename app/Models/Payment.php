@@ -4,13 +4,16 @@ namespace App\Models;
 
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payment extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'appointment_id',
@@ -137,6 +140,16 @@ class Payment extends Model
     {
         return $query->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year);
+    }
+
+    public function scopeUnpaid(Builder $query): Builder
+    {
+        return $query->where('status', PaymentStatus::PENDING);
+    }
+
+    public function scopeForPeriod(Builder $query, Carbon $from, Carbon $to): Builder
+    {
+        return $query->whereBetween('created_at', [$from, $to]);
     }
 
     // ==================== Methods ====================

@@ -7,10 +7,15 @@ use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Http\Resources\ScheduleResource;
 use App\Models\Schedule;
+use App\Services\SlotGeneratorService;
 use Illuminate\Http\JsonResponse;
 
 class ScheduleController extends Controller
 {
+    public function __construct(
+        protected SlotGeneratorService $slotService
+    ) {
+    }
     /**
      * List all schedules.
      */
@@ -30,6 +35,9 @@ class ScheduleController extends Controller
     public function store(StoreScheduleRequest $request): JsonResponse
     {
         $schedule = Schedule::create($request->validated());
+
+        // Invalidate slot cache when schedule changes
+        $this->slotService->invalidateCache();
 
         return response()->json([
             'success' => true,
@@ -56,6 +64,9 @@ class ScheduleController extends Controller
     {
         $schedule->update($request->validated());
 
+        // Invalidate slot cache when schedule changes
+        $this->slotService->invalidateCache();
+
         return response()->json([
             'success' => true,
             'message' => 'تم تحديث الجدول بنجاح.',
@@ -70,6 +81,9 @@ class ScheduleController extends Controller
     {
         $schedule->delete();
 
+        // Invalidate slot cache when schedule changes
+        $this->slotService->invalidateCache();
+
         return response()->json([
             'success' => true,
             'message' => 'تم حذف الجدول بنجاح.',
@@ -82,6 +96,9 @@ class ScheduleController extends Controller
     public function toggle(Schedule $schedule): JsonResponse
     {
         $schedule->update(['is_active' => !$schedule->is_active]);
+
+        // Invalidate slot cache when schedule changes
+        $this->slotService->invalidateCache();
 
         $status = $schedule->is_active ? 'تفعيل' : 'تعطيل';
 

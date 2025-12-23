@@ -132,4 +132,78 @@ class MedicalRecordTest extends TestCase
 
         $this->assertCount(1, MedicalRecord::followUpDue()->get());
     }
+
+    // ==================== Soft Delete Tests ====================
+
+    public function test_medical_record_can_be_soft_deleted(): void
+    {
+        $medicalRecord = MedicalRecord::factory()->create();
+        $medicalRecord->delete();
+
+        $this->assertSoftDeleted('medical_records', ['id' => $medicalRecord->id]);
+        $this->assertNotNull($medicalRecord->fresh()->deleted_at);
+    }
+
+    public function test_soft_deleted_medical_records_are_excluded_by_default(): void
+    {
+        $active = MedicalRecord::factory()->create();
+        $deleted = MedicalRecord::factory()->create();
+        $deleted->delete();
+
+        $records = MedicalRecord::all();
+
+        $this->assertCount(1, $records);
+        $this->assertTrue($records->contains($active));
+        $this->assertFalse($records->contains($deleted));
+    }
+
+    public function test_soft_deleted_medical_record_can_be_restored(): void
+    {
+        $medicalRecord = MedicalRecord::factory()->create();
+        $medicalRecord->delete();
+
+        $this->assertSoftDeleted('medical_records', ['id' => $medicalRecord->id]);
+
+        $medicalRecord->restore();
+
+        $this->assertNull($medicalRecord->fresh()->deleted_at);
+    }
+
+    // ==================== New Scope Tests ====================
+
+    public function test_scope_with_due_follow_ups(): void
+    {
+        // Due (past dates)
+        MedicalRecord::factory()->create([
+            'follow_up_date' => now()->subDays(5)->toDateString(),
+        ]);
+
+        MedicalRecord::factory()->create([
+            'follow_up_date' => now()->subDays(1)->toDateString(),
+        ]);
+
+        // Not due yet (future)
+        MedicalRecord::factory()->create([
+            'follow_up_date' => now()->addDays(7)->toDateString(),
+        ]);
+
+        // No follow up
+        MedicalRecord::factory()->create([
+            'follow_up_date' => null,
+        ]);
+
+        $this->assertCount(2, MedicalRecord::withDueFollowUps()->get());
+    }
+
+    public function test_scope_recent_first(): void
+    {
+        $oldest = MedicalRecord::factory()->create(['created_at' => now()->subDays(10)]);
+        $newest = MedicalRecord::factory()->create(['created_at' => now()]);
+        $middle = MedicalRecord::factory()->create(['created_at' => now()->subDays(5)]);
+
+        $records = MedicalRecord::recentFirst()->get();
+
+        $this->assertEquals($newest->id, $records->first()->id);
+        $this->assertEquals($oldest->id, $records->last()->id);
+    }
 }

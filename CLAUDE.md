@@ -41,8 +41,19 @@ npm start                     # Production server
 
 #### Docker
 ```bash
+# Quick start
 docker-start.bat              # Windows - runs full stack
 ./docker-start.sh             # Linux/Mac - runs full stack
+
+# Makefile commands (recommended)
+make setup                    # First time setup (build + start + seed)
+make up                       # Start containers
+make down                     # Stop containers
+make fresh                    # Fresh database + seed
+make test                     # Run tests in container
+make shell                    # Open shell in app container
+make logs                     # View container logs
+make with-tools               # Start with phpMyAdmin (localhost:8080)
 ```
 
 ### Code Quality
@@ -56,6 +67,7 @@ cd frontend && npm run lint   # Frontend linting
 ### Backend Tests
 ```bash
 php artisan test                                    # Run all tests (544 tests)
+composer test                                       # Alternative (clears config first)
 php artisan test --coverage --min=100               # With 100% coverage requirement
 php artisan test --filter=TestClassName             # Specific test file
 php artisan test --filter=TestClassName::test_method_name  # Single test method

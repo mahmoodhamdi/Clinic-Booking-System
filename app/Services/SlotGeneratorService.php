@@ -7,16 +7,58 @@ use App\Models\Appointment;
 use App\Models\ClinicSetting;
 use App\Models\Schedule;
 use App\Models\Vacation;
+use App\Traits\LogsActivity;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class SlotGeneratorService
 {
+    use LogsActivity;
+
     protected ClinicSetting $settings;
+    protected int $cacheTtl;
 
     public function __construct()
     {
         $this->settings = ClinicSetting::getInstance();
+        $this->cacheTtl = config('clinic.cache.slots_ttl', 300);
+    }
+
+    /**
+     * Get cache key for schedule data.
+     */
+    protected function getScheduleCacheKey(int $dayOfWeek): string
+    {
+        return "schedule_day_{$dayOfWeek}";
+    }
+
+    /**
+     * Get cache key for vacation data.
+     */
+    protected function getVacationCacheKey(string $date): string
+    {
+        return "vacation_{$date}";
+    }
+
+    /**
+     * Invalidate all slot-related cache.
+     */
+    public function invalidateCache(): void
+    {
+        // Invalidate schedule cache for all days
+        for ($i = 0; $i <= 6; $i++) {
+            Cache::forget($this->getScheduleCacheKey($i));
+        }
+
+        // Invalidate vacation cache for upcoming days
+        $days = $this->settings->advance_booking_days ?? 30;
+        for ($i = 0; $i <= $days; $i++) {
+            $date = now()->addDays($i)->toDateString();
+            Cache::forget($this->getVacationCacheKey($date));
+        }
+
+        $this->logInfo('Slot cache invalidated');
     }
 
     /**
@@ -48,15 +90,26 @@ class SlotGeneratorService
      */
     public function isDateAvailable(Carbon $date): bool
     {
-        // Check if it's a vacation day
-        if (Vacation::isVacationDay($date)) {
+        $dateString = $date->toDateString();
+
+        // Check if it's a vacation day (cached)
+        $isVacation = Cache::remember(
+            $this->getVacationCacheKey($dateString),
+            $this->cacheTtl,
+            fn() => Vacation::isVacationDay($date)
+        );
+
+        if ($isVacation) {
             return false;
         }
 
-        // Check if there's an active schedule for this day
-        $schedule = Schedule::active()
-            ->forDay(DayOfWeek::fromDate($date))
-            ->first();
+        // Check if there's an active schedule for this day (cached)
+        $dayOfWeek = DayOfWeek::fromDate($date)->value;
+        $schedule = Cache::remember(
+            $this->getScheduleCacheKey($dayOfWeek),
+            $this->cacheTtl,
+            fn() => Schedule::active()->forDay(DayOfWeek::from($dayOfWeek))->first()
+        );
 
         return $schedule !== null;
     }
@@ -66,21 +119,32 @@ class SlotGeneratorService
      */
     public function getSlotsForDate(Carbon $date): Collection
     {
-        // Check if it's a vacation day
-        if (Vacation::isVacationDay($date)) {
+        $dateString = $date->toDateString();
+
+        // Check if it's a vacation day (cached)
+        $isVacation = Cache::remember(
+            $this->getVacationCacheKey($dateString),
+            $this->cacheTtl,
+            fn() => Vacation::isVacationDay($date)
+        );
+
+        if ($isVacation) {
             return collect();
         }
 
-        // Get schedule for this day
-        $schedule = Schedule::active()
-            ->forDay(DayOfWeek::fromDate($date))
-            ->first();
+        // Get schedule for this day (cached)
+        $dayOfWeek = DayOfWeek::fromDate($date)->value;
+        $schedule = Cache::remember(
+            $this->getScheduleCacheKey($dayOfWeek),
+            $this->cacheTtl,
+            fn() => Schedule::active()->forDay(DayOfWeek::from($dayOfWeek))->first()
+        );
 
         if (!$schedule) {
             return collect();
         }
 
-        // Generate slots
+        // Generate slots (from cached schedule)
         $slots = $schedule->generateSlots($this->settings->slot_duration);
 
         // Filter out past slots if it's today
@@ -91,6 +155,7 @@ class SlotGeneratorService
         }
 
         // Map to full slot info with availability check
+        // Note: We don't cache appointment booking status as it changes frequently
         return $slots->map(function ($time) use ($date) {
             $isBooked = Appointment::isSlotBooked($date, $time);
             return [
