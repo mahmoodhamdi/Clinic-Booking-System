@@ -14,7 +14,6 @@ jest.mock('@/lib/api/auth', () => ({
 beforeEach(() => {
   useAuthStore.setState({
     user: null,
-    token: null,
     isAuthenticated: false,
     isLoading: false,
     error: null,
@@ -29,11 +28,6 @@ describe('Auth Store', () => {
       expect(user).toBeNull();
     });
 
-    it('should have null token initially', () => {
-      const { token } = useAuthStore.getState();
-      expect(token).toBeNull();
-    });
-
     it('should not be authenticated initially', () => {
       const { isAuthenticated } = useAuthStore.getState();
       expect(isAuthenticated).toBe(false);
@@ -42,6 +36,11 @@ describe('Auth Store', () => {
     it('should not be loading initially', () => {
       const { isLoading } = useAuthStore.getState();
       expect(isLoading).toBe(false);
+    });
+
+    it('should have no error initially', () => {
+      const { error } = useAuthStore.getState();
+      expect(error).toBeNull();
     });
   });
 
@@ -56,79 +55,68 @@ describe('Auth Store', () => {
 
       useAuthStore.getState().setUser(mockUser);
 
-      const { user } = useAuthStore.getState();
+      const { user, isAuthenticated } = useAuthStore.getState();
       expect(user).toEqual(mockUser);
+      expect(isAuthenticated).toBe(true);
     });
 
-    it('should clear user when passed null', () => {
+    it('should clear user and authentication when passed null', () => {
       useAuthStore.setState({
         user: { id: 1, name: 'Test', phone: '123', role: 'patient' },
+        isAuthenticated: true,
       });
 
       useAuthStore.getState().setUser(null);
 
-      const { user } = useAuthStore.getState();
+      const { user, isAuthenticated } = useAuthStore.getState();
       expect(user).toBeNull();
-    });
-  });
-
-  describe('setToken', () => {
-    it('should set token and isAuthenticated correctly', () => {
-      const mockToken = 'test-token-123';
-
-      useAuthStore.getState().setToken(mockToken);
-
-      const { token, isAuthenticated } = useAuthStore.getState();
-      expect(token).toBe(mockToken);
-      expect(isAuthenticated).toBe(true);
-    });
-
-    it('should store token in localStorage', () => {
-      const mockToken = 'test-token-123';
-
-      useAuthStore.getState().setToken(mockToken);
-
-      expect(localStorage.setItem).toHaveBeenCalledWith('token', mockToken);
-    });
-
-    it('should clear authentication when token is null', () => {
-      useAuthStore.setState({ token: 'test-token', isAuthenticated: true });
-
-      useAuthStore.getState().setToken(null);
-
-      const { token, isAuthenticated } = useAuthStore.getState();
-      expect(token).toBeNull();
       expect(isAuthenticated).toBe(false);
     });
   });
 
   describe('logout', () => {
-    it('should clear user and token on logout', async () => {
+    it('should clear user on logout', async () => {
       // Set initial state
       useAuthStore.setState({
         user: { id: 1, name: 'Test', phone: '123', role: 'patient' },
-        token: 'test-token',
         isAuthenticated: true,
       });
 
       await useAuthStore.getState().logout();
 
-      const { user, token, isAuthenticated } = useAuthStore.getState();
+      const { user, isAuthenticated } = useAuthStore.getState();
       expect(user).toBeNull();
-      expect(token).toBeNull();
       expect(isAuthenticated).toBe(false);
     });
 
-    it('should remove token from localStorage on logout', async () => {
+    it('should call auth API logout', async () => {
+      const { authApi } = require('@/lib/api/auth');
+
       useAuthStore.setState({
         user: { id: 1, name: 'Test', phone: '123', role: 'patient' },
-        token: 'test-token',
         isAuthenticated: true,
       });
 
       await useAuthStore.getState().logout();
 
-      expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+      expect(authApi.logout).toHaveBeenCalled();
+    });
+
+    it('should handle logout errors gracefully', async () => {
+      const { authApi } = require('@/lib/api/auth');
+      authApi.logout.mockRejectedValueOnce(new Error('Logout failed'));
+
+      useAuthStore.setState({
+        user: { id: 1, name: 'Test', phone: '123', role: 'patient' },
+        isAuthenticated: true,
+      });
+
+      // Should not throw
+      await useAuthStore.getState().logout();
+
+      const { user, isAuthenticated } = useAuthStore.getState();
+      expect(user).toBeNull();
+      expect(isAuthenticated).toBe(false);
     });
   });
 

@@ -45,18 +45,7 @@ export default function RegisterPage() {
     try {
       await register(data);
       toast.success(t('registerSuccess'));
-
-      // Set cookies for middleware
-      const token = useAuthStore.getState().token;
-      const user = useAuthStore.getState().user;
-
-      if (token) {
-        document.cookie = `token=${token};path=/;max-age=86400`;
-      }
-      if (user) {
-        document.cookie = `user=${JSON.stringify(user)};path=/;max-age=86400`;
-      }
-
+      // Token is set via HttpOnly cookie by the server
       router.push('/dashboard');
     } catch {
       // Error is handled by the store
