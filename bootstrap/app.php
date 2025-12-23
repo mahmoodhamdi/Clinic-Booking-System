@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'secretary' => \App\Http\Middleware\SecretaryMiddleware::class,
+            'cache.api' => \App\Http\Middleware\CacheApiResponse::class,
         ]);
 
         // Add cookie authentication, security headers and request ID to all API responses

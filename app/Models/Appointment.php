@@ -172,6 +172,47 @@ class Appointment extends Model
         return $query->where('status', AppointmentStatus::PENDING);
     }
 
+    /**
+     * Scope for optimized listing queries - select only essential columns.
+     */
+    public function scopeForListing(Builder $query): Builder
+    {
+        return $query->select([
+            'id',
+            'user_id',
+            'appointment_date',
+            'appointment_time',
+            'status',
+            'notes',
+            'admin_notes',
+            'created_at',
+        ]);
+    }
+
+    /**
+     * Scope to include common relations for listings.
+     */
+    public function scopeWithCommonRelations(Builder $query): Builder
+    {
+        return $query->with(['user', 'payment']);
+    }
+
+    /**
+     * Scope to include patient with profile.
+     */
+    public function scopeWithPatientProfile(Builder $query): Builder
+    {
+        return $query->with(['user.profile']);
+    }
+
+    /**
+     * Scope for full detail view with all relations.
+     */
+    public function scopeWithFullDetails(Builder $query): Builder
+    {
+        return $query->with(['user.profile', 'payment', 'medicalRecord.prescriptions']);
+    }
+
     // ==================== Accessors ====================
 
     public function getFormattedDateAttribute(): string
