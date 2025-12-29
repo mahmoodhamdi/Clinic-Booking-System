@@ -13,6 +13,7 @@ use App\Traits\LogsActivity;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
@@ -56,22 +57,51 @@ class DashboardService
     {
         $today = now()->toDateString();
 
-        $appointments = Appointment::whereDate('appointment_date', $today)->get();
-        $payments = Payment::whereDate('created_at', $today)->get();
+        // Single query for all appointment stats
+        $appointmentStats = Appointment::query()
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as confirmed,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show
+            ", [
+                AppointmentStatus::PENDING->value,
+                AppointmentStatus::CONFIRMED->value,
+                AppointmentStatus::COMPLETED->value,
+                AppointmentStatus::CANCELLED->value,
+                AppointmentStatus::NO_SHOW->value,
+            ])
+            ->whereDate('appointment_date', $today)
+            ->first();
+
+        // Single query for all payment stats
+        $paymentStats = Payment::query()
+            ->selectRaw("
+                COALESCE(SUM(total), 0) as total,
+                COALESCE(SUM(CASE WHEN status = ? THEN total ELSE 0 END), 0) as paid,
+                COALESCE(SUM(CASE WHEN status = ? THEN total ELSE 0 END), 0) as pending
+            ", [
+                PaymentStatus::PAID->value,
+                PaymentStatus::PENDING->value,
+            ])
+            ->whereDate('created_at', $today)
+            ->first();
 
         return [
             'appointments' => [
-                'total' => $appointments->count(),
-                'pending' => $appointments->where('status', AppointmentStatus::PENDING)->count(),
-                'confirmed' => $appointments->where('status', AppointmentStatus::CONFIRMED)->count(),
-                'completed' => $appointments->where('status', AppointmentStatus::COMPLETED)->count(),
-                'cancelled' => $appointments->where('status', AppointmentStatus::CANCELLED)->count(),
-                'no_show' => $appointments->where('status', AppointmentStatus::NO_SHOW)->count(),
+                'total' => (int) $appointmentStats->total,
+                'pending' => (int) $appointmentStats->pending,
+                'confirmed' => (int) $appointmentStats->confirmed,
+                'completed' => (int) $appointmentStats->completed,
+                'cancelled' => (int) $appointmentStats->cancelled,
+                'no_show' => (int) $appointmentStats->no_show,
             ],
             'revenue' => [
-                'total' => $payments->sum('total'),
-                'paid' => $payments->where('status', PaymentStatus::PAID)->sum('total'),
-                'pending' => $payments->where('status', PaymentStatus::PENDING)->sum('total'),
+                'total' => (float) $paymentStats->total,
+                'paid' => (float) $paymentStats->paid,
+                'pending' => (float) $paymentStats->pending,
             ],
             'next_appointment' => $this->getNextAppointment(),
         ];
@@ -167,18 +197,28 @@ class DashboardService
 
     public function getAppointmentsTrend(string $period = 'week'): array
     {
-        $data = [];
         $days = $period === 'week' ? 7 : 30;
         $startDate = now()->subDays($days - 1)->startOfDay();
+        $endDate = now()->endOfDay();
 
+        // Single query for all days
+        $appointments = Appointment::query()
+            ->selectRaw('DATE(appointment_date) as date, COUNT(*) as count')
+            ->whereBetween('appointment_date', [$startDate, $endDate])
+            ->groupBy(DB::raw('DATE(appointment_date)'))
+            ->pluck('count', 'date')
+            ->toArray();
+
+        // Build data array with all dates
+        $data = [];
         for ($i = 0; $i < $days; $i++) {
             $date = $startDate->copy()->addDays($i);
-            $count = Appointment::whereDate('appointment_date', $date->toDateString())->count();
+            $dateString = $date->toDateString();
 
             $data[] = [
-                'date' => $date->toDateString(),
+                'date' => $dateString,
                 'day' => $date->translatedFormat('D'),
-                'count' => $count,
+                'count' => $appointments[$dateString] ?? 0,
             ];
         }
 
@@ -187,20 +227,29 @@ class DashboardService
 
     public function getRevenueTrend(string $period = 'week'): array
     {
-        $data = [];
         $days = $period === 'week' ? 7 : 30;
         $startDate = now()->subDays($days - 1)->startOfDay();
+        $endDate = now()->endOfDay();
 
+        // Single query for all days
+        $revenue = Payment::query()
+            ->selectRaw('DATE(paid_at) as date, SUM(total) as amount')
+            ->where('status', PaymentStatus::PAID)
+            ->whereBetween('paid_at', [$startDate, $endDate])
+            ->groupBy(DB::raw('DATE(paid_at)'))
+            ->pluck('amount', 'date')
+            ->toArray();
+
+        // Build data array with all dates
+        $data = [];
         for ($i = 0; $i < $days; $i++) {
             $date = $startDate->copy()->addDays($i);
-            $amount = Payment::paid()
-                ->whereDate('paid_at', $date->toDateString())
-                ->sum('total');
+            $dateString = $date->toDateString();
 
             $data[] = [
-                'date' => $date->toDateString(),
+                'date' => $dateString,
                 'day' => $date->translatedFormat('D'),
-                'amount' => (float) $amount,
+                'amount' => (float) ($revenue[$dateString] ?? 0),
             ];
         }
 
@@ -211,8 +260,26 @@ class DashboardService
     {
         $thisMonth = now()->startOfMonth();
 
-        $appointments = Appointment::where('appointment_date', '>=', $thisMonth)->get();
-        $total = $appointments->count();
+        // Single query for all status counts
+        $stats = Appointment::query()
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as confirmed,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show
+            ", [
+                AppointmentStatus::PENDING->value,
+                AppointmentStatus::CONFIRMED->value,
+                AppointmentStatus::COMPLETED->value,
+                AppointmentStatus::CANCELLED->value,
+                AppointmentStatus::NO_SHOW->value,
+            ])
+            ->where('appointment_date', '>=', $thisMonth)
+            ->first();
+
+        $total = (int) $stats->total;
 
         if ($total === 0) {
             return [
@@ -225,11 +292,11 @@ class DashboardService
         }
 
         return [
-            'pending' => round($appointments->where('status', AppointmentStatus::PENDING)->count() / $total * 100, 1),
-            'confirmed' => round($appointments->where('status', AppointmentStatus::CONFIRMED)->count() / $total * 100, 1),
-            'completed' => round($appointments->where('status', AppointmentStatus::COMPLETED)->count() / $total * 100, 1),
-            'cancelled' => round($appointments->where('status', AppointmentStatus::CANCELLED)->count() / $total * 100, 1),
-            'no_show' => round($appointments->where('status', AppointmentStatus::NO_SHOW)->count() / $total * 100, 1),
+            'pending' => round((int) $stats->pending / $total * 100, 1),
+            'confirmed' => round((int) $stats->confirmed / $total * 100, 1),
+            'completed' => round((int) $stats->completed / $total * 100, 1),
+            'cancelled' => round((int) $stats->cancelled / $total * 100, 1),
+            'no_show' => round((int) $stats->no_show / $total * 100, 1),
         ];
     }
 
@@ -237,11 +304,19 @@ class DashboardService
     {
         $thisMonth = now()->startOfMonth();
 
-        $payments = Payment::paid()
+        // Single query for all payment method totals
+        $stats = Payment::query()
+            ->selectRaw("
+                COALESCE(SUM(total), 0) as total,
+                COALESCE(SUM(CASE WHEN method = 'cash' THEN total ELSE 0 END), 0) as cash,
+                COALESCE(SUM(CASE WHEN method = 'card' THEN total ELSE 0 END), 0) as card,
+                COALESCE(SUM(CASE WHEN method = 'wallet' THEN total ELSE 0 END), 0) as wallet
+            ")
+            ->where('status', PaymentStatus::PAID)
             ->where('paid_at', '>=', $thisMonth)
-            ->get();
+            ->first();
 
-        $total = $payments->sum('total');
+        $total = (float) $stats->total;
 
         if ($total == 0) {
             return [
@@ -252,9 +327,9 @@ class DashboardService
         }
 
         return [
-            'cash' => round($payments->where('method', 'cash')->sum('total') / $total * 100, 1),
-            'card' => round($payments->where('method', 'card')->sum('total') / $total * 100, 1),
-            'wallet' => round($payments->where('method', 'wallet')->sum('total') / $total * 100, 1),
+            'cash' => round((float) $stats->cash / $total * 100, 1),
+            'card' => round((float) $stats->card / $total * 100, 1),
+            'wallet' => round((float) $stats->wallet / $total * 100, 1),
         ];
     }
 

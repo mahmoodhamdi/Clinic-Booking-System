@@ -17,77 +17,54 @@ php artisan key:generate
 php artisan migrate:fresh --seed
 
 # Frontend
-cd frontend
-npm install
-cd ..
+cd frontend && npm install
 ```
 
 ### Running Development Servers
-
-#### Backend (Laravel)
 ```bash
-composer dev                  # Full dev environment (API + queue + logs + vite) - RECOMMENDED
-php artisan serve             # Just the API server (localhost:8000)
-php artisan queue:listen      # Process background jobs (notifications)
+# Backend (recommended - runs API + queue + logs + vite concurrently)
+composer dev
+
+# Frontend
+cd frontend && npm run dev
 ```
 
-#### Frontend (Next.js)
+### Docker Quick Start
 ```bash
-cd frontend
-npm run dev                   # Development server (localhost:3000)
-npm run build                 # Production build
-npm start                     # Production server
-```
-
-#### Docker
-```bash
-# Quick start
-docker-start.bat              # Windows - runs full stack
-./docker-start.sh             # Linux/Mac - runs full stack
-
-# Makefile commands (recommended)
-make setup                    # First time setup (build + start + seed)
-make up                       # Start containers
-make down                     # Stop containers
-make fresh                    # Fresh database + seed
-make test                     # Run tests in container
-make shell                    # Open shell in app container
-make logs                     # View container logs
-make with-tools               # Start with phpMyAdmin (localhost:8080)
+docker-start.bat              # Windows
+./docker-start.sh             # Linux/Mac
+make setup                    # First time (build + start + seed)
 ```
 
 ### Code Quality
 ```bash
-./vendor/bin/pint             # Laravel code formatting (PSR-12)
+./vendor/bin/pint             # Laravel formatting (PSR-12)
 cd frontend && npm run lint   # Frontend linting
 ```
 
 ## Testing Commands
 
-### Backend Tests
+### Backend
 ```bash
-php artisan test                                    # Run all tests (544 tests)
-composer test                                       # Alternative (clears config first)
-php artisan test --coverage --min=100               # With 100% coverage requirement
-php artisan test --filter=TestClassName             # Specific test file
+php artisan test                                           # All tests (544 tests)
+composer test                                              # Clears config first
+php artisan test --coverage --min=100                      # With coverage requirement
+php artisan test --filter=TestClassName                    # Single test file
 php artisan test --filter=TestClassName::test_method_name  # Single test method
-./vendor/bin/phpunit --coverage-html coverage-report      # Generate HTML report
 ```
 
-### Frontend Tests
+### Frontend
 ```bash
 cd frontend
 npm test                      # Unit tests (Jest)
 npm run test:watch            # Watch mode
-npm run test:coverage         # With coverage report
+npm run test:coverage         # With coverage
 npm run test:e2e              # E2E tests (Playwright)
-npm run test:e2e:ui           # E2E with UI
-npm run test:e2e:headed       # E2E in headed mode
 ```
 
 ## Architecture
 
-### Backend Layered Architecture
+### Backend Flow
 ```
 routes/api.php → Controllers → Services → Models
                      ↓
@@ -97,14 +74,14 @@ routes/api.php → Controllers → Services → Models
 ```
 
 ### Route Groups (routes/api.php)
-- **Public**: `/api/auth/*` (register, login, password reset), `/api/slots/*`
+- **Public**: `/api/auth/*`, `/api/slots/*`
 - **Patient (auth:sanctum)**: `/api/appointments/*`, `/api/patient/*`, `/api/medical-records/*`, `/api/prescriptions/*`, `/api/notifications/*`
 - **Admin (auth:sanctum + admin)**: `/api/admin/*` (dashboard, reports, settings, schedules, vacations, appointments, patients, medical-records, prescriptions, payments)
 
 ### Core Services (app/Services/)
 | Service | Responsibility |
 |---------|----------------|
-| SlotGeneratorService | Generates available slots from schedules, handles vacation blocking |
+| SlotGeneratorService | Generates slots from schedules, handles vacation blocking |
 | AppointmentService | Booking logic, status transitions (pending→confirmed→completed), conflict detection |
 | PaymentService | Payment processing, revenue calculations |
 | NotificationService | Database notifications with optional SMS |
@@ -133,12 +110,35 @@ ClinicSetting (singleton)
 - PaymentMethod, PaymentStatus
 - BloodType, Gender, DayOfWeek
 
-### Frontend Stack (frontend/)
-- **Routing**: Next.js 16 App Router
-- **State**: Zustand + React Query
-- **Forms**: React Hook Form + Zod
+### Frontend Architecture (frontend/src/)
+```
+app/                          # Next.js 16 App Router
+  (auth)/                     # Auth pages (login, register, forgot-password, verify-otp, reset-password)
+  (patient)/                  # Patient pages (dashboard, appointments, book, medical-records, etc.)
+  (admin)/admin/              # Admin pages (dashboard, patients, appointments, settings, etc.)
+components/
+  ui/                         # Radix UI primitives (button, input, dialog, etc.)
+  layouts/                    # AuthLayout, PatientLayout, AdminLayout
+  shared/                     # LanguageSwitcher, LoadingSpinner, Avatar, VirtualizedList
+  providers/                  # React Query, Zustand providers
+lib/
+  api/                        # API client (client.ts, auth.ts, patient.ts, admin.ts, appointments.ts)
+  stores/                     # Zustand stores (auth.ts)
+  validations/                # Zod schemas (auth.ts, api-responses.ts)
+  utils/                      # Utilities (utils.ts, sanitize.ts)
+hooks/                        # Custom hooks (useDebounce.ts)
+i18n/                         # next-intl config
+types/                        # TypeScript types
+__tests__/                    # Jest tests with MSW mocks
+```
+
+### Frontend Stack
+- **Routing**: Next.js 16 App Router with route groups
+- **State**: Zustand (auth) + React Query (server state)
+- **Forms**: React Hook Form + Zod validation
 - **UI**: Radix UI primitives + Tailwind CSS
-- **i18n**: next-intl
+- **i18n**: next-intl (Arabic default, English fallback)
+- **Testing**: Jest + Testing Library + MSW (mocks) + Playwright (E2E)
 
 ## Development Workflow
 
@@ -182,3 +182,4 @@ Phone: 01000000000, Password: admin123
 ## Environment
 - PHP 8.2+, MySQL 8.0+ or SQLite, Node.js 18+
 - Queue driver: database (for notifications)
+- Backend: localhost:8000, Frontend: localhost:3000

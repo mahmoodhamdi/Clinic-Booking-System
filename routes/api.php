@@ -35,17 +35,17 @@ Route::get('/health', function () {
     ]);
 });
 
-// Public auth routes with rate limiting
-Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:3,1');
-    Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:5,1');
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
+// Public auth routes with strict rate limiting
+Route::prefix('auth')->middleware('throttle:auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
-// Protected auth routes
-Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
+// Protected auth routes with API rate limiting
+Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -55,26 +55,26 @@ Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
     Route::delete('/account', [AuthController::class, 'deleteAccount']);
 });
 
-// Public slots routes
-Route::prefix('slots')->group(function () {
+// Public slots routes with rate limiting
+Route::prefix('slots')->middleware('throttle:slots')->group(function () {
     Route::get('/dates', [SlotController::class, 'dates']);
     Route::get('/next', [SlotController::class, 'next']);
     Route::post('/check', [SlotController::class, 'check']);
     Route::get('/{date}', [SlotController::class, 'slots']);
 });
 
-// Patient appointment routes (requires authentication)
-Route::middleware('auth:sanctum')->prefix('appointments')->group(function () {
+// Patient appointment routes (requires authentication) with API rate limiting
+Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('appointments')->group(function () {
     Route::get('/', [AppointmentController::class, 'index']);
     Route::get('/upcoming', [AppointmentController::class, 'upcoming']);
-    Route::post('/', [AppointmentController::class, 'store']);
-    Route::post('/check', [AppointmentController::class, 'checkBooking']);
+    Route::post('/', [AppointmentController::class, 'store'])->middleware('throttle:booking');
+    Route::post('/check', [AppointmentController::class, 'checkBooking'])->middleware('throttle:slots');
     Route::get('/{appointment}', [AppointmentController::class, 'show']);
     Route::post('/{appointment}/cancel', [AppointmentController::class, 'cancel']);
 });
 
-// Patient profile & dashboard routes (requires authentication)
-Route::middleware('auth:sanctum')->prefix('patient')->group(function () {
+// Patient profile & dashboard routes (requires authentication) with API rate limiting
+Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('patient')->group(function () {
     Route::get('/dashboard', [PatientController::class, 'dashboard']);
     Route::get('/profile', [PatientController::class, 'profile']);
     Route::post('/profile', [PatientController::class, 'createProfile']);
@@ -83,20 +83,20 @@ Route::middleware('auth:sanctum')->prefix('patient')->group(function () {
     Route::get('/statistics', [PatientController::class, 'statistics']);
 });
 
-// Patient medical records routes (requires authentication)
-Route::middleware('auth:sanctum')->prefix('medical-records')->group(function () {
+// Patient medical records routes (requires authentication) with API rate limiting
+Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('medical-records')->group(function () {
     Route::get('/', [MedicalRecordController::class, 'index']);
     Route::get('/{medicalRecord}', [MedicalRecordController::class, 'show']);
 });
 
-// Patient prescriptions routes (requires authentication)
-Route::middleware('auth:sanctum')->prefix('prescriptions')->group(function () {
+// Patient prescriptions routes (requires authentication) with API rate limiting
+Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('prescriptions')->group(function () {
     Route::get('/', [PrescriptionController::class, 'index']);
     Route::get('/{prescription}', [PrescriptionController::class, 'show']);
 });
 
-// Patient notifications routes (requires authentication)
-Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
+// Patient notifications routes (requires authentication) with API rate limiting
+Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('notifications')->group(function () {
     Route::get('/', [NotificationController::class, 'index']);
     Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
     Route::post('/{notification}/read', [NotificationController::class, 'markAsRead']);
@@ -104,8 +104,8 @@ Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
     Route::delete('/{notification}', [NotificationController::class, 'destroy']);
 });
 
-// Admin routes (requires authentication + admin role)
-Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+// Admin routes (requires authentication + admin role) with API rate limiting
+Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->prefix('admin')->group(function () {
     // Dashboard
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/dashboard/today', [DashboardController::class, 'today']);

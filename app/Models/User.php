@@ -173,59 +173,8 @@ class User extends Authenticatable
     }
 
     // ==================== Patient Statistics ====================
-
-    /**
-     * Get total appointments count.
-     */
-    public function getTotalAppointmentsAttribute(): int
-    {
-        return $this->appointments()->count();
-    }
-
-    /**
-     * Get completed appointments count.
-     */
-    public function getCompletedAppointmentsCountAttribute(): int
-    {
-        return $this->appointments()->completed()->count();
-    }
-
-    /**
-     * Get cancelled appointments count.
-     */
-    public function getCancelledAppointmentsCountAttribute(): int
-    {
-        return $this->appointments()->cancelled()->count();
-    }
-
-    /**
-     * Get no-show count.
-     */
-    public function getNoShowCountAttribute(): int
-    {
-        return $this->appointments()->noShow()->count();
-    }
-
-    /**
-     * Get upcoming appointments count.
-     */
-    public function getUpcomingAppointmentsCountAttribute(): int
-    {
-        return $this->appointments()->upcoming()->count();
-    }
-
-    /**
-     * Get last visit date.
-     */
-    public function getLastVisitAttribute(): ?Carbon
-    {
-        $lastAppointment = $this->appointments()
-            ->completed()
-            ->orderByDesc('appointment_date')
-            ->first();
-
-        return $lastAppointment?->appointment_date;
-    }
+    // Note: Statistics accessors have been moved to PatientStatisticsService
+    // to avoid N+1 query problems. Use the service for batch statistics.
 
     /**
      * Check if patient has complete profile.

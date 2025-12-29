@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\AppointmentStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Exceptions\BusinessLogicException;
@@ -13,6 +14,7 @@ use App\Traits\LogsActivity;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ReportService
 {
@@ -62,22 +64,40 @@ class ReportService
             'status' => $status,
         ]);
 
-        $query = Appointment::with(['patient'])
-            ->whereBetween('appointment_date', [$from->toDateString(), $to->toDateString()]);
+        $fromStr = $from->toDateString();
+        $toStr = $to->toDateString();
+
+        // Get summary statistics in a single query
+        $summaryQuery = Appointment::query()
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as confirmed
+            ", [
+                AppointmentStatus::COMPLETED->value,
+                AppointmentStatus::CANCELLED->value,
+                AppointmentStatus::NO_SHOW->value,
+                AppointmentStatus::PENDING->value,
+                AppointmentStatus::CONFIRMED->value,
+            ])
+            ->whereBetween('appointment_date', [$fromStr, $toStr]);
 
         if ($status) {
-            $query->where('status', $status);
+            $summaryQuery->where('status', $status);
         }
 
-        $appointments = $query->orderBy('appointment_date')->orderBy('appointment_time')->get();
+        $stats = $summaryQuery->first();
 
         $summary = [
-            'total' => $appointments->count(),
-            'completed' => $appointments->where('status', AppointmentStatus::COMPLETED)->count(),
-            'cancelled' => $appointments->where('status', AppointmentStatus::CANCELLED)->count(),
-            'no_show' => $appointments->where('status', AppointmentStatus::NO_SHOW)->count(),
-            'pending' => $appointments->where('status', AppointmentStatus::PENDING)->count(),
-            'confirmed' => $appointments->where('status', AppointmentStatus::CONFIRMED)->count(),
+            'total' => (int) $stats->total,
+            'completed' => (int) $stats->completed,
+            'cancelled' => (int) $stats->cancelled,
+            'no_show' => (int) $stats->no_show,
+            'pending' => (int) $stats->pending,
+            'confirmed' => (int) $stats->confirmed,
         ];
 
         $completion_rate = $summary['total'] > 0
@@ -88,10 +108,25 @@ class ReportService
             ? round($summary['cancelled'] / $summary['total'] * 100, 1)
             : 0;
 
+        // Get appointments list (only select needed columns)
+        $appointmentsQuery = Appointment::query()
+            ->select(['id', 'user_id', 'appointment_date', 'appointment_time', 'status'])
+            ->with(['patient:id,name,phone'])
+            ->whereBetween('appointment_date', [$fromStr, $toStr]);
+
+        if ($status) {
+            $appointmentsQuery->where('status', $status);
+        }
+
+        $appointments = $appointmentsQuery
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time')
+            ->get();
+
         return [
             'period' => [
-                'from' => $from->toDateString(),
-                'to' => $to->toDateString(),
+                'from' => $fromStr,
+                'to' => $toStr,
             ],
             'summary' => $summary,
             'completion_rate' => $completion_rate,
@@ -131,26 +166,42 @@ class ReportService
             'group_by' => $groupBy,
         ]);
 
-        $payments = Payment::with(['appointment.patient'])
-            ->paid()
-            ->whereBetween('paid_at', [$from->startOfDay(), $to->endOfDay()])
-            ->orderBy('paid_at')
-            ->get();
+        $fromDate = $from->copy()->startOfDay();
+        $toDate = $to->copy()->endOfDay();
 
-        $totalRevenue = $payments->sum('total');
-        $totalDiscount = $payments->sum('discount');
-        $totalPayments = $payments->count();
+        // Get summary and by_method in a single query
+        $summaryStats = Payment::query()
+            ->selectRaw("
+                COALESCE(SUM(total), 0) as total_revenue,
+                COALESCE(SUM(discount), 0) as total_discount,
+                COUNT(*) as total_payments,
+                COALESCE(SUM(CASE WHEN method = ? THEN total ELSE 0 END), 0) as cash_total,
+                COALESCE(SUM(CASE WHEN method = ? THEN total ELSE 0 END), 0) as card_total,
+                COALESCE(SUM(CASE WHEN method = ? THEN total ELSE 0 END), 0) as wallet_total
+            ", [
+                PaymentMethod::CASH->value,
+                PaymentMethod::CARD->value,
+                PaymentMethod::WALLET->value,
+            ])
+            ->where('status', PaymentStatus::PAID)
+            ->whereBetween('paid_at', [$fromDate, $toDate])
+            ->first();
+
+        $totalRevenue = (float) $summaryStats->total_revenue;
+        $totalPayments = (int) $summaryStats->total_payments;
         $averagePayment = $totalPayments > 0 ? $totalRevenue / $totalPayments : 0;
 
-        // Group by period
-        $breakdown = $this->groupPaymentsByPeriod($payments, $groupBy, $from, $to);
+        // Get breakdown by period using database GROUP BY
+        $breakdown = $this->groupPaymentsByPeriodOptimized($groupBy, $fromDate, $toDate, $from, $to);
 
-        // Group by method
-        $byMethod = [
-            'cash' => $payments->where('method', 'cash')->sum('total'),
-            'card' => $payments->where('method', 'card')->sum('total'),
-            'wallet' => $payments->where('method', 'wallet')->sum('total'),
-        ];
+        // Get payments list (only select needed columns)
+        $payments = Payment::query()
+            ->select(['id', 'appointment_id', 'amount', 'discount', 'total', 'method', 'paid_at'])
+            ->with(['appointment:id,user_id', 'appointment.patient:id,name'])
+            ->where('status', PaymentStatus::PAID)
+            ->whereBetween('paid_at', [$fromDate, $toDate])
+            ->orderBy('paid_at')
+            ->get();
 
         return [
             'period' => [
@@ -158,12 +209,16 @@ class ReportService
                 'to' => $to->toDateString(),
             ],
             'summary' => [
-                'total_revenue' => (float) $totalRevenue,
-                'total_discount' => (float) $totalDiscount,
+                'total_revenue' => $totalRevenue,
+                'total_discount' => (float) $summaryStats->total_discount,
                 'total_payments' => $totalPayments,
                 'average_payment' => round($averagePayment, 2),
             ],
-            'by_method' => $byMethod,
+            'by_method' => [
+                'cash' => (float) $summaryStats->cash_total,
+                'card' => (float) $summaryStats->card_total,
+                'wallet' => (float) $summaryStats->wallet_total,
+            ],
             'breakdown' => $breakdown,
             'payments' => $payments->map(fn ($payment) => [
                 'id' => $payment->id,
@@ -265,61 +320,100 @@ class ReportService
             ->setPaper('a4', 'portrait');
     }
 
-    private function groupPaymentsByPeriod(Collection $payments, string $groupBy, Carbon $from, Carbon $to): array
-    {
-        $breakdown = [];
-
+    /**
+     * Group payments by period using database GROUP BY for better performance.
+     */
+    private function groupPaymentsByPeriodOptimized(
+        string $groupBy,
+        Carbon $fromDate,
+        Carbon $toDate,
+        Carbon $from,
+        Carbon $to
+    ): array {
+        // Get aggregated data from database
         if ($groupBy === 'day') {
+            $dbResults = Payment::query()
+                ->selectRaw('DATE(paid_at) as period_key, SUM(total) as total, COUNT(*) as count')
+                ->where('status', PaymentStatus::PAID)
+                ->whereBetween('paid_at', [$fromDate, $toDate])
+                ->groupBy(DB::raw('DATE(paid_at)'))
+                ->get()
+                ->keyBy('period_key');
+
+            // Build full date range
+            $breakdown = [];
             $current = $from->copy();
             while ($current->lte($to)) {
                 $dateStr = $current->toDateString();
-                $dayPayments = $payments->filter(fn ($p) => $p->paid_at->toDateString() === $dateStr);
-
+                $dbRow = $dbResults->get($dateStr);
                 $breakdown[] = [
                     'period' => $dateStr,
                     'label' => $current->translatedFormat('D, d M'),
-                    'total' => (float) $dayPayments->sum('total'),
-                    'count' => $dayPayments->count(),
+                    'total' => (float) ($dbRow->total ?? 0),
+                    'count' => (int) ($dbRow->count ?? 0),
                 ];
-
                 $current->addDay();
             }
-        } elseif ($groupBy === 'week') {
+            return $breakdown;
+        }
+
+        if ($groupBy === 'week') {
+            // For weekly, use strftime to get week number
+            $dbResults = Payment::query()
+                ->selectRaw("strftime('%Y-%W', paid_at) as period_key, SUM(total) as total, COUNT(*) as count")
+                ->where('status', PaymentStatus::PAID)
+                ->whereBetween('paid_at', [$fromDate, $toDate])
+                ->groupBy(DB::raw("strftime('%Y-%W', paid_at)"))
+                ->get()
+                ->keyBy('period_key');
+
+            $breakdown = [];
             $current = $from->copy()->startOfWeek();
             while ($current->lte($to)) {
                 $weekEnd = $current->copy()->endOfWeek();
-                $weekPayments = $payments->filter(fn ($p) =>
-                    $p->paid_at->gte($current) && $p->paid_at->lte($weekEnd)
-                );
+                $weekKey = $current->format('Y-W');
+                $dbRow = $dbResults->get($weekKey);
 
                 $breakdown[] = [
                     'period' => $current->toDateString(),
                     'label' => $current->format('d M') . ' - ' . $weekEnd->format('d M'),
-                    'total' => (float) $weekPayments->sum('total'),
-                    'count' => $weekPayments->count(),
+                    'total' => (float) ($dbRow->total ?? 0),
+                    'count' => (int) ($dbRow->count ?? 0),
                 ];
 
                 $current->addWeek();
             }
-        } elseif ($groupBy === 'month') {
+            return $breakdown;
+        }
+
+        if ($groupBy === 'month') {
+            // For monthly, use strftime to get year-month
+            $dbResults = Payment::query()
+                ->selectRaw("strftime('%Y-%m', paid_at) as period_key, SUM(total) as total, COUNT(*) as count")
+                ->where('status', PaymentStatus::PAID)
+                ->whereBetween('paid_at', [$fromDate, $toDate])
+                ->groupBy(DB::raw("strftime('%Y-%m', paid_at)"))
+                ->get()
+                ->keyBy('period_key');
+
+            $breakdown = [];
             $current = $from->copy()->startOfMonth();
             while ($current->lte($to)) {
-                $monthEnd = $current->copy()->endOfMonth();
-                $monthPayments = $payments->filter(fn ($p) =>
-                    $p->paid_at->month === $current->month && $p->paid_at->year === $current->year
-                );
+                $monthKey = $current->format('Y-m');
+                $dbRow = $dbResults->get($monthKey);
 
                 $breakdown[] = [
-                    'period' => $current->format('Y-m'),
+                    'period' => $monthKey,
                     'label' => $current->translatedFormat('F Y'),
-                    'total' => (float) $monthPayments->sum('total'),
-                    'count' => $monthPayments->count(),
+                    'total' => (float) ($dbRow->total ?? 0),
+                    'count' => (int) ($dbRow->count ?? 0),
                 ];
 
                 $current->addMonth();
             }
+            return $breakdown;
         }
 
-        return $breakdown;
+        return [];
     }
 }

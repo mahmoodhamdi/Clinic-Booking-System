@@ -82,6 +82,9 @@ class MedicalRecordController extends Controller
 
     public function destroy(MedicalRecord $medicalRecord): JsonResponse
     {
+        // Only admin can delete medical records
+        $this->authorize('delete', $medicalRecord);
+
         // Delete associated attachments files
         foreach ($medicalRecord->attachments as $attachment) {
             $attachment->deleteFile();

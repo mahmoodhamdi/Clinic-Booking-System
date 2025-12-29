@@ -2,18 +2,21 @@
 
 namespace App\Observers;
 
-use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
-use Illuminate\Support\Facades\Cache;
+use App\Services\CacheInvalidationService;
 
 class AppointmentObserver
 {
+    public function __construct(
+        protected CacheInvalidationService $cacheService
+    ) {}
+
     /**
      * Handle the Appointment "created" event.
      */
     public function created(Appointment $appointment): void
     {
-        $this->invalidateDashboardCache();
+        $this->cacheService->onAppointmentChanged();
     }
 
     /**
@@ -21,7 +24,7 @@ class AppointmentObserver
      */
     public function updated(Appointment $appointment): void
     {
-        $this->invalidateDashboardCache();
+        $this->cacheService->onAppointmentChanged();
     }
 
     /**
@@ -29,7 +32,7 @@ class AppointmentObserver
      */
     public function deleted(Appointment $appointment): void
     {
-        $this->invalidateDashboardCache();
+        $this->cacheService->onAppointmentChanged();
     }
 
     /**
@@ -37,7 +40,7 @@ class AppointmentObserver
      */
     public function restored(Appointment $appointment): void
     {
-        $this->invalidateDashboardCache();
+        $this->cacheService->onAppointmentChanged();
     }
 
     /**
@@ -45,14 +48,6 @@ class AppointmentObserver
      */
     public function forceDeleted(Appointment $appointment): void
     {
-        $this->invalidateDashboardCache();
-    }
-
-    /**
-     * Invalidate dashboard statistics cache when appointments change.
-     */
-    protected function invalidateDashboardCache(): void
-    {
-        Cache::forget('dashboard_stats');
+        $this->cacheService->onAppointmentChanged();
     }
 }

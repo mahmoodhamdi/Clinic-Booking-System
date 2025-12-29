@@ -22,8 +22,16 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'phone' => ['required', 'string'],
-            'password' => ['required', 'string'],
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^01[0125][0-9]{8}$/',
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:6',
+            ],
         ];
     }
 
@@ -35,8 +43,22 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.required' => 'رقم الهاتف مطلوب.',
-            'password.required' => 'كلمة المرور مطلوبة.',
+            'phone.required' => __('رقم الهاتف مطلوب.'),
+            'phone.regex' => __('يرجى إدخال رقم هاتف مصري صحيح.'),
+            'password.required' => __('كلمة المرور مطلوبة.'),
+            'password.min' => __('كلمة المرور يجب أن تكون 6 أحرف على الأقل.'),
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('phone')) {
+            $this->merge([
+                'phone' => preg_replace('/\s+/', '', $this->phone ?? ''),
+            ]);
+        }
     }
 }

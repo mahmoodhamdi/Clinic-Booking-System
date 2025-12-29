@@ -9,11 +9,15 @@ use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\PatientDashboardResource;
 use App\Http\Resources\PatientProfileResource;
 use App\Models\PatientProfile;
+use App\Services\PatientStatisticsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
+    public function __construct(
+        protected PatientStatisticsService $statisticsService
+    ) {}
     public function dashboard(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -27,9 +31,11 @@ class PatientController extends Controller
             ->limit(5)
             ->get();
 
+        $statistics = $this->statisticsService->getForPatient($user);
+
         return response()->json([
             'success' => true,
-            'data' => new PatientDashboardResource($user, $upcomingAppointments),
+            'data' => new PatientDashboardResource($user, $upcomingAppointments, $statistics),
         ]);
     }
 
@@ -135,16 +141,17 @@ class PatientController extends Controller
     public function statistics(Request $request): JsonResponse
     {
         $user = $request->user();
+        $statistics = $this->statisticsService->getForPatient($user);
 
         return response()->json([
             'success' => true,
             'data' => [
-                'total_appointments' => $user->total_appointments,
-                'completed_appointments' => $user->completed_appointments_count,
-                'cancelled_appointments' => $user->cancelled_appointments_count,
-                'no_shows' => $user->no_show_count,
-                'upcoming_appointments' => $user->upcoming_appointments_count,
-                'last_visit' => $user->last_visit?->toDateString(),
+                'total_appointments' => $statistics['total_appointments'],
+                'completed_appointments' => $statistics['completed_appointments'],
+                'cancelled_appointments' => $statistics['cancelled_appointments'],
+                'no_shows' => $statistics['no_show_count'],
+                'upcoming_appointments' => $statistics['upcoming_appointments'],
+                'last_visit' => $statistics['last_visit'],
                 'profile_complete' => $user->has_complete_profile,
             ],
         ]);

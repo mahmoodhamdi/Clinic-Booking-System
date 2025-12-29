@@ -57,7 +57,7 @@ class SlotController extends Controller
         }
 
         // Check if date is too far in the future
-        $settings = $this->slotService->getSettings();
+        $settings = $this->slotService->getClinicSettings();
         if ($dateObj->gt($settings->getMaxBookingDate())) {
             return response()->json([
                 'success' => false,
