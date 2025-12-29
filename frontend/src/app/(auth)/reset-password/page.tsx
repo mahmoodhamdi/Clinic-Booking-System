@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, Loader2, CheckCircle, Circle } from 'lucide-react';
+import Link from 'next/link';
 
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { Button } from '@/components/ui/button';
@@ -19,15 +21,106 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Card, CardContent } from '@/components/ui/card';
 import { resetPasswordSchema, ResetPasswordFormData } from '@/lib/validations/auth';
 import { authApi } from '@/lib/api/auth';
+
+interface PasswordRequirement {
+  met: boolean;
+  label: string;
+}
+
+function PasswordRequirements({ password, t }: { password: string; t: (key: string) => string }) {
+  const requirements = useMemo<PasswordRequirement[]>(() => [
+    { met: password.length >= 6, label: t('passwordMinLength') },
+    { met: /[A-Z]/.test(password), label: t('passwordUppercase') },
+    { met: /[a-z]/.test(password), label: t('passwordLowercase') },
+    { met: /[0-9]/.test(password), label: t('passwordNumber') },
+    { met: /[^A-Za-z0-9]/.test(password), label: t('passwordSpecial') },
+  ], [password, t]);
+
+  const metCount = requirements.filter(r => r.met).length;
+  const strengthPercentage = (metCount / requirements.length) * 100;
+
+  const strengthColor = useMemo(() => {
+    if (strengthPercentage < 40) return 'bg-red-500';
+    if (strengthPercentage < 80) return 'bg-yellow-500';
+    return 'bg-green-500';
+  }, [strengthPercentage]);
+
+  const strengthLabel = useMemo(() => {
+    if (strengthPercentage < 40) return t('passwordWeak');
+    if (strengthPercentage < 80) return t('passwordMedium');
+    return t('passwordStrong');
+  }, [strengthPercentage, t]);
+
+  return (
+    <div className="space-y-3">
+      {/* Strength Bar */}
+      <div className="space-y-1">
+        <div className="flex justify-between text-xs">
+          <span className="text-muted-foreground">{t('passwordStrength')}</span>
+          <span className={`font-medium ${strengthPercentage >= 80 ? 'text-green-600' : strengthPercentage >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
+            {password.length > 0 ? strengthLabel : ''}
+          </span>
+        </div>
+        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className={`h-full transition-all duration-300 ${strengthColor}`}
+            style={{ width: `${strengthPercentage}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Requirements List */}
+      <ul className="space-y-1.5">
+        {requirements.map((req, index) => (
+          <li
+            key={index}
+            className={`text-xs flex items-center gap-2 transition-colors ${
+              req.met ? 'text-green-600' : 'text-muted-foreground'
+            }`}
+          >
+            {req.met ? (
+              <CheckCircle className="h-3.5 w-3.5" />
+            ) : (
+              <Circle className="h-3.5 w-3.5" />
+            )}
+            {req.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SuccessState({ t }: { t: (key: string) => string }) {
+  return (
+    <Card className="w-full max-w-md">
+      <CardContent className="pt-6">
+        <div className="text-center space-y-4">
+          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+            <CheckCircle className="h-8 w-8 text-green-600" />
+          </div>
+          <h2 className="text-xl font-semibold">{t('passwordChanged')}</h2>
+          <p className="text-muted-foreground">
+            {t('passwordChangedMessage')}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {t('redirectingToLogin')}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function ResetPasswordPage() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
@@ -52,26 +145,42 @@ export default function ResetPasswordPage() {
     form.setValue('otp', otp);
   }, [router, form]);
 
-  const onSubmit = async (data: ResetPasswordFormData) => {
-    setIsLoading(true);
-    try {
-      await authApi.resetPassword(data);
-      toast.success(t('success'));
-
+  const resetPassword = useMutation({
+    mutationFn: (data: ResetPasswordFormData) => authApi.resetPassword(data),
+    onSuccess: () => {
       // Clear session storage
       sessionStorage.removeItem('reset_phone');
       sessionStorage.removeItem('reset_otp');
 
-      router.push('/login');
-    } catch {
+      setIsSuccess(true);
+      toast.success(t('passwordChanged'));
+
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        router.push('/login');
+      }, 3000);
+    },
+    onError: () => {
       toast.error(t('error'));
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = (data: ResetPasswordFormData) => {
+    resetPassword.mutate(data);
   };
 
+  const password = form.watch('password');
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+        <SuccessState t={t} />
+      </div>
+    );
+  }
+
   return (
-    <AuthLayout title={t('resetPassword')}>
+    <AuthLayout title={t('resetPassword')} subtitle={t('enterNewPassword')}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
@@ -107,6 +216,9 @@ export default function ResetPasswordPage() {
             )}
           />
 
+          {/* Password Requirements */}
+          <PasswordRequirements password={password || ''} t={t} />
+
           <FormField
             control={form.control}
             name="password_confirmation"
@@ -140,16 +252,25 @@ export default function ResetPasswordPage() {
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          <Button type="submit" className="w-full" disabled={resetPassword.isPending}>
+            {resetPassword.isPending ? (
+              <>
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 {t('resetPassword')}...
-              </span>
+              </>
             ) : (
               t('resetPassword')
             )}
           </Button>
+
+          <div className="text-center">
+            <Link
+              href="/login"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              {t('backToLogin')}
+            </Link>
+          </div>
         </form>
       </Form>
     </AuthLayout>

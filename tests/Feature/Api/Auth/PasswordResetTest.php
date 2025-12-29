@@ -56,7 +56,7 @@ class PasswordResetTest extends TestCase
 
         $response = $this->postJson('/api/auth/verify-otp', [
             'phone' => '01012345678',
-            'token' => $token,
+            'otp' => $token,
         ]);
 
         $response->assertOk()
@@ -78,7 +78,7 @@ class PasswordResetTest extends TestCase
 
         $response = $this->postJson('/api/auth/verify-otp', [
             'phone' => '01012345678',
-            'token' => '999999',
+            'otp' => '999999',
         ]);
 
         $response->assertStatus(422)
@@ -101,7 +101,7 @@ class PasswordResetTest extends TestCase
 
         $response = $this->postJson('/api/auth/verify-otp', [
             'phone' => '01012345678',
-            'token' => $token,
+            'otp' => $token,
         ]);
 
         $response->assertStatus(422)
@@ -124,7 +124,7 @@ class PasswordResetTest extends TestCase
 
         $response = $this->postJson('/api/auth/reset-password', [
             'phone' => '01012345678',
-            'token' => $token,
+            'otp' => $token,
             'password' => 'NewPassword1!',
             'password_confirmation' => 'NewPassword1!',
         ]);
@@ -157,7 +157,7 @@ class PasswordResetTest extends TestCase
 
         $response = $this->postJson('/api/auth/reset-password', [
             'phone' => '01012345678',
-            'token' => '999999',
+            'otp' => '999999',
             'password' => 'NewPassword1!',
             'password_confirmation' => 'NewPassword1!',
         ]);
@@ -182,7 +182,7 @@ class PasswordResetTest extends TestCase
 
         $response = $this->postJson('/api/auth/reset-password', [
             'phone' => '01012345678',
-            'token' => $token,
+            'otp' => $token,
             'password' => 'NewPassword1!',
         ]);
 

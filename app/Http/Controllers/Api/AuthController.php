@@ -12,10 +12,12 @@ use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\SmsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -200,7 +202,7 @@ class AuthController extends Controller
     /**
      * Request password reset (send OTP).
      */
-    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    public function forgotPassword(ForgotPasswordRequest $request, SmsService $smsService): JsonResponse
     {
         $token = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
@@ -208,13 +210,31 @@ class AuthController extends Controller
             ['phone' => $request->phone],
             [
                 'token' => Hash::make($token),
+                'attempts' => 0,
+                'locked_until' => null,
                 'created_at' => now(),
             ]
         );
 
-        // TODO: Implement SMS gateway integration to send OTP
-        // In production, use a service like Twilio, Vonage, or local SMS provider
-        // NotificationService::sendPasswordResetSms($request->phone, $token);
+        // Send OTP via SMS service
+        $sent = $smsService->sendOtp($request->phone, $token);
+
+        if (! $sent && $smsService->isRealProvider()) {
+            Log::error('Failed to send OTP SMS', ['phone' => $request->phone]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'فشل إرسال رمز التحقق. يرجى المحاولة مرة أخرى.',
+            ], 500);
+        }
+
+        // Log the OTP in development for testing purposes
+        if (! $smsService->isRealProvider()) {
+            Log::info('OTP for password reset', [
+                'phone' => $request->phone,
+                'otp' => $token,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -239,14 +259,14 @@ class AuthController extends Controller
     {
         $request->validate([
             'phone' => ['required', 'string', 'exists:users,phone'],
-            'token' => ['required', 'string', 'size:6'],
+            'otp' => ['required', 'string', 'size:6'],
         ]);
 
         $record = DB::table('password_reset_tokens')
             ->where('phone', $request->phone)
             ->first();
 
-        if (!$record) {
+        if (! $record) {
             return response()->json([
                 'success' => false,
                 'message' => 'رمز التحقق غير صحيح.',
@@ -256,6 +276,7 @@ class AuthController extends Controller
         // Check if account is locked out
         if ($record->locked_until && now()->lessThan($record->locked_until)) {
             $remainingMinutes = now()->diffInMinutes($record->locked_until);
+
             return response()->json([
                 'success' => false,
                 'message' => "تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد {$remainingMinutes} دقيقة.",
@@ -271,7 +292,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        if (!Hash::check($request->token, $record->token)) {
+        if (! Hash::check($request->otp, $record->token)) {
             // Increment failed attempts
             $attempts = ($record->attempts ?? 0) + 1;
             $updateData = ['attempts' => $attempts];
@@ -307,6 +328,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'رمز التحقق صحيح.',
+            'data' => ['verified' => true],
         ]);
     }
 
@@ -319,7 +341,7 @@ class AuthController extends Controller
             ->where('phone', $request->phone)
             ->first();
 
-        if (!$record) {
+        if (! $record) {
             return response()->json([
                 'success' => false,
                 'message' => 'رمز التحقق غير صحيح.',
@@ -329,6 +351,7 @@ class AuthController extends Controller
         // Check if account is locked out
         if ($record->locked_until && now()->lessThan($record->locked_until)) {
             $remainingMinutes = now()->diffInMinutes($record->locked_until);
+
             return response()->json([
                 'success' => false,
                 'message' => "تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد {$remainingMinutes} دقيقة.",
@@ -344,7 +367,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        if (!Hash::check($request->token, $record->token)) {
+        if (! Hash::check($request->otp, $record->token)) {
             // Increment failed attempts
             $attempts = ($record->attempts ?? 0) + 1;
             $updateData = ['attempts' => $attempts];

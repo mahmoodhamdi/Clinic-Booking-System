@@ -24,16 +24,12 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             'phone' => ['required', 'string', 'exists:users,phone'],
-            'token' => ['required', 'string'],
+            'otp' => ['required', 'string', 'size:6'],
             'password' => [
                 'required',
                 'string',
                 'confirmed',
-                Password::min(8)
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
+                Password::min(6),
             ],
         ];
     }
@@ -47,7 +43,8 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             'phone.exists' => 'رقم الهاتف غير مسجل.',
-            'token.required' => 'رمز التحقق مطلوب.',
+            'otp.required' => 'رمز التحقق مطلوب.',
+            'otp.size' => 'رمز التحقق يجب أن يكون 6 أرقام.',
             'password.confirmed' => 'كلمة المرور غير متطابقة.',
         ];
     }

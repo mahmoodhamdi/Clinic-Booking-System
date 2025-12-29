@@ -35,4 +35,32 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | SMS Service Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure SMS provider for OTP and notifications.
+    | Supported providers: 'log' (development), 'twilio', 'vonage'
+    |
+    */
+
+    'sms' => [
+        'provider' => env('SMS_PROVIDER', 'log'),
+        'api_key' => env('SMS_API_KEY'),
+        'sender_id' => env('SMS_SENDER_ID'),
+    ],
+
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'from' => env('TWILIO_FROM'),
+    ],
+
+    'vonage' => [
+        'key' => env('VONAGE_KEY'),
+        'secret' => env('VONAGE_SECRET'),
+        'from' => env('VONAGE_FROM'),
+    ],
+
 ];
