@@ -14,7 +14,7 @@ import {
   Search,
   Plus,
   Calendar,
-  User,
+  User as UserIcon,
   Eye,
   CheckCircle2,
   Clock,
@@ -207,7 +207,7 @@ export default function AdminPrescriptionsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <User className="h-4 w-4 text-gray-400" />
+                        <UserIcon className="h-4 w-4 text-gray-400" />
                         <span className="font-medium">{prescription.patient?.name}</span>
                       </div>
                       <p className="text-sm text-gray-500">{prescription.diagnosis}</p>

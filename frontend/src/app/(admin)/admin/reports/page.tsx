@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQuery } from '@tantml:function_calls>@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import {
@@ -36,8 +36,8 @@ export default function ReportsPage() {
     queryKey: ['revenueReport', revenueStartDate, revenueEndDate],
     queryFn: () =>
       adminApi.getRevenueReport({
-        start_date: revenueStartDate,
-        end_date: revenueEndDate,
+        from_date: revenueStartDate,
+        to_date: revenueEndDate,
       }),
     enabled: !!revenueStartDate && !!revenueEndDate,
   });
@@ -47,8 +47,8 @@ export default function ReportsPage() {
     queryKey: ['appointmentsReport', appointmentsStartDate, appointmentsEndDate],
     queryFn: () =>
       adminApi.getAppointmentsReport({
-        start_date: appointmentsStartDate,
-        end_date: appointmentsEndDate,
+        from_date: appointmentsStartDate,
+        to_date: appointmentsEndDate,
       }),
     enabled: !!appointmentsStartDate && !!appointmentsEndDate,
   });
@@ -58,8 +58,8 @@ export default function ReportsPage() {
     queryKey: ['patientsReport', patientsStartDate, patientsEndDate],
     queryFn: () =>
       adminApi.getPatientsReport({
-        start_date: patientsStartDate,
-        end_date: patientsEndDate,
+        from_date: patientsStartDate,
+        to_date: patientsEndDate,
       }),
     enabled: !!patientsStartDate && !!patientsEndDate,
   });
@@ -68,8 +68,8 @@ export default function ReportsPage() {
     if (!revenueStartDate || !revenueEndDate) return;
     try {
       const blob = await adminApi.exportRevenueReport({
-        start_date: revenueStartDate,
-        end_date: revenueEndDate,
+        from_date: revenueStartDate,
+        to_date: revenueEndDate,
       });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -88,8 +88,8 @@ export default function ReportsPage() {
     if (!appointmentsStartDate || !appointmentsEndDate) return;
     try {
       const blob = await adminApi.exportAppointmentsReport({
-        start_date: appointmentsStartDate,
-        end_date: appointmentsEndDate,
+        from_date: appointmentsStartDate,
+        to_date: appointmentsEndDate,
       });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -108,8 +108,8 @@ export default function ReportsPage() {
     if (!patientsStartDate || !patientsEndDate) return;
     try {
       const blob = await adminApi.exportPatientsReport({
-        start_date: patientsStartDate,
-        end_date: patientsEndDate,
+        from_date: patientsStartDate,
+        to_date: patientsEndDate,
       });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -209,7 +209,7 @@ export default function ReportsPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-2xl font-bold">
-                        {revenueReport.data.completed_count || 0}
+                        {revenueReport.data.total_paid?.toLocaleString() || 0} {t('common.currency')}
                       </p>
                     </CardContent>
                   </Card>
@@ -217,12 +217,12 @@ export default function ReportsPage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('admin.dashboard.pendingAppointments')}
+                        {t('admin.payments.pending')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-2xl font-bold">
-                        {revenueReport.data.pending_count || 0}
+                        {revenueReport.data.total_pending?.toLocaleString() || 0} {t('common.currency')}
                       </p>
                     </CardContent>
                   </Card>
@@ -300,7 +300,7 @@ export default function ReportsPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-2xl font-bold text-green-600">
-                        {appointmentsReport.data.completed || 0}
+                        {appointmentsReport.data.by_status?.completed || 0}
                       </p>
                     </CardContent>
                   </Card>
@@ -313,7 +313,7 @@ export default function ReportsPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-2xl font-bold text-red-600">
-                        {appointmentsReport.data.cancelled || 0}
+                        {appointmentsReport.data.by_status?.cancelled || 0}
                       </p>
                     </CardContent>
                   </Card>
@@ -326,7 +326,7 @@ export default function ReportsPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-2xl font-bold text-orange-600">
-                        {appointmentsReport.data.no_show || 0}
+                        {appointmentsReport.data.by_status?.no_show || 0}
                       </p>
                     </CardContent>
                   </Card>
@@ -418,7 +418,7 @@ export default function ReportsPage() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-2xl font-bold">
-                        {patientsReport.data.active_patients || 0}
+                        {patientsReport.data.returning_patients || 0}
                       </p>
                     </CardContent>
                   </Card>

@@ -105,6 +105,7 @@ export interface MedicalRecord {
   follow_up_notes: string | null;
   created_at: string;
   attachments?: Attachment[];
+  patient?: User;
 }
 
 // Attachment types
@@ -130,6 +131,7 @@ export interface Prescription {
   dispensed_at: string | null;
   created_at: string;
   items?: PrescriptionItem[];
+  patient?: User;
 }
 
 export interface PrescriptionItem {
@@ -158,6 +160,8 @@ export interface Payment {
   paid_at: string | null;
   refunded_at: string | null;
   created_at: string;
+  patient?: User;
+  appointment?: Appointment;
 }
 
 // Notification types
