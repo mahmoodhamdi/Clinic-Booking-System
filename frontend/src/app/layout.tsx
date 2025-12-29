@@ -8,7 +8,9 @@ import './globals.css';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
+  display: 'swap',
   variable: '--font-cairo',
+  weight: ['400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
