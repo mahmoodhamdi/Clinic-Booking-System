@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   Calendar,
@@ -36,7 +37,9 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
 import { useAuthStore } from '@/lib/stores/auth';
+import { patientApi } from '@/lib/api/patient';
 import { cn } from '@/lib/utils';
+import type { ApiResponse } from '@/types';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -172,6 +175,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Fetch unread notification count
+  const { data: unreadData } = useQuery<ApiResponse<{ count: number }>>({
+    queryKey: ['admin-unread-notifications-count'],
+    queryFn: () => patientApi.getUnreadCount(),
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  const unreadCount = unreadData?.data?.count ?? 0;
+
   const navigation = useMemo<NavItem[]>(() => [
     { name: t('admin.dashboard.title'), href: '/admin/dashboard', icon: LayoutDashboard },
     { name: t('admin.appointments.title'), href: '/admin/appointments', icon: Calendar },
@@ -268,9 +280,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               {/* Notifications */}
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                <Badge className="absolute -top-1 -end-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                  5
-                </Badge>
+                {unreadCount > 0 && (
+                  <Badge className="absolute -top-1 -end-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </Badge>
+                )}
               </Button>
 
               {/* Language Switcher */}

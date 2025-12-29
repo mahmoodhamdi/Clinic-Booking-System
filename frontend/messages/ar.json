@@ -138,6 +138,10 @@
       "emergencyName": "اسم جهة الاتصال",
       "emergencyPhone": "رقم هاتف الطوارئ",
       "emergencyRelation": "صلة القرابة",
+      "emergencyContactName": "اسم جهة الاتصال",
+      "emergencyContactPhone": "هاتف الطوارئ",
+      "allergiesPlaceholder": "اكتب الحساسية المعروفة...",
+      "chronicDiseasesPlaceholder": "اكتب الأمراض المزمنة...",
       "insuranceProvider": "شركة التأمين",
       "policyNumber": "رقم البوليصة",
       "updateSuccess": "تم تحديث الملف الشخصي بنجاح"

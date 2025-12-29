@@ -192,27 +192,28 @@ export default function AppointmentsPage() {
   }, [t]);
 
   const filterAppointments = useCallback((status: string) => {
-    if (!appointments?.data) return [];
+    const data = appointments?.data;
+    if (!data) return [];
 
     const now = new Date();
 
     switch (status) {
       case 'upcoming':
-        return appointments.data.filter(
+        return data.filter(
           (a) =>
             new Date(a.date) >= now &&
             (a.status === 'pending' || a.status === 'confirmed')
         );
       case 'past':
-        return appointments.data.filter(
+        return data.filter(
           (a) => a.status === 'completed' || new Date(a.date) < now
         );
       case 'cancelled':
-        return appointments.data.filter((a) => a.status === 'cancelled');
+        return data.filter((a) => a.status === 'cancelled');
       default:
-        return appointments.data;
+        return data;
     }
-  }, [appointments?.data]);
+  }, [appointments]);
 
   const handleCancelClick = useCallback((appointment: Appointment) => {
     setSelectedAppointment(appointment);
