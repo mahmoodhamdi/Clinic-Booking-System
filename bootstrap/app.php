@@ -1,8 +1,14 @@
 <?php
 
+use App\Http\Helpers\ApiResponse;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,7 +35,36 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\App\Exceptions\BusinessLogicException $e, \Illuminate\Http\Request $request) {
+        // Handle authentication exceptions
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return ApiResponse::unauthorized(__('يرجى تسجيل الدخول للمتابعة.'));
+            }
+        });
+
+        // Handle validation exceptions
+        $exceptions->render(function (ValidationException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return ApiResponse::validationError($e->errors());
+            }
+        });
+
+        // Handle not found exceptions
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return ApiResponse::notFound();
+            }
+        });
+
+        // Handle rate limiting exceptions
+        $exceptions->render(function (TooManyRequestsHttpException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return ApiResponse::tooManyRequests();
+            }
+        });
+
+        // Handle business logic exceptions
+        $exceptions->render(function (\App\Exceptions\BusinessLogicException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -40,7 +75,8 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (\App\Exceptions\PaymentException $e, \Illuminate\Http\Request $request) {
+        // Handle payment exceptions
+        $exceptions->render(function (\App\Exceptions\PaymentException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,

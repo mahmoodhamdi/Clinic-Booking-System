@@ -16,13 +16,23 @@ class SlotGeneratorService
 {
     use LogsActivity;
 
-    protected ClinicSetting $settings;
+    protected ?ClinicSetting $settings = null;
     protected int $cacheTtl;
 
     public function __construct()
     {
-        $this->settings = ClinicSetting::getInstance();
         $this->cacheTtl = config('clinic.cache.slots_ttl', 300);
+    }
+
+    /**
+     * Get clinic settings (lazy-loaded).
+     */
+    protected function getSettings(): ClinicSetting
+    {
+        if ($this->settings === null) {
+            $this->settings = ClinicSetting::getInstance();
+        }
+        return $this->settings;
     }
 
     /**
@@ -52,7 +62,7 @@ class SlotGeneratorService
         }
 
         // Invalidate vacation cache for upcoming days
-        $days = $this->settings->advance_booking_days ?? 30;
+        $days = $this->getSettings()->advance_booking_days ?? 30;
         for ($i = 0; $i <= $days; $i++) {
             $date = now()->addDays($i)->toDateString();
             Cache::forget($this->getVacationCacheKey($date));
@@ -66,23 +76,72 @@ class SlotGeneratorService
      */
     public function getAvailableDates(?int $days = null): Collection
     {
-        $days = $days ?? $this->settings->advance_booking_days;
+        $days = $days ?? $this->getSettings()->advance_booking_days;
+
+        // Batch load vacation dates for the entire range
+        $startDate = now()->toDateString();
+        $endDate = now()->addDays($days)->toDateString();
+        $vacationDates = $this->getVacationDatesInRange($startDate, $endDate);
+
+        // Preload schedules for all days of week (cached)
+        $schedules = $this->getAllSchedules();
+
         $dates = collect();
 
         for ($i = 0; $i <= $days; $i++) {
             $date = now()->addDays($i);
+            $dateString = $date->toDateString();
 
-            if ($this->isDateAvailable($date)) {
-                $dates->push([
-                    'date' => $date->toDateString(),
-                    'day_name' => DayOfWeek::fromDate($date)->labelAr(),
-                    'day_name_en' => DayOfWeek::fromDate($date)->label(),
-                    'slots_count' => $this->getSlotsForDate($date)->count(),
-                ]);
+            // Check vacation using preloaded set
+            if ($vacationDates->contains($dateString)) {
+                continue;
             }
+
+            // Check schedule using preloaded array
+            $dayOfWeek = DayOfWeek::fromDate($date)->value;
+            $schedule = $schedules[$dayOfWeek] ?? null;
+
+            if (!$schedule) {
+                continue;
+            }
+
+            $dates->push([
+                'date' => $dateString,
+                'day_name' => DayOfWeek::fromDate($date)->labelAr(),
+                'day_name_en' => DayOfWeek::fromDate($date)->label(),
+                'slots_count' => $this->getSlotsForDate($date)->count(),
+            ]);
         }
 
         return $dates;
+    }
+
+    /**
+     * Get vacation dates in a date range (batch query).
+     */
+    protected function getVacationDatesInRange(string $startDate, string $endDate): Collection
+    {
+        return Vacation::query()
+            ->where('is_active', true)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->pluck('date')
+            ->map(fn($date) => Carbon::parse($date)->toDateString());
+    }
+
+    /**
+     * Get all schedules indexed by day of week (cached).
+     */
+    protected function getAllSchedules(): array
+    {
+        $schedules = [];
+        for ($i = 0; $i <= 6; $i++) {
+            $schedules[$i] = Cache::remember(
+                $this->getScheduleCacheKey($i),
+                $this->cacheTtl,
+                fn() => Schedule::active()->forDay(DayOfWeek::from($i))->first()
+            );
+        }
+        return $schedules;
     }
 
     /**
@@ -145,7 +204,7 @@ class SlotGeneratorService
         }
 
         // Generate slots (from cached schedule)
-        $slots = $schedule->generateSlots($this->settings->slot_duration);
+        $slots = $schedule->generateSlots($this->getSettings()->slot_duration);
 
         // Filter out past slots if it's today
         if ($date->isToday()) {
@@ -154,16 +213,31 @@ class SlotGeneratorService
             });
         }
 
+        // Batch query all booked slots for this date (single query instead of N queries)
+        $bookedTimes = $this->getBookedTimesForDate($date);
+
         // Map to full slot info with availability check
-        // Note: We don't cache appointment booking status as it changes frequently
-        return $slots->map(function ($time) use ($date) {
-            $isBooked = Appointment::isSlotBooked($date, $time);
+        return $slots->map(function ($time) use ($date, $bookedTimes) {
+            $normalizedTime = Carbon::parse($time)->format('H:i');
+            $isBooked = $bookedTimes->contains($normalizedTime);
             return [
                 'time' => $time,
                 'datetime' => $date->copy()->setTimeFromTimeString($time)->toIso8601String(),
                 'is_available' => !$isBooked,
             ];
         })->values();
+    }
+
+    /**
+     * Get all booked times for a specific date (batch query).
+     */
+    protected function getBookedTimesForDate(Carbon $date): Collection
+    {
+        return Appointment::query()
+            ->whereDate('appointment_date', $date->toDateString())
+            ->active()
+            ->pluck('appointment_time')
+            ->map(fn($time) => Carbon::parse($time)->format('H:i'));
     }
 
     /**
@@ -205,7 +279,7 @@ class SlotGeneratorService
      */
     public function getNextAvailableSlot(): ?array
     {
-        $days = $this->settings->advance_booking_days;
+        $days = $this->getSettings()->advance_booking_days;
 
         for ($i = 0; $i <= $days; $i++) {
             $date = now()->addDays($i);
@@ -232,7 +306,7 @@ class SlotGeneratorService
      */
     public function getSlotsSummary(?int $days = null): array
     {
-        $days = $days ?? $this->settings->advance_booking_days;
+        $days = $days ?? $this->getSettings()->advance_booking_days;
         $totalSlots = 0;
         $availableSlots = 0;
         $availableDates = 0;
@@ -258,11 +332,11 @@ class SlotGeneratorService
     }
 
     /**
-     * Get clinic settings.
+     * Get clinic settings (public accessor).
      */
-    public function getSettings(): ClinicSetting
+    public function getClinicSettings(): ClinicSetting
     {
-        return $this->settings;
+        return $this->getSettings();
     }
 
     /**

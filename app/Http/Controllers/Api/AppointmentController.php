@@ -78,13 +78,7 @@ class AppointmentController extends Controller
 
     public function show(Request $request, Appointment $appointment): JsonResponse
     {
-        // Ensure patient can only see their own appointments
-        if ($appointment->user_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => __('غير مصرح لك بعرض هذا الحجز'),
-            ], 403);
-        }
+        $this->authorize('view', $appointment);
 
         return response()->json([
             'success' => true,
@@ -94,13 +88,8 @@ class AppointmentController extends Controller
 
     public function cancel(CancelAppointmentRequest $request, Appointment $appointment): JsonResponse
     {
-        // Ensure patient can only cancel their own appointments
-        if ($appointment->user_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => __('غير مصرح لك بإلغاء هذا الحجز'),
-            ], 403);
-        }
+        // Authorization handled via policy - check if user can cancel
+        $this->authorize('cancel', $appointment);
 
         $canCancel = $this->appointmentService->canCancel($appointment, $request->user());
 

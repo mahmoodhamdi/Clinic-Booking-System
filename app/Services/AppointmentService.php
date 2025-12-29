@@ -280,7 +280,9 @@ class AppointmentService
 
     public function getAllAppointments(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Appointment::with('patient');
+        $query = Appointment::query()
+            ->forListing()
+            ->withListingRelations();
 
         // Filter by status
         if (!empty($filters['status'])) {
@@ -322,57 +324,119 @@ class AppointmentService
 
     public function getStatistics(?Carbon $from = null, ?Carbon $to = null): array
     {
-        $query = Appointment::query();
+        // Build date filter condition
+        $dateCondition = '';
+        $bindings = [];
 
         if ($from && $to) {
-            $query->betweenDates($from, $to);
+            $dateCondition = 'AND appointment_date BETWEEN ? AND ?';
+            $bindings = [$from->toDateString(), $to->toDateString()];
         }
 
-        $all = (clone $query)->count();
-        $byStatus = [];
+        // Get all stats in a single query
+        $stats = DB::selectOne("
+            SELECT
+                COUNT(*) as total,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as confirmed,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show
+            FROM appointments
+            WHERE deleted_at IS NULL {$dateCondition}
+        ", array_merge([
+            AppointmentStatus::PENDING->value,
+            AppointmentStatus::CONFIRMED->value,
+            AppointmentStatus::COMPLETED->value,
+            AppointmentStatus::CANCELLED->value,
+            AppointmentStatus::NO_SHOW->value,
+        ], $bindings));
 
-        foreach (AppointmentStatus::cases() as $status) {
-            $byStatus[$status->value] = (clone $query)
-                ->where('status', $status)
-                ->count();
-        }
+        // Get today's stats in a single query
+        $todayStats = DB::selectOne("
+            SELECT
+                COUNT(*) as total,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as confirmed,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed
+            FROM appointments
+            WHERE deleted_at IS NULL AND appointment_date = DATE('now')
+        ", [
+            AppointmentStatus::PENDING->value,
+            AppointmentStatus::CONFIRMED->value,
+            AppointmentStatus::COMPLETED->value,
+        ]);
 
-        $todayQuery = Appointment::today();
-        $today = [
-            'total' => (clone $todayQuery)->count(),
-            'pending' => (clone $todayQuery)->pending()->count(),
-            'confirmed' => (clone $todayQuery)->confirmed()->count(),
-            'completed' => (clone $todayQuery)->completed()->count(),
-        ];
-
-        $thisWeek = Appointment::thisWeek()->count();
-        $thisMonth = Appointment::thisMonth()->count();
+        // Get weekly and monthly counts
+        $periodStats = DB::selectOne("
+            SELECT
+                SUM(CASE WHEN appointment_date BETWEEN DATE('now', 'weekday 0', '-6 days') AND DATE('now', 'weekday 0') THEN 1 ELSE 0 END) as this_week,
+                SUM(CASE WHEN strftime('%Y-%m', appointment_date) = strftime('%Y-%m', 'now') THEN 1 ELSE 0 END) as this_month
+            FROM appointments
+            WHERE deleted_at IS NULL
+        ");
 
         return [
-            'total' => $all,
-            'by_status' => $byStatus,
-            'today' => $today,
-            'this_week' => $thisWeek,
-            'this_month' => $thisMonth,
+            'total' => (int) $stats->total,
+            'by_status' => [
+                'pending' => (int) $stats->pending,
+                'confirmed' => (int) $stats->confirmed,
+                'completed' => (int) $stats->completed,
+                'cancelled' => (int) $stats->cancelled,
+                'no_show' => (int) $stats->no_show,
+            ],
+            'today' => [
+                'total' => (int) $todayStats->total,
+                'pending' => (int) $todayStats->pending,
+                'confirmed' => (int) $todayStats->confirmed,
+                'completed' => (int) $todayStats->completed,
+            ],
+            'this_week' => (int) ($periodStats->this_week ?? 0),
+            'this_month' => (int) ($periodStats->this_month ?? 0),
         ];
     }
 
     public function getDailyStatistics(Carbon $from, Carbon $to): Collection
     {
+        // Fetch all stats in a single query grouped by date
+        $results = DB::select("
+            SELECT
+                appointment_date as date,
+                COUNT(*) as total,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show
+            FROM appointments
+            WHERE deleted_at IS NULL
+              AND appointment_date BETWEEN ? AND ?
+            GROUP BY appointment_date
+            ORDER BY appointment_date
+        ", [
+            AppointmentStatus::COMPLETED->value,
+            AppointmentStatus::CANCELLED->value,
+            AppointmentStatus::NO_SHOW->value,
+            $from->toDateString(),
+            $to->toDateString(),
+        ]);
+
+        // Index results by date for fast lookup
+        $resultsByDate = collect($results)->keyBy('date');
+
+        // Build full date range with stats
         $stats = collect();
         $current = $from->copy();
 
         while ($current->lte($to)) {
-            $date = $current->toDateString();
-            $dayAppointments = Appointment::forDate($current);
+            $dateString = $current->toDateString();
+            $dayStats = $resultsByDate->get($dateString);
 
             $stats->push([
-                'date' => $date,
+                'date' => $dateString,
                 'day_name' => $current->locale('ar')->dayName,
-                'total' => (clone $dayAppointments)->count(),
-                'completed' => (clone $dayAppointments)->completed()->count(),
-                'cancelled' => (clone $dayAppointments)->cancelled()->count(),
-                'no_show' => (clone $dayAppointments)->noShow()->count(),
+                'total' => (int) ($dayStats->total ?? 0),
+                'completed' => (int) ($dayStats->completed ?? 0),
+                'cancelled' => (int) ($dayStats->cancelled ?? 0),
+                'no_show' => (int) ($dayStats->no_show ?? 0),
             ]);
 
             $current->addDay();

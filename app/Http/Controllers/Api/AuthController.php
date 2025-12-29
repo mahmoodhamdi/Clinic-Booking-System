@@ -223,6 +223,16 @@ class AuthController extends Controller
     }
 
     /**
+     * Maximum OTP verification attempts before lockout.
+     */
+    private const MAX_OTP_ATTEMPTS = 5;
+
+    /**
+     * Lockout duration in minutes.
+     */
+    private const OTP_LOCKOUT_MINUTES = 30;
+
+    /**
      * Verify OTP token.
      */
     public function verifyOtp(Request $request): JsonResponse
@@ -236,11 +246,20 @@ class AuthController extends Controller
             ->where('phone', $request->phone)
             ->first();
 
-        if (!$record || !Hash::check($request->token, $record->token)) {
+        if (!$record) {
             return response()->json([
                 'success' => false,
                 'message' => 'رمز التحقق غير صحيح.',
             ], 422);
+        }
+
+        // Check if account is locked out
+        if ($record->locked_until && now()->lessThan($record->locked_until)) {
+            $remainingMinutes = now()->diffInMinutes($record->locked_until);
+            return response()->json([
+                'success' => false,
+                'message' => "تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد {$remainingMinutes} دقيقة.",
+            ], 429);
         }
 
         // Check if token is expired (60 minutes)
@@ -251,6 +270,39 @@ class AuthController extends Controller
                 'message' => 'رمز التحقق منتهي الصلاحية.',
             ], 422);
         }
+
+        if (!Hash::check($request->token, $record->token)) {
+            // Increment failed attempts
+            $attempts = ($record->attempts ?? 0) + 1;
+            $updateData = ['attempts' => $attempts];
+
+            // Lock out if max attempts reached
+            if ($attempts >= self::MAX_OTP_ATTEMPTS) {
+                $updateData['locked_until'] = now()->addMinutes(self::OTP_LOCKOUT_MINUTES);
+            }
+
+            DB::table('password_reset_tokens')
+                ->where('phone', $request->phone)
+                ->update($updateData);
+
+            $remainingAttempts = self::MAX_OTP_ATTEMPTS - $attempts;
+            if ($remainingAttempts > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "رمز التحقق غير صحيح. المحاولات المتبقية: {$remainingAttempts}",
+                ], 422);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد 30 دقيقة.',
+            ], 429);
+        }
+
+        // Reset attempts on successful verification
+        DB::table('password_reset_tokens')
+            ->where('phone', $request->phone)
+            ->update(['attempts' => 0, 'locked_until' => null]);
 
         return response()->json([
             'success' => true,
@@ -267,11 +319,20 @@ class AuthController extends Controller
             ->where('phone', $request->phone)
             ->first();
 
-        if (!$record || !Hash::check($request->token, $record->token)) {
+        if (!$record) {
             return response()->json([
                 'success' => false,
                 'message' => 'رمز التحقق غير صحيح.',
             ], 422);
+        }
+
+        // Check if account is locked out
+        if ($record->locked_until && now()->lessThan($record->locked_until)) {
+            $remainingMinutes = now()->diffInMinutes($record->locked_until);
+            return response()->json([
+                'success' => false,
+                'message' => "تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد {$remainingMinutes} دقيقة.",
+            ], 429);
         }
 
         // Check if token is expired (60 minutes)
@@ -281,6 +342,34 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'رمز التحقق منتهي الصلاحية.',
             ], 422);
+        }
+
+        if (!Hash::check($request->token, $record->token)) {
+            // Increment failed attempts
+            $attempts = ($record->attempts ?? 0) + 1;
+            $updateData = ['attempts' => $attempts];
+
+            // Lock out if max attempts reached
+            if ($attempts >= self::MAX_OTP_ATTEMPTS) {
+                $updateData['locked_until'] = now()->addMinutes(self::OTP_LOCKOUT_MINUTES);
+            }
+
+            DB::table('password_reset_tokens')
+                ->where('phone', $request->phone)
+                ->update($updateData);
+
+            $remainingAttempts = self::MAX_OTP_ATTEMPTS - $attempts;
+            if ($remainingAttempts > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "رمز التحقق غير صحيح. المحاولات المتبقية: {$remainingAttempts}",
+                ], 422);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد 30 دقيقة.',
+            ], 429);
         }
 
         // Update password
@@ -324,16 +413,25 @@ class AuthController extends Controller
     }
 
     /**
+     * Get cookie expiration in minutes (matches token expiration).
+     */
+    protected function getCookieExpiration(): int
+    {
+        return (int) config('sanctum.expiration', 240);
+    }
+
+    /**
      * Create HttpOnly auth cookie.
      */
     protected function createAuthCookie(string $token): \Symfony\Component\HttpFoundation\Cookie
     {
         $secure = app()->environment('production');
+        $expiration = $this->getCookieExpiration();
 
         return cookie(
             'auth_token',
             $token,
-            60 * 24, // 24 hours in minutes
+            $expiration,
             '/',
             null,
             $secure, // secure (HTTPS only in production)
@@ -349,6 +447,7 @@ class AuthController extends Controller
     protected function createUserCookie(User $user): \Symfony\Component\HttpFoundation\Cookie
     {
         $secure = app()->environment('production');
+        $expiration = $this->getCookieExpiration();
 
         // Only include non-sensitive user info
         $userData = [
@@ -361,7 +460,7 @@ class AuthController extends Controller
         return cookie(
             'user',
             json_encode($userData),
-            60 * 24, // 24 hours
+            $expiration,
             '/',
             null,
             $secure,

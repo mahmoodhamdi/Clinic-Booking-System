@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\BelongsToPatient;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MedicalRecord extends Model
 {
-    use HasFactory, SoftDeletes;
+    use BelongsToPatient, HasFactory, SoftDeletes;
+
+    /**
+     * Override the patient foreign key for this model.
+     */
+    public function getPatientForeignKey(): string
+    {
+        return 'patient_id';
+    }
 
     protected $fillable = [
         'appointment_id',

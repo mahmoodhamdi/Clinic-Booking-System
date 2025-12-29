@@ -2,17 +2,24 @@
 
 namespace App\Observers;
 
+use App\Enums\UserRole;
 use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use App\Services\CacheInvalidationService;
 
 class UserObserver
 {
+    public function __construct(
+        protected CacheInvalidationService $cacheService
+    ) {}
+
     /**
      * Handle the User "created" event.
      */
     public function created(User $user): void
     {
-        $this->invalidateDashboardCache();
+        if ($this->isPatient($user)) {
+            $this->cacheService->onPatientChanged();
+        }
     }
 
     /**
@@ -20,7 +27,9 @@ class UserObserver
      */
     public function updated(User $user): void
     {
-        $this->invalidateDashboardCache();
+        if ($this->isPatient($user)) {
+            $this->cacheService->onPatientChanged();
+        }
     }
 
     /**
@@ -28,7 +37,9 @@ class UserObserver
      */
     public function deleted(User $user): void
     {
-        $this->invalidateDashboardCache();
+        if ($this->isPatient($user)) {
+            $this->cacheService->onPatientChanged();
+        }
     }
 
     /**
@@ -36,7 +47,9 @@ class UserObserver
      */
     public function restored(User $user): void
     {
-        $this->invalidateDashboardCache();
+        if ($this->isPatient($user)) {
+            $this->cacheService->onPatientChanged();
+        }
     }
 
     /**
@@ -44,14 +57,16 @@ class UserObserver
      */
     public function forceDeleted(User $user): void
     {
-        $this->invalidateDashboardCache();
+        if ($this->isPatient($user)) {
+            $this->cacheService->onPatientChanged();
+        }
     }
 
     /**
-     * Invalidate dashboard statistics cache when users change.
+     * Check if the user is a patient.
      */
-    protected function invalidateDashboardCache(): void
+    protected function isPatient(User $user): bool
     {
-        Cache::forget('dashboard_stats');
+        return $user->role === UserRole::PATIENT;
     }
 }

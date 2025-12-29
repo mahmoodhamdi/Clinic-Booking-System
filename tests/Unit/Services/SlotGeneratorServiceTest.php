@@ -244,6 +244,6 @@ class SlotGeneratorServiceTest extends TestCase
 
         $this->service->refreshSettings();
 
-        $this->assertEquals(45, $this->service->getSettings()->slot_duration);
+        $this->assertEquals(45, $this->service->getClinicSettings()->slot_duration);
     }
 }

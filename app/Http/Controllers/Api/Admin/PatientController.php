@@ -9,15 +9,21 @@ use App\Http\Requests\UpdatePatientProfileRequest;
 use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\PatientResource;
 use App\Models\User;
+use App\Services\PatientStatisticsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
+    public function __construct(
+        protected PatientStatisticsService $statisticsService
+    ) {}
+
     public function index(ListPatientsRequest $request): JsonResponse
     {
         $query = User::patients()
-            ->with('profile');
+            ->with('profile')
+            ->select(['id', 'name', 'phone', 'email', 'date_of_birth', 'gender', 'address', 'avatar', 'is_active', 'created_at']);
 
         // Search by name, phone, or email
         if ($search = $request->validated('search')) {
@@ -65,9 +71,17 @@ class PatientController extends Controller
         $perPage = $request->integer('per_page', 15);
         $patients = $query->paginate($perPage);
 
+        // Get all statistics in one query
+        $statistics = $this->statisticsService->getForPatients($patients->getCollection());
+
+        // Transform collection with statistics
+        $transformedItems = $patients->getCollection()->map(function ($patient) use ($statistics) {
+            return (new PatientResource($patient))->setStatistics($statistics[$patient->id] ?? null);
+        });
+
         return response()->json([
             'success' => true,
-            'data' => PatientResource::collection($patients),
+            'data' => $transformedItems,
             'meta' => [
                 'current_page' => $patients->currentPage(),
                 'last_page' => $patients->lastPage(),
@@ -88,9 +102,12 @@ class PatientController extends Controller
 
         $patient->load('profile');
 
+        // Get statistics for this patient
+        $statistics = $this->statisticsService->getForPatient($patient);
+
         return response()->json([
             'success' => true,
-            'data' => new PatientResource($patient),
+            'data' => (new PatientResource($patient))->setStatistics($statistics),
         ]);
     }
 
@@ -138,15 +155,17 @@ class PatientController extends Controller
             ], 404);
         }
 
+        $statistics = $this->statisticsService->getForPatient($patient);
+
         return response()->json([
             'success' => true,
             'data' => [
-                'total_appointments' => $patient->total_appointments,
-                'completed_appointments' => $patient->completed_appointments_count,
-                'cancelled_appointments' => $patient->cancelled_appointments_count,
-                'no_shows' => $patient->no_show_count,
-                'upcoming_appointments' => $patient->upcoming_appointments_count,
-                'last_visit' => $patient->last_visit?->toDateString(),
+                'total_appointments' => $statistics['total_appointments'],
+                'completed_appointments' => $statistics['completed_appointments'],
+                'cancelled_appointments' => $statistics['cancelled_appointments'],
+                'no_shows' => $statistics['no_show_count'],
+                'upcoming_appointments' => $statistics['upcoming_appointments'],
+                'last_visit' => $statistics['last_visit'],
                 'has_profile' => $patient->profile !== null,
                 'profile_complete' => $patient->has_complete_profile,
             ],

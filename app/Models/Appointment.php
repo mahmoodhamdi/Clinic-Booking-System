@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\AppointmentStatus;
 use App\Enums\CancelledBy;
 use App\Enums\DayOfWeek;
+use App\Models\Traits\BelongsToPatient;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appointment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use BelongsToPatient, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -190,11 +191,14 @@ class Appointment extends Model
     }
 
     /**
-     * Scope to include common relations for listings.
+     * Scope for listing with common relationships (optimized).
      */
-    public function scopeWithCommonRelations(Builder $query): Builder
+    public function scopeWithListingRelations(Builder $query): Builder
     {
-        return $query->with(['user', 'payment']);
+        return $query->with([
+            'patient:id,name,phone,avatar',
+            'payment:id,appointment_id,status,total',
+        ]);
     }
 
     /**
@@ -206,11 +210,35 @@ class Appointment extends Model
     }
 
     /**
+     * Scope for detailed view with all relationships.
+     */
+    public function scopeWithDetailRelations(Builder $query): Builder
+    {
+        return $query->with([
+            'patient:id,name,phone,email,avatar',
+            'patient.profile',
+            'payment',
+            'medicalRecord.prescriptions.items',
+            'medicalRecord.attachments',
+        ]);
+    }
+
+    /**
      * Scope for full detail view with all relations.
+     * @deprecated Use withDetailRelations() instead
      */
     public function scopeWithFullDetails(Builder $query): Builder
     {
-        return $query->with(['user.profile', 'payment', 'medicalRecord.prescriptions']);
+        return $this->scopeWithDetailRelations($query);
+    }
+
+    /**
+     * Scope to include common relations for listings.
+     * @deprecated Use withListingRelations() instead
+     */
+    public function scopeWithCommonRelations(Builder $query): Builder
+    {
+        return $this->scopeWithListingRelations($query);
     }
 
     // ==================== Accessors ====================

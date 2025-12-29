@@ -149,6 +149,9 @@ class PaymentController extends Controller
 
     public function refund(Request $request, Payment $payment): JsonResponse
     {
+        // Only admin can refund payments
+        $this->authorize('refund', $payment);
+
         $request->validate([
             'reason' => ['nullable', 'string', 'max:500'],
         ]);

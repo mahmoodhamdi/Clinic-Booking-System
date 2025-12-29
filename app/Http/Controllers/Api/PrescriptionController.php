@@ -24,12 +24,7 @@ class PrescriptionController extends Controller
 
     public function show(Request $request, Prescription $prescription): PrescriptionResource
     {
-        // Ensure patient can only view their own prescriptions
-        $patient = $prescription->medicalRecord?->patient;
-
-        if (!$patient || $patient->id !== $request->user()->id) {
-            abort(403, 'غير مصرح لك بعرض هذه الوصفة');
-        }
+        $this->authorize('view', $prescription);
 
         $prescription->load(['medicalRecord', 'items']);
 

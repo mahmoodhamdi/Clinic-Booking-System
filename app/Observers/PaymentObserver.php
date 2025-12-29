@@ -3,16 +3,20 @@
 namespace App\Observers;
 
 use App\Models\Payment;
-use Illuminate\Support\Facades\Cache;
+use App\Services\CacheInvalidationService;
 
 class PaymentObserver
 {
+    public function __construct(
+        protected CacheInvalidationService $cacheService
+    ) {}
+
     /**
      * Handle the Payment "created" event.
      */
     public function created(Payment $payment): void
     {
-        $this->invalidateDashboardCache();
+        $this->cacheService->onPaymentChanged();
     }
 
     /**
@@ -20,7 +24,7 @@ class PaymentObserver
      */
     public function updated(Payment $payment): void
     {
-        $this->invalidateDashboardCache();
+        $this->cacheService->onPaymentChanged();
     }
 
     /**
@@ -28,7 +32,7 @@ class PaymentObserver
      */
     public function deleted(Payment $payment): void
     {
-        $this->invalidateDashboardCache();
+        $this->cacheService->onPaymentChanged();
     }
 
     /**
@@ -36,7 +40,7 @@ class PaymentObserver
      */
     public function restored(Payment $payment): void
     {
-        $this->invalidateDashboardCache();
+        $this->cacheService->onPaymentChanged();
     }
 
     /**
@@ -44,14 +48,6 @@ class PaymentObserver
      */
     public function forceDeleted(Payment $payment): void
     {
-        $this->invalidateDashboardCache();
-    }
-
-    /**
-     * Invalidate dashboard statistics cache when payments change.
-     */
-    protected function invalidateDashboardCache(): void
-    {
-        Cache::forget('dashboard_stats');
+        $this->cacheService->onPaymentChanged();
     }
 }

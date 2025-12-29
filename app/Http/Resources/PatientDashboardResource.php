@@ -9,10 +9,13 @@ class PatientDashboardResource extends JsonResource
 {
     protected $upcomingAppointments;
 
-    public function __construct($resource, $upcomingAppointments = null)
+    protected ?array $statistics;
+
+    public function __construct($resource, $upcomingAppointments = null, ?array $statistics = null)
     {
         parent::__construct($resource);
         $this->upcomingAppointments = $upcomingAppointments;
+        $this->statistics = $statistics;
     }
 
     public function toArray(Request $request): array
@@ -33,10 +36,10 @@ class PatientDashboardResource extends JsonResource
                 ? AppointmentResource::collection($this->upcomingAppointments)
                 : [],
             'statistics' => [
-                'total_appointments' => $this->total_appointments,
-                'upcoming_count' => $this->upcoming_appointments_count,
-                'completed_count' => $this->completed_appointments_count,
-                'last_visit' => $this->last_visit?->toDateString(),
+                'total_appointments' => $this->statistics['total_appointments'] ?? 0,
+                'upcoming_count' => $this->statistics['upcoming_appointments'] ?? 0,
+                'completed_count' => $this->statistics['completed_appointments'] ?? 0,
+                'last_visit' => $this->statistics['last_visit'] ?? null,
             ],
             'next_appointment' => $nextAppointment ? [
                 'id' => $nextAppointment->id,

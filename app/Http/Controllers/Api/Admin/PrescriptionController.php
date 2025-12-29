@@ -127,6 +127,9 @@ class PrescriptionController extends Controller
 
     public function destroy(Prescription $prescription): JsonResponse
     {
+        // Only admin can delete prescriptions
+        $this->authorize('delete', $prescription);
+
         $prescription->delete();
 
         return response()->json([
