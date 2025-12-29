@@ -50,6 +50,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
+import type { Payment, User, ApiResponse, PaginatedResponse } from '@/types';
 
 const paymentSchema = z.object({
   patient_id: z.string().min(1, 'Patient is required'),
@@ -78,7 +79,7 @@ export default function AdminPaymentsPage() {
   });
 
   // Fetch payments
-  const { data: payments, isLoading } = useQuery({
+  const { data: payments, isLoading } = useQuery<PaginatedResponse<Payment>>({
     queryKey: ['adminPayments', statusFilter],
     queryFn: () =>
       adminApi.getPayments({
@@ -87,7 +88,7 @@ export default function AdminPaymentsPage() {
   });
 
   // Fetch patients for select
-  const { data: patients } = useQuery({
+  const { data: patients } = useQuery<PaginatedResponse<User>>({
     queryKey: ['adminPatients'],
     queryFn: () => adminApi.getPatients(),
   });
@@ -156,21 +157,21 @@ export default function AdminPaymentsPage() {
     }
   };
 
-  const filteredPayments = payments?.data?.filter((payment: any) => {
+  const filteredPayments = payments?.data?.filter((payment) => {
     if (!searchQuery) return true;
     const search = searchQuery.toLowerCase();
-    return payment.patient?.name?.toLowerCase().includes(search);
+    return (payment as Payment & { patient?: User }).patient?.name?.toLowerCase().includes(search);
   });
 
   // Calculate totals
   const totalAmount = filteredPayments?.reduce(
-    (sum: number, p: any) => sum + (p.amount || 0),
+    (sum, p) => sum + (p.amount || 0),
     0
   ) || 0;
   const completedAmount =
     filteredPayments
-      ?.filter((p: any) => p.status === 'completed')
-      .reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0;
+      ?.filter((p) => p.status === 'paid')
+      .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
 
   return (
     <div className="space-y-6">
@@ -262,7 +263,7 @@ export default function AdminPaymentsPage() {
         </div>
       ) : filteredPayments && filteredPayments.length > 0 ? (
         <div className="space-y-4">
-          {filteredPayments.map((payment: any) => (
+          {filteredPayments.map((payment) => (
             <Card key={payment.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
@@ -326,7 +327,7 @@ export default function AdminPaymentsPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {patients?.data?.map((patient: any) => (
+                        {patients?.data?.map((patient) => (
                           <SelectItem key={patient.id} value={patient.id.toString()}>
                             {patient.name} - {patient.phone}
                           </SelectItem>

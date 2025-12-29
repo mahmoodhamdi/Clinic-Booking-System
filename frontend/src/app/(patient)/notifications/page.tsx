@@ -12,13 +12,14 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api/client';
 import { cn } from '@/lib/utils';
+import type { Notification, ApiResponse } from '@/types';
 
 export default function NotificationsPage() {
   const t = useTranslations();
   const queryClient = useQueryClient();
 
   // Fetch notifications
-  const { data: notifications, isLoading } = useQuery({
+  const { data: notifications, isLoading } = useQuery<ApiResponse<Notification[]>>({
     queryKey: ['notifications'],
     queryFn: async () => {
       const response = await api.get('/notifications');
@@ -58,7 +59,7 @@ export default function NotificationsPage() {
     },
   });
 
-  const unreadCount = notifications?.data?.filter((n: any) => !n.read_at).length || 0;
+  const unreadCount = notifications?.data?.filter((n) => !n.read_at).length || 0;
 
   return (
     <div className="space-y-6">
@@ -91,7 +92,7 @@ export default function NotificationsPage() {
         </div>
       ) : notifications?.data && notifications.data.length > 0 ? (
         <div className="space-y-3">
-          {notifications.data.map((notification: any) => (
+          {notifications.data.map((notification) => (
             <Card
               key={notification.id}
               className={cn(

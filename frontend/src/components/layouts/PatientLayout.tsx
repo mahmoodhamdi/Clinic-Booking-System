@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -36,29 +36,21 @@ interface PatientLayoutProps {
   children: React.ReactNode;
 }
 
-export function PatientLayout({ children }: PatientLayoutProps) {
-  const t = useTranslations();
-  const pathname = usePathname();
-  const { user, logout } = useAuthStore();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+}
 
-  const navigation = [
-    { name: t('navigation.dashboard'), href: '/dashboard', icon: LayoutDashboard },
-    { name: t('navigation.bookAppointment'), href: '/book', icon: CalendarPlus },
-    { name: t('navigation.myAppointments'), href: '/appointments', icon: Calendar },
-    { name: t('navigation.medicalRecords'), href: '/medical-records', icon: FileText },
-    { name: t('navigation.prescriptions'), href: '/prescriptions', icon: Pill },
-    { name: t('navigation.notifications'), href: '/notifications', icon: Bell },
-  ];
+interface NavLinksProps {
+  navigation: NavItem[];
+  pathname: string;
+  mobile?: boolean;
+  onNavClick?: () => void;
+}
 
-  const handleLogout = async () => {
-    await logout();
-    document.cookie = 'token=;path=/;max-age=0';
-    document.cookie = 'user=;path=/;max-age=0';
-    window.location.href = '/login';
-  };
-
-  const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
+function NavLinks({ navigation, pathname, mobile = false, onNavClick }: NavLinksProps) {
+  return (
     <nav className={cn('flex gap-1', mobile ? 'flex-col' : 'flex-row')}>
       {navigation.map((item) => {
         const isActive = pathname === item.href;
@@ -66,7 +58,7 @@ export function PatientLayout({ children }: PatientLayoutProps) {
           <Link
             key={item.href}
             href={item.href}
-            onClick={() => mobile && setMobileMenuOpen(false)}
+            onClick={onNavClick}
             className={cn(
               'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
               isActive
@@ -81,6 +73,33 @@ export function PatientLayout({ children }: PatientLayoutProps) {
       })}
     </nav>
   );
+}
+
+export function PatientLayout({ children }: PatientLayoutProps) {
+  const t = useTranslations();
+  const pathname = usePathname();
+  const { user, logout } = useAuthStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navigation = useMemo<NavItem[]>(() => [
+    { name: t('navigation.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: t('navigation.bookAppointment'), href: '/book', icon: CalendarPlus },
+    { name: t('navigation.myAppointments'), href: '/appointments', icon: Calendar },
+    { name: t('navigation.medicalRecords'), href: '/medical-records', icon: FileText },
+    { name: t('navigation.prescriptions'), href: '/prescriptions', icon: Pill },
+    { name: t('navigation.notifications'), href: '/notifications', icon: Bell },
+  ], [t]);
+
+  const handleLogout = useCallback(async () => {
+    await logout();
+    document.cookie = 'token=;path=/;max-age=0';
+    document.cookie = 'user=;path=/;max-age=0';
+    window.location.href = '/login';
+  }, [logout]);
+
+  const handleMobileNavClick = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -100,7 +119,7 @@ export function PatientLayout({ children }: PatientLayoutProps) {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex">
-              <NavLinks />
+              <NavLinks navigation={navigation} pathname={pathname} />
             </div>
 
             {/* Right Side */}
@@ -165,12 +184,17 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={handleMobileNavClick}
                       >
                         <X className="h-5 w-5" />
                       </Button>
                     </div>
-                    <NavLinks mobile />
+                    <NavLinks
+                      navigation={navigation}
+                      pathname={pathname}
+                      mobile
+                      onNavClick={handleMobileNavClick}
+                    />
                   </div>
                 </SheetContent>
               </Sheet>

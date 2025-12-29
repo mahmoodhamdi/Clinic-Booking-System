@@ -11,12 +11,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api/client';
+import type { MedicalRecord, ApiResponse } from '@/types';
 
 export default function MedicalRecordsPage() {
   const t = useTranslations();
 
   // Fetch medical records
-  const { data: records, isLoading } = useQuery({
+  const { data: records, isLoading } = useQuery<ApiResponse<MedicalRecord[]>>({
     queryKey: ['myMedicalRecords'],
     queryFn: async () => {
       const response = await api.get('/medical-records');
@@ -38,7 +39,7 @@ export default function MedicalRecordsPage() {
         </div>
       ) : records?.data && records.data.length > 0 ? (
         <div className="space-y-4">
-          {records.data.map((record: any) => (
+          {records.data.map((record) => (
             <Card key={record.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
