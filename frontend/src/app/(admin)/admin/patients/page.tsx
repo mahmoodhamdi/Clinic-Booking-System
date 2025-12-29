@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { adminApi } from '@/lib/api/admin';
-import { User } from '@/types';
+import type { User, Appointment, MedicalRecord, Prescription, PaginatedResponse } from '@/types';
 
 export default function AdminPatientsPage() {
   const t = useTranslations();
@@ -40,7 +40,7 @@ export default function AdminPatientsPage() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   // Fetch patients
-  const { data: patients, isLoading } = useQuery({
+  const { data: patients, isLoading } = useQuery<PaginatedResponse<User>>({
     queryKey: ['adminPatients', searchQuery],
     queryFn: () => adminApi.getPatients({ search: searchQuery || undefined }),
   });
@@ -208,7 +208,7 @@ export default function AdminPatientsPage() {
                 <TabsContent value="appointments" className="mt-4">
                   {patientDetails.data.appointments?.length > 0 ? (
                     <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {patientDetails.data.appointments.map((apt: any) => (
+                      {patientDetails.data.appointments.map((apt: Appointment) => (
                         <div
                           key={apt.id}
                           className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -241,7 +241,7 @@ export default function AdminPatientsPage() {
                 <TabsContent value="records" className="mt-4">
                   {patientDetails.data.medical_records?.length > 0 ? (
                     <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {patientDetails.data.medical_records.map((record: any) => (
+                      {patientDetails.data.medical_records.map((record: MedicalRecord) => (
                         <div
                           key={record.id}
                           className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -261,7 +261,7 @@ export default function AdminPatientsPage() {
                 <TabsContent value="prescriptions" className="mt-4">
                   {patientDetails.data.prescriptions?.length > 0 ? (
                     <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {patientDetails.data.prescriptions.map((prescription: any) => (
+                      {patientDetails.data.prescriptions.map((prescription: Prescription) => (
                         <div
                           key={prescription.id}
                           className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"

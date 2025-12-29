@@ -1,5 +1,12 @@
-// User types
+// ============ Base Enums & Types ============
+
 export type UserRole = 'admin' | 'secretary' | 'patient';
+export type Gender = 'male' | 'female';
+export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+export type CancelledBy = 'patient' | 'admin' | 'system';
+export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+// ============ User Types ============
 
 export interface User {
   id: number;
@@ -8,12 +15,28 @@ export interface User {
   phone: string;
   role: UserRole;
   date_of_birth: string | null;
-  gender: 'male' | 'female' | null;
+  gender: Gender | null;
   address: string | null;
   avatar: string | null;
+  avatar_url?: string | null;
   is_active: boolean;
   phone_verified_at: string | null;
   created_at: string;
+  profile?: PatientProfile | null;
+}
+
+export interface PatientWithProfile extends User {
+  profile: PatientProfile | null;
+  statistics?: PatientStatistics;
+}
+
+export interface PatientStatistics {
+  total_appointments: number;
+  completed_appointments: number;
+  cancelled_appointments: number;
+  no_show_count: number;
+  upcoming_appointments: number;
+  last_visit: string | null;
 }
 
 export interface AuthResponse {
@@ -46,11 +69,12 @@ export interface Appointment {
   patient?: User;
 }
 
-// Patient Profile types
+// ============ Patient Profile Types ============
+
 export interface PatientProfile {
   id: number;
   user_id: number;
-  blood_type: string | null;
+  blood_type: BloodType | null;
   allergies: string | null;
   chronic_diseases: string | null;
   current_medications: string | null;
@@ -268,10 +292,165 @@ export interface PaginatedResponse<T> {
   data: T[];
   meta: {
     current_page: number;
-    from: number;
+    from: number | null;
     last_page: number;
     per_page: number;
-    to: number;
+    to: number | null;
     total: number;
   };
+  links?: {
+    first: string;
+    last: string;
+    prev: string | null;
+    next: string | null;
+  };
+}
+
+export interface ApiError {
+  success: false;
+  message: string;
+  errors?: Record<string, string[]>;
+}
+
+// ============ Form Data Types ============
+
+export interface LoginFormData {
+  phone: string;
+  password: string;
+}
+
+export interface RegisterFormData {
+  name: string;
+  phone: string;
+  email?: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export interface BookingFormData {
+  date: string;
+  time: string;
+  notes?: string;
+}
+
+export interface ProfileFormData {
+  name: string;
+  email?: string;
+  date_of_birth?: string;
+  gender?: Gender;
+  address?: string;
+}
+
+export interface MedicalInfoFormData {
+  blood_type?: BloodType;
+  allergies?: string;
+  chronic_diseases?: string;
+  current_medications?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  emergency_contact_relationship?: string;
+  insurance_provider?: string;
+  insurance_policy_number?: string;
+}
+
+export interface PasswordChangeFormData {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export interface AppointmentFormData {
+  patient_id?: number;
+  date: string;
+  slot_time: string;
+  reason?: string;
+  notes?: string;
+}
+
+export interface MedicalRecordFormData {
+  patient_id: number;
+  appointment_id?: number;
+  diagnosis: string;
+  notes?: string;
+  treatment_plan?: string;
+  blood_pressure_systolic?: number;
+  blood_pressure_diastolic?: number;
+  heart_rate?: number;
+  temperature?: number;
+  weight?: number;
+  height?: number;
+  follow_up_date?: string;
+  follow_up_notes?: string;
+}
+
+export interface PrescriptionFormData {
+  medical_record_id: number;
+  diagnosis: string;
+  notes?: string;
+  items: PrescriptionItemFormData[];
+}
+
+export interface PrescriptionItemFormData {
+  medication_name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  instructions?: string;
+}
+
+export interface PaymentFormData {
+  appointment_id: number;
+  amount: number;
+  discount?: number;
+  payment_method: PaymentMethod;
+  notes?: string;
+}
+
+export interface ScheduleFormData {
+  day_of_week: DayOfWeek;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+}
+
+export interface VacationFormData {
+  start_date: string;
+  end_date: string;
+  reason?: string;
+}
+
+export interface ClinicSettingsFormData {
+  clinic_name: string;
+  clinic_phone?: string;
+  clinic_email?: string;
+  clinic_address?: string;
+  slot_duration: number;
+  max_patients_per_slot: number;
+  advance_booking_days: number;
+  cancellation_hours: number;
+  consultation_fee: number;
+}
+
+// ============ Filter Types ============
+
+export interface AppointmentFilters {
+  status?: AppointmentStatus;
+  date?: string;
+  from_date?: string;
+  to_date?: string;
+  patient_id?: number;
+  page?: number;
+  per_page?: number;
+}
+
+export interface PatientFilters {
+  search?: string;
+  page?: number;
+  per_page?: number;
+}
+
+export interface ReportFilters {
+  from_date: string;
+  to_date: string;
+  group_by?: 'day' | 'week' | 'month';
 }

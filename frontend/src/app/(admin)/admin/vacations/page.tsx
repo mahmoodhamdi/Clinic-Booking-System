@@ -42,6 +42,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { adminApi } from '@/lib/api/admin';
+import type { Vacation, ApiResponse } from '@/types';
 
 const vacationSchema = z.object({
   start_date: z.string().min(1, 'Start date is required'),
@@ -67,7 +68,7 @@ export default function VacationsPage() {
   });
 
   // Fetch vacations
-  const { data: vacations, isLoading } = useQuery({
+  const { data: vacations, isLoading } = useQuery<ApiResponse<Vacation[]>>({
     queryKey: ['vacations'],
     queryFn: () => adminApi.getVacations(),
   });
@@ -126,7 +127,7 @@ export default function VacationsPage() {
             </div>
           ) : vacations?.data && vacations.data.length > 0 ? (
             <div className="space-y-4">
-              {vacations.data.map((vacation: any) => (
+              {vacations.data.map((vacation) => (
                 <div
                   key={vacation.id}
                   className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"

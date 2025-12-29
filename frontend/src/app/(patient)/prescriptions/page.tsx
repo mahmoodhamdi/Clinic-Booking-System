@@ -12,12 +12,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api/client';
+import type { Prescription, ApiResponse } from '@/types';
 
 export default function PrescriptionsPage() {
   const t = useTranslations();
 
   // Fetch prescriptions
-  const { data: prescriptions, isLoading } = useQuery({
+  const { data: prescriptions, isLoading } = useQuery<ApiResponse<Prescription[]>>({
     queryKey: ['myPrescriptions'],
     queryFn: async () => {
       const response = await api.get('/prescriptions');
@@ -39,7 +40,7 @@ export default function PrescriptionsPage() {
         </div>
       ) : prescriptions?.data && prescriptions.data.length > 0 ? (
         <div className="space-y-4">
-          {prescriptions.data.map((prescription: any) => (
+          {prescriptions.data.map((prescription) => (
             <Card key={prescription.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">

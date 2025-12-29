@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -17,7 +17,6 @@ import {
   CalendarOff,
   LogOut,
   Menu,
-  X,
   Bell,
   ChevronLeft,
   ChevronRight,
@@ -32,7 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
@@ -43,66 +42,65 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
-export function AdminLayout({ children }: AdminLayoutProps) {
-  const t = useTranslations();
-  const pathname = usePathname();
-  const { user, logout } = useAuthStore();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+}
 
-  const navigation = [
-    { name: t('admin.dashboard.title'), href: '/admin/dashboard', icon: LayoutDashboard },
-    { name: t('admin.appointments.title'), href: '/admin/appointments', icon: Calendar },
-    { name: t('admin.patients.title'), href: '/admin/patients', icon: Users },
-    { name: t('admin.medicalRecords.title'), href: '/admin/medical-records', icon: FileText },
-    { name: t('admin.prescriptions.title'), href: '/admin/prescriptions', icon: Pill },
-    { name: t('admin.payments.title'), href: '/admin/payments', icon: CreditCard },
-    { name: t('admin.reports.title'), href: '/admin/reports', icon: BarChart3 },
-  ];
+interface NavLinkProps {
+  item: NavItem;
+  collapsed?: boolean;
+  onClick?: () => void;
+  isActive: boolean;
+}
 
-  const settingsNavigation = [
-    { name: t('admin.settings.title'), href: '/admin/settings', icon: Settings },
-    { name: t('admin.schedules.title'), href: '/admin/schedules', icon: Clock },
-    { name: t('admin.vacations.title'), href: '/admin/vacations', icon: CalendarOff },
-  ];
+function NavLink({ item, collapsed = false, onClick, isActive }: NavLinkProps) {
+  return (
+    <Link
+      href={item.href}
+      onClick={onClick}
+      className={cn(
+        'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+        isActive
+          ? 'bg-primary text-primary-foreground'
+          : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
+        collapsed && 'justify-center px-2'
+      )}
+      title={collapsed ? item.name : undefined}
+    >
+      <item.icon className="h-5 w-5 flex-shrink-0" />
+      {!collapsed && <span>{item.name}</span>}
+    </Link>
+  );
+}
 
-  const handleLogout = async () => {
-    await logout();
-    document.cookie = 'token=;path=/;max-age=0';
-    document.cookie = 'user=;path=/;max-age=0';
-    window.location.href = '/login';
-  };
+interface SidebarContentProps {
+  collapsed?: boolean;
+  mobile?: boolean;
+  navigation: NavItem[];
+  settingsNavigation: NavItem[];
+  pathname: string;
+  onNavClick?: () => void;
+  onCollapseToggle?: () => void;
+  appName: string;
+  closeLabel: string;
+}
 
-  const NavLink = ({
-    item,
-    collapsed = false,
-    onClick,
-  }: {
-    item: { name: string; href: string; icon: React.ElementType };
-    collapsed?: boolean;
-    onClick?: () => void;
-  }) => {
-    const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-    return (
-      <Link
-        href={item.href}
-        onClick={onClick}
-        className={cn(
-          'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-          isActive
-            ? 'bg-primary text-primary-foreground'
-            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
-          collapsed && 'justify-center px-2'
-        )}
-        title={collapsed ? item.name : undefined}
-      >
-        <item.icon className="h-5 w-5 flex-shrink-0" />
-        {!collapsed && <span>{item.name}</span>}
-      </Link>
-    );
-  };
+function SidebarContent({
+  collapsed = false,
+  mobile = false,
+  navigation,
+  settingsNavigation,
+  pathname,
+  onNavClick,
+  onCollapseToggle,
+  appName,
+  closeLabel,
+}: SidebarContentProps) {
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
-  const SidebarContent = ({ collapsed = false, mobile = false }: { collapsed?: boolean; mobile?: boolean }) => (
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className={cn('flex items-center h-16 px-4', collapsed && 'justify-center px-2')}>
@@ -111,7 +109,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <span className="text-white font-bold text-lg">C</span>
           </div>
           {!collapsed && (
-            <span className="font-bold text-lg">{t('common.appName')}</span>
+            <span className="font-bold text-lg">{appName}</span>
           )}
         </Link>
       </div>
@@ -125,7 +123,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             key={item.href}
             item={item}
             collapsed={collapsed}
-            onClick={() => mobile && setMobileMenuOpen(false)}
+            isActive={isActive(item.href)}
+            onClick={onNavClick}
           />
         ))}
 
@@ -136,26 +135,27 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             key={item.href}
             item={item}
             collapsed={collapsed}
-            onClick={() => mobile && setMobileMenuOpen(false)}
+            isActive={isActive(item.href)}
+            onClick={onNavClick}
           />
         ))}
       </nav>
 
       {/* Collapse Button (Desktop only) */}
-      {!mobile && (
+      {!mobile && onCollapseToggle && (
         <div className="p-3 border-t">
           <Button
             variant="ghost"
             size="sm"
             className="w-full"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onClick={onCollapseToggle}
           >
             {collapsed ? (
               <ChevronRight className="h-4 w-4" />
             ) : (
               <>
                 <ChevronLeft className="h-4 w-4 me-2" />
-                {t('common.close')}
+                {closeLabel}
               </>
             )}
           </Button>
@@ -163,6 +163,45 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       )}
     </div>
   );
+}
+
+export function AdminLayout({ children }: AdminLayoutProps) {
+  const t = useTranslations();
+  const pathname = usePathname();
+  const { user, logout } = useAuthStore();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navigation = useMemo<NavItem[]>(() => [
+    { name: t('admin.dashboard.title'), href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: t('admin.appointments.title'), href: '/admin/appointments', icon: Calendar },
+    { name: t('admin.patients.title'), href: '/admin/patients', icon: Users },
+    { name: t('admin.medicalRecords.title'), href: '/admin/medical-records', icon: FileText },
+    { name: t('admin.prescriptions.title'), href: '/admin/prescriptions', icon: Pill },
+    { name: t('admin.payments.title'), href: '/admin/payments', icon: CreditCard },
+    { name: t('admin.reports.title'), href: '/admin/reports', icon: BarChart3 },
+  ], [t]);
+
+  const settingsNavigation = useMemo<NavItem[]>(() => [
+    { name: t('admin.settings.title'), href: '/admin/settings', icon: Settings },
+    { name: t('admin.schedules.title'), href: '/admin/schedules', icon: Clock },
+    { name: t('admin.vacations.title'), href: '/admin/vacations', icon: CalendarOff },
+  ], [t]);
+
+  const handleLogout = useCallback(async () => {
+    await logout();
+    document.cookie = 'token=;path=/;max-age=0';
+    document.cookie = 'user=;path=/;max-age=0';
+    window.location.href = '/login';
+  }, [logout]);
+
+  const handleMobileNavClick = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
+  const handleCollapseToggle = useCallback(() => {
+    setSidebarCollapsed(prev => !prev);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -173,13 +212,29 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           sidebarCollapsed ? 'w-16' : 'w-64'
         )}
       >
-        <SidebarContent collapsed={sidebarCollapsed} />
+        <SidebarContent
+          collapsed={sidebarCollapsed}
+          navigation={navigation}
+          settingsNavigation={settingsNavigation}
+          pathname={pathname}
+          onCollapseToggle={handleCollapseToggle}
+          appName={t('common.appName')}
+          closeLabel={t('common.close')}
+        />
       </aside>
 
       {/* Mobile Sidebar */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetContent side="left" className="w-72 p-0">
-          <SidebarContent mobile />
+          <SidebarContent
+            mobile
+            navigation={navigation}
+            settingsNavigation={settingsNavigation}
+            pathname={pathname}
+            onNavClick={handleMobileNavClick}
+            appName={t('common.appName')}
+            closeLabel={t('common.close')}
+          />
         </SheetContent>
       </Sheet>
 

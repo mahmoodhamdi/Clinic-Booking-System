@@ -48,6 +48,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
+import type { MedicalRecord, User, Attachment, ApiResponse, PaginatedResponse } from '@/types';
 
 const recordSchema = z.object({
   patient_id: z.string().min(1, 'Patient is required'),
@@ -64,7 +65,7 @@ export default function AdminMedicalRecordsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
 
   const form = useForm<RecordFormData>({
     resolver: zodResolver(recordSchema),
@@ -77,13 +78,13 @@ export default function AdminMedicalRecordsPage() {
   });
 
   // Fetch medical records
-  const { data: records, isLoading } = useQuery({
+  const { data: records, isLoading } = useQuery<ApiResponse<MedicalRecord[]>>({
     queryKey: ['adminMedicalRecords'],
     queryFn: () => adminApi.getMedicalRecords(),
   });
 
   // Fetch patients for select
-  const { data: patients } = useQuery({
+  const { data: patients } = useQuery<PaginatedResponse<User>>({
     queryKey: ['adminPatients'],
     queryFn: () => adminApi.getPatients(),
   });
@@ -108,7 +109,7 @@ export default function AdminMedicalRecordsPage() {
     },
   });
 
-  const handleViewRecord = (record: any) => {
+  const handleViewRecord = (record: MedicalRecord) => {
     setSelectedRecord(record);
     setViewDialogOpen(true);
   };
@@ -117,11 +118,11 @@ export default function AdminMedicalRecordsPage() {
     createMutation.mutate(data);
   };
 
-  const filteredRecords = records?.data?.filter((record: any) => {
+  const filteredRecords = records?.data?.filter((record) => {
     if (!searchQuery) return true;
     const search = searchQuery.toLowerCase();
     return (
-      record.patient?.name?.toLowerCase().includes(search) ||
+      (record as MedicalRecord & { patient?: User }).patient?.name?.toLowerCase().includes(search) ||
       record.diagnosis?.toLowerCase().includes(search)
     );
   });
@@ -160,7 +161,7 @@ export default function AdminMedicalRecordsPage() {
         </div>
       ) : filteredRecords && filteredRecords.length > 0 ? (
         <div className="space-y-4">
-          {filteredRecords.map((record: any) => (
+          {filteredRecords.map((record) => (
             <Card key={record.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
@@ -222,7 +223,7 @@ export default function AdminMedicalRecordsPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {patients?.data?.map((patient: any) => (
+                        {patients?.data?.map((patient) => (
                           <SelectItem key={patient.id} value={patient.id.toString()}>
                             {patient.name} - {patient.phone}
                           </SelectItem>
@@ -317,7 +318,7 @@ export default function AdminMedicalRecordsPage() {
                     {t('admin.medicalRecords.attachments')}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {selectedRecord.attachments.map((attachment: any, index: number) => (
+                    {selectedRecord.attachments.map((attachment, index) => (
                       <a
                         key={index}
                         href={attachment.url}

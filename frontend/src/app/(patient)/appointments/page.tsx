@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Eye,
   X,
 } from 'lucide-react';
 
@@ -32,6 +31,93 @@ import {
 } from '@/components/ui/dialog';
 import { appointmentsApi } from '@/lib/api/appointments';
 import { Appointment } from '@/types';
+
+interface AppointmentCardProps {
+  appointment: Appointment;
+  onCancelClick: (appointment: Appointment) => void;
+  getStatusBadge: (status: string) => React.ReactNode;
+  cancelLabel: string;
+}
+
+function AppointmentCard({
+  appointment,
+  onCancelClick,
+  getStatusBadge,
+  cancelLabel,
+}: AppointmentCardProps) {
+  return (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
+              <span className="text-lg font-bold text-primary">
+                {new Date(appointment.date).getDate()}
+              </span>
+              <span className="text-xs text-primary">
+                {format(new Date(appointment.date), 'MMM', { locale: ar })}
+              </span>
+            </div>
+            <div>
+              <p className="font-medium">
+                {format(new Date(appointment.date), 'EEEE', { locale: ar })}
+              </p>
+              <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                <Clock className="h-4 w-4" />
+                <span>{appointment.slot_time}</span>
+              </div>
+              {appointment.reason && (
+                <p className="text-sm text-gray-500 mt-1 line-clamp-1">
+                  {appointment.reason}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            {getStatusBadge(appointment.status)}
+            <div className="flex gap-2">
+              {(appointment.status === 'pending' ||
+                appointment.status === 'confirmed') && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => onCancelClick(appointment)}
+                >
+                  <X className="h-4 w-4 me-1" />
+                  {cancelLabel}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface EmptyStateProps {
+  message: string;
+}
+
+function EmptyState({ message }: EmptyStateProps) {
+  return (
+    <div className="text-center py-12">
+      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+      <p className="text-gray-500">{message}</p>
+    </div>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <Skeleton key={i} className="h-24" />
+      ))}
+    </div>
+  );
+}
 
 export default function AppointmentsPage() {
   const t = useTranslations();
@@ -63,7 +149,7 @@ export default function AppointmentsPage() {
     },
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = useCallback((status: string) => {
     switch (status) {
       case 'confirmed':
         return (
@@ -103,9 +189,9 @@ export default function AppointmentsPage() {
       default:
         return null;
     }
-  };
+  }, [t]);
 
-  const filterAppointments = (status: string) => {
+  const filterAppointments = useCallback((status: string) => {
     if (!appointments?.data) return [];
 
     const now = new Date();
@@ -126,85 +212,26 @@ export default function AppointmentsPage() {
       default:
         return appointments.data;
     }
-  };
+  }, [appointments?.data]);
 
-  const handleCancelClick = (appointment: Appointment) => {
+  const handleCancelClick = useCallback((appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setCancelDialogOpen(true);
-  };
+  }, []);
 
-  const handleCancelConfirm = () => {
+  const handleCancelConfirm = useCallback(() => {
     if (!selectedAppointment) return;
     cancelMutation.mutate({
       id: selectedAppointment.id,
       reason: cancelReason,
     });
-  };
+  }, [cancelMutation, selectedAppointment, cancelReason]);
 
-  const AppointmentCard = ({ appointment }: { appointment: Appointment }) => (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-lg bg-primary/10 flex flex-col items-center justify-center">
-              <span className="text-lg font-bold text-primary">
-                {new Date(appointment.date).getDate()}
-              </span>
-              <span className="text-xs text-primary">
-                {format(new Date(appointment.date), 'MMM', { locale: ar })}
-              </span>
-            </div>
-            <div>
-              <p className="font-medium">
-                {format(new Date(appointment.date), 'EEEE', { locale: ar })}
-              </p>
-              <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                <Clock className="h-4 w-4" />
-                <span>{appointment.slot_time}</span>
-              </div>
-              {appointment.reason && (
-                <p className="text-sm text-gray-500 mt-1 line-clamp-1">
-                  {appointment.reason}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            {getStatusBadge(appointment.status)}
-            <div className="flex gap-2">
-              {(appointment.status === 'pending' ||
-                appointment.status === 'confirmed') && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => handleCancelClick(appointment)}
-                >
-                  <X className="h-4 w-4 me-1" />
-                  {t('patient.appointments.cancelAppointment')}
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const upcomingAppointments = useMemo(() => filterAppointments('upcoming'), [filterAppointments]);
+  const pastAppointments = useMemo(() => filterAppointments('past'), [filterAppointments]);
+  const cancelledAppointments = useMemo(() => filterAppointments('cancelled'), [filterAppointments]);
 
-  const EmptyState = ({ message }: { message: string }) => (
-    <div className="text-center py-12">
-      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-      <p className="text-gray-500">{message}</p>
-    </div>
-  );
-
-  const LoadingSkeleton = () => (
-    <div className="space-y-4">
-      {[1, 2, 3].map((i) => (
-        <Skeleton key={i} className="h-24" />
-      ))}
-    </div>
-  );
+  const cancelLabel = t('patient.appointments.cancelAppointment');
 
   return (
     <div className="space-y-6">
@@ -228,10 +255,16 @@ export default function AppointmentsPage() {
         <TabsContent value="upcoming" className="mt-6">
           {isLoading ? (
             <LoadingSkeleton />
-          ) : filterAppointments('upcoming').length > 0 ? (
+          ) : upcomingAppointments.length > 0 ? (
             <div className="space-y-4">
-              {filterAppointments('upcoming').map((appointment) => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
+              {upcomingAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  onCancelClick={handleCancelClick}
+                  getStatusBadge={getStatusBadge}
+                  cancelLabel={cancelLabel}
+                />
               ))}
             </div>
           ) : (
@@ -242,10 +275,16 @@ export default function AppointmentsPage() {
         <TabsContent value="past" className="mt-6">
           {isLoading ? (
             <LoadingSkeleton />
-          ) : filterAppointments('past').length > 0 ? (
+          ) : pastAppointments.length > 0 ? (
             <div className="space-y-4">
-              {filterAppointments('past').map((appointment) => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
+              {pastAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  onCancelClick={handleCancelClick}
+                  getStatusBadge={getStatusBadge}
+                  cancelLabel={cancelLabel}
+                />
               ))}
             </div>
           ) : (
@@ -256,10 +295,16 @@ export default function AppointmentsPage() {
         <TabsContent value="cancelled" className="mt-6">
           {isLoading ? (
             <LoadingSkeleton />
-          ) : filterAppointments('cancelled').length > 0 ? (
+          ) : cancelledAppointments.length > 0 ? (
             <div className="space-y-4">
-              {filterAppointments('cancelled').map((appointment) => (
-                <AppointmentCard key={appointment.id} appointment={appointment} />
+              {cancelledAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  onCancelClick={handleCancelClick}
+                  getStatusBadge={getStatusBadge}
+                  cancelLabel={cancelLabel}
+                />
               ))}
             </div>
           ) : (

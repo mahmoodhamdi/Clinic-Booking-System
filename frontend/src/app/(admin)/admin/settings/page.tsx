@@ -56,6 +56,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { adminApi } from '@/lib/api/admin';
+import type { Schedule, Vacation, ApiResponse } from '@/types';
 
 const settingsSchema = z.object({
   clinic_name: z.string().min(1, 'Clinic name is required'),
@@ -115,13 +116,13 @@ export default function AdminSettingsPage() {
   });
 
   // Fetch schedules
-  const { data: schedules, isLoading: isLoadingSchedules } = useQuery({
+  const { data: schedules, isLoading: isLoadingSchedules } = useQuery<ApiResponse<Schedule[]>>({
     queryKey: ['schedules'],
     queryFn: () => adminApi.getSchedules(),
   });
 
   // Fetch vacations
-  const { data: vacations, isLoading: isLoadingVacations } = useQuery({
+  const { data: vacations, isLoading: isLoadingVacations } = useQuery<ApiResponse<Vacation[]>>({
     queryKey: ['vacations'],
     queryFn: () => adminApi.getVacations(),
   });
@@ -353,7 +354,7 @@ export default function AdminSettingsPage() {
                 <div className="space-y-4">
                   {DAYS_OF_WEEK.map((day) => {
                     const schedule = schedules?.data?.find(
-                      (s: any) => s.day_of_week === day.value
+                      (s) => s.day_of_week === day.value
                     );
                     if (!schedule) return null;
                     return (
@@ -434,7 +435,7 @@ export default function AdminSettingsPage() {
                 </div>
               ) : vacations?.data && vacations.data.length > 0 ? (
                 <div className="space-y-4">
-                  {vacations.data.map((vacation: any) => (
+                  {vacations.data.map((vacation) => (
                     <div
                       key={vacation.id}
                       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"

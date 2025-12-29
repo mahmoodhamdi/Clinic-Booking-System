@@ -50,6 +50,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
+import type { Prescription, PrescriptionItem, User, ApiResponse, PaginatedResponse } from '@/types';
 
 const prescriptionSchema = z.object({
   patient_id: z.string().min(1, 'Patient is required'),
@@ -74,7 +75,7 @@ export default function AdminPrescriptionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [selectedPrescription, setSelectedPrescription] = useState<any>(null);
+  const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
 
   const form = useForm<PrescriptionFormData>({
     resolver: zodResolver(prescriptionSchema),
@@ -100,13 +101,13 @@ export default function AdminPrescriptionsPage() {
   });
 
   // Fetch prescriptions
-  const { data: prescriptions, isLoading } = useQuery({
+  const { data: prescriptions, isLoading } = useQuery<ApiResponse<Prescription[]>>({
     queryKey: ['adminPrescriptions'],
     queryFn: () => adminApi.getPrescriptions(),
   });
 
   // Fetch patients for select
-  const { data: patients } = useQuery({
+  const { data: patients } = useQuery<PaginatedResponse<User>>({
     queryKey: ['adminPatients'],
     queryFn: () => adminApi.getPatients(),
   });
@@ -144,7 +145,7 @@ export default function AdminPrescriptionsPage() {
     },
   });
 
-  const handleViewPrescription = (prescription: any) => {
+  const handleViewPrescription = (prescription: Prescription) => {
     setSelectedPrescription(prescription);
     setViewDialogOpen(true);
   };
@@ -153,11 +154,11 @@ export default function AdminPrescriptionsPage() {
     createMutation.mutate(data);
   };
 
-  const filteredPrescriptions = prescriptions?.data?.filter((prescription: any) => {
+  const filteredPrescriptions = prescriptions?.data?.filter((prescription) => {
     if (!searchQuery) return true;
     const search = searchQuery.toLowerCase();
     return (
-      prescription.patient?.name?.toLowerCase().includes(search) ||
+      (prescription as Prescription & { patient?: User }).patient?.name?.toLowerCase().includes(search) ||
       prescription.diagnosis?.toLowerCase().includes(search)
     );
   });
@@ -196,7 +197,7 @@ export default function AdminPrescriptionsPage() {
         </div>
       ) : filteredPrescriptions && filteredPrescriptions.length > 0 ? (
         <div className="space-y-4">
-          {filteredPrescriptions.map((prescription: any) => (
+          {filteredPrescriptions.map((prescription) => (
             <Card key={prescription.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
@@ -276,7 +277,7 @@ export default function AdminPrescriptionsPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {patients?.data?.map((patient: any) => (
+                        {patients?.data?.map((patient) => (
                           <SelectItem key={patient.id} value={patient.id.toString()}>
                             {patient.name} - {patient.phone}
                           </SelectItem>
@@ -474,7 +475,7 @@ export default function AdminPrescriptionsPage() {
               <div>
                 <p className="text-sm text-gray-500 mb-2">{t('admin.prescriptions.medications')}</p>
                 <div className="space-y-2">
-                  {selectedPrescription.items?.map((item: any, index: number) => (
+                  {selectedPrescription.items?.map((item, index) => (
                     <div key={index} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="font-medium">{item.medication_name}</p>
                       <div className="text-sm text-gray-500 mt-1 space-x-2 rtl:space-x-reverse">
