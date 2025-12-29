@@ -14,8 +14,15 @@ export function Providers({ children }: ProvidersProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000, // 1 minute
+            staleTime: 1000 * 60 * 5, // 5 minutes - data is considered fresh
+            gcTime: 1000 * 60 * 30, // 30 minutes - garbage collection time (was cacheTime)
             refetchOnWindowFocus: false,
+            refetchOnReconnect: true,
+            retry: 2,
+            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+          },
+          mutations: {
+            retry: 1,
           },
         },
       })
