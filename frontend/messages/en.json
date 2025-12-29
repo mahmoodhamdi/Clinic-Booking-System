@@ -138,6 +138,10 @@
       "emergencyName": "Contact Name",
       "emergencyPhone": "Emergency Phone",
       "emergencyRelation": "Relationship",
+      "emergencyContactName": "Contact Name",
+      "emergencyContactPhone": "Emergency Phone",
+      "allergiesPlaceholder": "Enter known allergies...",
+      "chronicDiseasesPlaceholder": "Enter chronic conditions...",
       "insuranceProvider": "Insurance Provider",
       "policyNumber": "Policy Number",
       "updateSuccess": "Profile updated successfully"

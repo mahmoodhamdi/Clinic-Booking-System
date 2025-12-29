@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard,
   Calendar,
@@ -30,7 +31,9 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
 import { useAuthStore } from '@/lib/stores/auth';
+import { patientApi } from '@/lib/api/patient';
 import { cn } from '@/lib/utils';
+import type { ApiResponse } from '@/types';
 
 interface PatientLayoutProps {
   children: React.ReactNode;
@@ -81,6 +84,15 @@ export function PatientLayout({ children }: PatientLayoutProps) {
   const { user, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Fetch unread notification count
+  const { data: unreadData } = useQuery<ApiResponse<{ count: number }>>({
+    queryKey: ['unread-notifications-count'],
+    queryFn: () => patientApi.getUnreadCount(),
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  const unreadCount = unreadData?.data?.count ?? 0;
+
   const navigation = useMemo<NavItem[]>(() => [
     { name: t('navigation.dashboard'), href: '/dashboard', icon: LayoutDashboard },
     { name: t('navigation.bookAppointment'), href: '/book', icon: CalendarPlus },
@@ -128,9 +140,11 @@ export function PatientLayout({ children }: PatientLayoutProps) {
               <Button variant="ghost" size="icon" className="relative" asChild>
                 <Link href="/notifications">
                   <Bell className="h-5 w-5" />
-                  <Badge className="absolute -top-1 -end-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                    3
-                  </Badge>
+                  {unreadCount > 0 && (
+                    <Badge className="absolute -top-1 -end-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  )}
                 </Link>
               </Button>
 
