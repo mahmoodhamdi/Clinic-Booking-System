@@ -14,7 +14,7 @@ import {
   Search,
   Plus,
   Calendar,
-  User,
+  User as UserIcon,
   DollarSign,
   CheckCircle2,
   Clock,
@@ -144,7 +144,7 @@ export default function AdminPaymentsPage() {
     }
   };
 
-  const getPaymentMethodLabel = (method: string) => {
+  const getPaymentMethodLabel = (method: string | null) => {
     switch (method) {
       case 'cash':
         return t('admin.payments.cash');
@@ -152,6 +152,8 @@ export default function AdminPaymentsPage() {
         return t('admin.payments.card');
       case 'bank_transfer':
         return t('admin.payments.bankTransfer');
+      case null:
+        return '-';
       default:
         return method;
     }
@@ -273,7 +275,7 @@ export default function AdminPaymentsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <User className="h-4 w-4 text-gray-400" />
+                        <UserIcon className="h-4 w-4 text-gray-400" />
                         <span className="font-medium">{payment.patient?.name}</span>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-gray-500">

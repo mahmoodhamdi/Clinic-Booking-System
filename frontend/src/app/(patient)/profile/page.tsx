@@ -47,7 +47,7 @@ const profileSchema = z.object({
 const medicalInfoSchema = z.object({
   blood_type: z.string().optional(),
   allergies: z.string().optional(),
-  chronic_conditions: z.string().optional(),
+  chronic_diseases: z.string().optional(),
   emergency_contact_name: z.string().optional(),
   emergency_contact_phone: z.string().optional(),
 });
@@ -112,7 +112,7 @@ export default function ProfilePage() {
     defaultValues: {
       blood_type: '',
       allergies: '',
-      chronic_conditions: '',
+      chronic_diseases: '',
       emergency_contact_name: '',
       emergency_contact_phone: '',
     },
@@ -133,7 +133,7 @@ export default function ProfilePage() {
       medicalForm.reset({
         blood_type: patientProfile.data.blood_type || '',
         allergies: patientProfile.data.allergies || '',
-        chronic_conditions: patientProfile.data.chronic_conditions || '',
+        chronic_diseases: patientProfile.data.chronic_diseases || '',
         emergency_contact_name: patientProfile.data.emergency_contact_name || '',
         emergency_contact_phone: patientProfile.data.emergency_contact_phone || '',
       });
@@ -424,7 +424,7 @@ export default function ProfilePage() {
 
                     <FormField
                       control={medicalForm.control}
-                      name="chronic_conditions"
+                      name="chronic_diseases"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>

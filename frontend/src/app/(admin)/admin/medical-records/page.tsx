@@ -14,7 +14,7 @@ import {
   Search,
   Plus,
   Calendar,
-  User,
+  User as UserIcon,
   Stethoscope,
   Eye,
   Upload,
@@ -171,7 +171,7 @@ export default function AdminMedicalRecordsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <User className="h-4 w-4 text-gray-400" />
+                        <UserIcon className="h-4 w-4 text-gray-400" />
                         <span className="font-medium">{record.patient?.name}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -321,13 +321,13 @@ export default function AdminMedicalRecordsPage() {
                     {selectedRecord.attachments.map((attachment, index) => (
                       <a
                         key={index}
-                        href={attachment.url}
+                        href={attachment.file_path}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-700"
                       >
                         <Upload className="h-3 w-3" />
-                        {attachment.name}
+                        {attachment.file_name}
                       </a>
                     ))}
                   </div>

@@ -206,9 +206,9 @@ export default function AdminPatientsPage() {
                 </TabsList>
 
                 <TabsContent value="appointments" className="mt-4">
-                  {patientDetails.data.appointments?.length > 0 ? (
+                  {(patientDetails.data.appointments?.length ?? 0) > 0 ? (
                     <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {patientDetails.data.appointments.map((apt: Appointment) => (
+                      {patientDetails.data.appointments?.map((apt: Appointment) => (
                         <div
                           key={apt.id}
                           className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -239,9 +239,9 @@ export default function AdminPatientsPage() {
                 </TabsContent>
 
                 <TabsContent value="records" className="mt-4">
-                  {patientDetails.data.medical_records?.length > 0 ? (
+                  {(patientDetails.data.medical_records?.length ?? 0) > 0 ? (
                     <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {patientDetails.data.medical_records.map((record: MedicalRecord) => (
+                      {patientDetails.data.medical_records?.map((record: MedicalRecord) => (
                         <div
                           key={record.id}
                           className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -259,9 +259,9 @@ export default function AdminPatientsPage() {
                 </TabsContent>
 
                 <TabsContent value="prescriptions" className="mt-4">
-                  {patientDetails.data.prescriptions?.length > 0 ? (
+                  {(patientDetails.data.prescriptions?.length ?? 0) > 0 ? (
                     <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {patientDetails.data.prescriptions.map((prescription: Prescription) => (
+                      {patientDetails.data.prescriptions?.map((prescription: Prescription) => (
                         <div
                           key={prescription.id}
                           className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"

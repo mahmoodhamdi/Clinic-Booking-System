@@ -237,8 +237,18 @@ export const adminApi = {
     return response.data;
   },
 
-  getPatient: async (id: number): Promise<ApiResponse<User & { profile?: PatientProfile }>> => {
-    const response = await api.get<ApiResponse<User & { profile?: PatientProfile }>>(`/admin/patients/${id}`);
+  getPatient: async (id: number): Promise<ApiResponse<User & {
+    profile?: PatientProfile;
+    appointments?: Appointment[];
+    medical_records?: MedicalRecord[];
+    prescriptions?: Prescription[];
+  }>> => {
+    const response = await api.get<ApiResponse<User & {
+      profile?: PatientProfile;
+      appointments?: Appointment[];
+      medical_records?: MedicalRecord[];
+      prescriptions?: Prescription[];
+    }>>(`/admin/patients/${id}`);
     return response.data;
   },
 
@@ -393,6 +403,16 @@ export const adminApi = {
 
   createPayment: async (data: CreatePaymentData): Promise<ApiResponse<Payment>> => {
     const response = await api.post<ApiResponse<Payment>>('/admin/payments', data);
+    return response.data;
+  },
+
+  recordPayment: async (data: {
+    patient_id: number;
+    amount: number;
+    payment_method?: string;
+    notes?: string;
+  }): Promise<ApiResponse<Payment>> => {
+    const response = await api.post<ApiResponse<Payment>>('/admin/payments/record', data);
     return response.data;
   },
 

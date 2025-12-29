@@ -146,7 +146,7 @@ export default function AdminSettingsPage() {
       data,
     }: {
       scheduleId: number;
-      data: { is_working?: boolean; start_time?: string; end_time?: string; slot_duration?: number };
+      data: { is_active?: boolean; start_time?: string; end_time?: string; slot_duration?: number };
     }) => adminApi.updateSchedule(scheduleId, data),
     onSuccess: () => {
       toast.success(t('common.success'));
@@ -195,20 +195,20 @@ export default function AdminSettingsPage() {
   const handleScheduleToggle = (scheduleId: number, isWorking: boolean) => {
     updateScheduleMutation.mutate({
       scheduleId,
-      data: { is_working: isWorking },
+      data: { is_active: isWorking },
     });
   };
 
   const handleScheduleTimeChange = (
     scheduleId: number,
-    schedule: { is_working: boolean; start_time: string; end_time: string },
+    schedule: { is_active: boolean; start_time: string; end_time: string },
     field: 'start_time' | 'end_time',
     value: string
   ) => {
     updateScheduleMutation.mutate({
       scheduleId,
       data: {
-        is_working: schedule.is_working,
+        is_active: schedule.is_active,
         start_time: field === 'start_time' ? value : schedule.start_time,
         end_time: field === 'end_time' ? value : schedule.end_time,
       },
@@ -364,14 +364,14 @@ export default function AdminSettingsPage() {
                       >
                         <div className="flex items-center gap-4">
                           <Switch
-                            checked={schedule.is_working ?? false}
+                            checked={schedule.is_active ?? false}
                             onCheckedChange={(checked) =>
                               handleScheduleToggle(schedule.id, checked)
                             }
                           />
                           <span className="font-medium w-24">{day.label}</span>
                         </div>
-                        {schedule.is_working && (
+                        {schedule.is_active && (
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                               <Label className="text-sm">{t('admin.settings.from')}</Label>

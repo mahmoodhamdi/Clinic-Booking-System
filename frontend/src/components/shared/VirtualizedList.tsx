@@ -47,6 +47,7 @@ export function VirtualizedList<T>({
       container.addEventListener('scroll', handleScroll, { passive: true });
       return () => container.removeEventListener('scroll', handleScroll);
     }
+    return undefined;
   }, [handleScroll]);
 
   if (items.length === 0) {
