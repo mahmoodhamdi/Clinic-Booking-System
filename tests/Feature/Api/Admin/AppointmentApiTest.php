@@ -363,4 +363,211 @@ class AppointmentApiTest extends TestCase
         $response->assertOk()
             ->assertJsonCount(2, 'data');
     }
+
+    // ==================== Reschedule Tests ====================
+
+    /** @test */
+    public function admin_can_reschedule_pending_appointment(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Sanctum::actingAs($admin);
+
+        $appointment = Appointment::factory()->pending()->create([
+            'appointment_date' => now()->addDays(2)->toDateString(),
+            'appointment_time' => '10:00',
+        ]);
+
+        // Create schedule for the new date - use a fixed future date to avoid flakiness
+        $newDate = now()->addDays(5)->startOfDay();
+        \App\Models\Schedule::factory()->forDay(\App\Enums\DayOfWeek::fromDate($newDate))->create([
+            'start_time' => '09:00',
+            'end_time' => '17:00',
+            'is_active' => true,
+        ]);
+
+        $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
+            'date' => $newDate->toDateString(),
+            'slot_time' => '11:00',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+            ]);
+
+        $appointment->refresh();
+        $this->assertEquals($newDate->toDateString(), $appointment->appointment_date->toDateString());
+        $this->assertEquals('11:00', $appointment->formatted_time);
+    }
+
+    /** @test */
+    public function admin_can_reschedule_confirmed_appointment(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Sanctum::actingAs($admin);
+
+        $appointment = Appointment::factory()->confirmed()->create([
+            'appointment_date' => now()->addDays(2)->toDateString(),
+            'appointment_time' => '10:00',
+        ]);
+
+        // Use addDays(6) for more deterministic behavior
+        $newDate = now()->addDays(6)->startOfDay();
+        \App\Models\Schedule::factory()->forDay(\App\Enums\DayOfWeek::fromDate($newDate))->create([
+            'start_time' => '09:00',
+            'end_time' => '17:00',
+            'is_active' => true,
+        ]);
+
+        $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
+            'date' => $newDate->toDateString(),
+            'slot_time' => '14:00',
+        ]);
+
+        $response->assertOk()
+            ->assertJson(['success' => true]);
+
+        $appointment->refresh();
+        $this->assertEquals($newDate->toDateString(), $appointment->appointment_date->toDateString());
+        $this->assertEquals('14:00', $appointment->formatted_time);
+    }
+
+    /** @test */
+    public function admin_cannot_reschedule_completed_appointment(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Sanctum::actingAs($admin);
+
+        $appointment = Appointment::factory()->completed()->create();
+
+        $newDate = now()->addDays(3);
+        \App\Models\Schedule::factory()->forDay(\App\Enums\DayOfWeek::fromDate($newDate))->create([
+            'start_time' => '09:00',
+            'end_time' => '17:00',
+            'is_active' => true,
+        ]);
+
+        $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
+            'date' => $newDate->toDateString(),
+            'slot_time' => '10:00',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    /** @test */
+    public function admin_cannot_reschedule_cancelled_appointment(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Sanctum::actingAs($admin);
+
+        $appointment = Appointment::factory()->cancelled()->create();
+
+        $newDate = now()->addDays(3);
+
+        $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
+            'date' => $newDate->toDateString(),
+            'slot_time' => '10:00',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    /** @test */
+    public function admin_cannot_reschedule_to_booked_slot(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Sanctum::actingAs($admin);
+
+        $newDate = now()->addDays(3);
+        \App\Models\Schedule::factory()->forDay(\App\Enums\DayOfWeek::fromDate($newDate))->create([
+            'start_time' => '09:00',
+            'end_time' => '17:00',
+            'is_active' => true,
+        ]);
+
+        // Existing appointment at the target slot
+        Appointment::factory()->pending()->create([
+            'appointment_date' => $newDate->toDateString(),
+            'appointment_time' => '11:00',
+        ]);
+
+        // Appointment to reschedule
+        $appointment = Appointment::factory()->pending()->create([
+            'appointment_date' => now()->addDays(2)->toDateString(),
+            'appointment_time' => '10:00',
+        ]);
+
+        $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
+            'date' => $newDate->toDateString(),
+            'slot_time' => '11:00',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    /** @test */
+    public function reschedule_requires_date(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Sanctum::actingAs($admin);
+
+        $appointment = Appointment::factory()->pending()->create();
+
+        $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
+            'slot_time' => '10:00',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['date']);
+    }
+
+    /** @test */
+    public function reschedule_requires_slot_time(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Sanctum::actingAs($admin);
+
+        $appointment = Appointment::factory()->pending()->create();
+
+        $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
+            'date' => now()->addDays(3)->toDateString(),
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['slot_time']);
+    }
+
+    /** @test */
+    public function reschedule_requires_valid_time_format(): void
+    {
+        $admin = User::factory()->admin()->create();
+        Sanctum::actingAs($admin);
+
+        $appointment = Appointment::factory()->pending()->create();
+
+        $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
+            'date' => now()->addDays(3)->toDateString(),
+            'slot_time' => 'invalid',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['slot_time']);
+    }
+
+    /** @test */
+    public function non_admin_cannot_reschedule_appointment(): void
+    {
+        $patient = User::factory()->patient()->create();
+        Sanctum::actingAs($patient);
+
+        $appointment = Appointment::factory()->pending()->create();
+
+        $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
+            'date' => now()->addDays(3)->toDateString(),
+            'slot_time' => '10:00',
+        ]);
+
+        $response->assertForbidden();
+    }
 }

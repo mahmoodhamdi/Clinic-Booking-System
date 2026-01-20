@@ -156,6 +156,7 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->prefix('admin')->g
     Route::post('/appointments/{appointment}/cancel', [AdminAppointmentController::class, 'cancel']);
     Route::post('/appointments/{appointment}/no-show', [AdminAppointmentController::class, 'noShow']);
     Route::put('/appointments/{appointment}/notes', [AdminAppointmentController::class, 'updateNotes']);
+    Route::post('/appointments/{appointment}/reschedule', [AdminAppointmentController::class, 'reschedule']);
 
     // Patients
     Route::get('/patients', [AdminPatientController::class, 'index']);
@@ -199,6 +200,7 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->prefix('admin')->g
     Route::get('/payments/statistics', [PaymentController::class, 'statistics']);
     Route::get('/payments/report', [PaymentController::class, 'report']);
     Route::post('/payments', [PaymentController::class, 'store']);
+    Route::post('/payments/record', [PaymentController::class, 'record']);
     Route::get('/payments/{payment}', [PaymentController::class, 'show']);
     Route::put('/payments/{payment}', [PaymentController::class, 'update']);
     Route::post('/payments/{payment}/mark-paid', [PaymentController::class, 'markAsPaid']);

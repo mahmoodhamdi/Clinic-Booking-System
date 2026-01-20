@@ -197,4 +197,36 @@ class AppointmentController extends Controller
             'data' => new AppointmentResource($appointment->load('patient')),
         ]);
     }
+
+    public function reschedule(Request $request, Appointment $appointment): JsonResponse
+    {
+        $request->validate([
+            'date' => ['required', 'date', 'after_or_equal:today'],
+            'slot_time' => ['required', 'string', 'regex:/^\d{2}:\d{2}$/'],
+        ]);
+
+        try {
+            $newDatetime = Carbon::parse($request->date . ' ' . $request->slot_time);
+            $appointment = $this->appointmentService->reschedule($appointment, $newDatetime);
+
+            return response()->json([
+                'success' => true,
+                'message' => __('تم إعادة جدولة الحجز بنجاح'),
+                'data' => new AppointmentResource($appointment->load('patient')),
+            ]);
+        } catch (\App\Exceptions\SlotNotAvailableException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'error_code' => $e->getErrorCode(),
+                'reason' => $e->getContext()['reason'] ?? null,
+            ], 422);
+        } catch (\App\Exceptions\BusinessLogicException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'error_code' => $e->getErrorCode(),
+            ], 422);
+        }
+    }
 }

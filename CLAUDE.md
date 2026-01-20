@@ -46,7 +46,7 @@ cd frontend && npm run lint   # Frontend linting
 
 ### Backend
 ```bash
-php artisan test                                           # All tests (544 tests)
+php artisan test                                           # All tests (827 tests)
 composer test                                              # Clears config first
 php artisan test --coverage --min=100                      # With coverage requirement
 php artisan test --filter=TestClassName                    # Single test file
@@ -56,10 +56,12 @@ php artisan test --filter=TestClassName::test_method_name  # Single test method
 ### Frontend
 ```bash
 cd frontend
-npm test                      # Unit tests (Jest)
+npm test                      # Unit tests (Jest, 403 tests)
 npm run test:watch            # Watch mode
 npm run test:coverage         # With coverage
-npm run test:e2e              # E2E tests (Playwright)
+npm run test:e2e              # E2E tests (Playwright, 7 specs)
+npm run test:e2e:ui           # E2E with Playwright UI
+npm run test:e2e:headed       # E2E in headed browser
 ```
 
 ## Architecture
@@ -74,9 +76,23 @@ routes/api.php → Controllers → Services → Models
 ```
 
 ### Route Groups (routes/api.php)
-- **Public**: `/api/auth/*`, `/api/slots/*`
+- **Public**: `/api/auth/*`, `/api/slots/*`, `/api/health` (health check)
 - **Patient (auth:sanctum)**: `/api/appointments/*`, `/api/patient/*`, `/api/medical-records/*`, `/api/prescriptions/*`, `/api/notifications/*`
 - **Admin (auth:sanctum + admin)**: `/api/admin/*` (dashboard, reports, settings, schedules, vacations, appointments, patients, medical-records, prescriptions, payments)
+
+### Rate Limiting Tiers
+- `throttle:auth` - Strict limits on authentication endpoints
+- `throttle:api` - Standard API rate limiting for authenticated routes
+- `throttle:slots` - Rate limiting for slot availability checks
+- `throttle:booking` - Rate limiting for appointment booking
+
+### Custom Middleware (app/Http/Middleware/)
+- `AdminMiddleware` - Restricts routes to admin role
+- `SecretaryMiddleware` - Restricts routes to secretary role
+- `SetLocale` - Sets locale from Accept-Language header or query param
+- `SecurityHeaders` - Adds security headers to responses
+- `CacheApiResponse` - Caches API responses
+- `AuthenticateFromCookie` - Cookie-based auth for SPA
 
 ### Core Services (app/Services/)
 | Service | Responsibility |
@@ -163,6 +179,8 @@ refactor(scope): description  # Code refactoring
 ```
 
 ## API Details
+
+> **Full API Documentation**: See [API.md](./API.md) for comprehensive documentation of all 88 endpoints.
 
 ### Response Format
 ```json

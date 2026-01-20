@@ -221,4 +221,36 @@ class PaymentController extends Controller
             'data' => new PaymentResource($payment),
         ]);
     }
+
+    /**
+     * Record a direct payment for a patient (without appointment).
+     */
+    public function record(Request $request): JsonResponse
+    {
+        $request->validate([
+            'patient_id' => ['required', 'integer', 'exists:users,id'],
+            'amount' => ['required', 'numeric', 'min:0'],
+            'payment_method' => ['nullable', 'string', 'in:cash,card,wallet'],
+            'notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $amount = $request->amount;
+        $payment = Payment::create([
+            'appointment_id' => null,
+            'patient_id' => $request->patient_id,
+            'amount' => $amount,
+            'discount' => 0,
+            'total' => $amount,
+            'method' => $request->payment_method ? PaymentMethod::from($request->payment_method) : PaymentMethod::CASH,
+            'status' => PaymentStatus::PAID,
+            'paid_at' => now(),
+            'notes' => $request->notes,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تسجيل الدفعة بنجاح',
+            'data' => new PaymentResource($payment),
+        ], 201);
+    }
 }

@@ -283,4 +283,129 @@ class AppointmentServiceTest extends TestCase
 
         $this->assertFalse($result['can_cancel']);
     }
+
+    // ==================== Reschedule Tests ====================
+
+    /** @test */
+    public function can_reschedule_pending_appointment(): void
+    {
+        $newDate = now()->addDays(3);
+        $this->createScheduleForDate($newDate);
+
+        $appointment = Appointment::factory()->pending()->create([
+            'appointment_date' => now()->addDay()->toDateString(),
+            'appointment_time' => '10:00',
+        ]);
+
+        $newDatetime = $newDate->copy()->setTime(14, 0);
+        $result = $this->service->reschedule($appointment, $newDatetime);
+
+        $this->assertEquals($newDate->toDateString(), $result->appointment_date->toDateString());
+        $this->assertEquals('14:00', $result->formatted_time);
+    }
+
+    /** @test */
+    public function can_reschedule_confirmed_appointment(): void
+    {
+        $newDate = now()->addDays(3);
+        $this->createScheduleForDate($newDate);
+
+        $appointment = Appointment::factory()->confirmed()->create([
+            'appointment_date' => now()->addDay()->toDateString(),
+            'appointment_time' => '10:00',
+        ]);
+
+        $newDatetime = $newDate->copy()->setTime(11, 0);
+        $result = $this->service->reschedule($appointment, $newDatetime);
+
+        $this->assertEquals($newDate->toDateString(), $result->appointment_date->toDateString());
+        $this->assertEquals('11:00', $result->formatted_time);
+    }
+
+    /** @test */
+    public function cannot_reschedule_completed_appointment(): void
+    {
+        $newDate = now()->addDays(3);
+        $this->createScheduleForDate($newDate);
+
+        $appointment = Appointment::factory()->completed()->create();
+
+        $this->expectException(BusinessLogicException::class);
+        $this->service->reschedule($appointment, $newDate->copy()->setTime(10, 0));
+    }
+
+    /** @test */
+    public function cannot_reschedule_cancelled_appointment(): void
+    {
+        $newDate = now()->addDays(3);
+        $this->createScheduleForDate($newDate);
+
+        $appointment = Appointment::factory()->cancelled()->create();
+
+        $this->expectException(BusinessLogicException::class);
+        $this->service->reschedule($appointment, $newDate->copy()->setTime(10, 0));
+    }
+
+    /** @test */
+    public function cannot_reschedule_no_show_appointment(): void
+    {
+        $newDate = now()->addDays(3);
+        $this->createScheduleForDate($newDate);
+
+        $appointment = Appointment::factory()->noShow()->create();
+
+        $this->expectException(BusinessLogicException::class);
+        $this->service->reschedule($appointment, $newDate->copy()->setTime(10, 0));
+    }
+
+    /** @test */
+    public function cannot_reschedule_to_booked_slot(): void
+    {
+        $newDate = now()->addDays(3);
+        $this->createScheduleForDate($newDate);
+
+        // Create existing appointment at target slot
+        Appointment::factory()->pending()->create([
+            'appointment_date' => $newDate->toDateString(),
+            'appointment_time' => '14:00',
+        ]);
+
+        $appointment = Appointment::factory()->pending()->create([
+            'appointment_date' => now()->addDay()->toDateString(),
+            'appointment_time' => '10:00',
+        ]);
+
+        $this->expectException(SlotNotAvailableException::class);
+        $this->service->reschedule($appointment, $newDate->copy()->setTime(14, 0));
+    }
+
+    /** @test */
+    public function cannot_reschedule_outside_working_hours(): void
+    {
+        $newDate = now()->addDays(3);
+        $this->createScheduleForDate($newDate); // Schedule is 09:00-17:00
+
+        $appointment = Appointment::factory()->pending()->create();
+
+        $this->expectException(SlotNotAvailableException::class);
+        $this->service->reschedule($appointment, $newDate->copy()->setTime(18, 0));
+    }
+
+    /** @test */
+    public function reschedule_allows_same_appointment_different_time(): void
+    {
+        $newDate = now()->addDays(3);
+        $this->createScheduleForDate($newDate);
+
+        $appointment = Appointment::factory()->pending()->create([
+            'appointment_date' => $newDate->toDateString(),
+            'appointment_time' => '10:00',
+        ]);
+
+        // Reschedule same appointment to different time on same day
+        $result = $this->service->reschedule($appointment, $newDate->copy()->setTime(14, 0));
+
+        $this->assertEquals($newDate->toDateString(), $result->appointment_date->toDateString());
+        $this->assertEquals('14:00', $result->formatted_time);
+    }
 }

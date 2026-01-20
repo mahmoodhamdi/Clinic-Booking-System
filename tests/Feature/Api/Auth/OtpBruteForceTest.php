@@ -191,8 +191,8 @@ class OtpBruteForceTest extends TestCase
             $this->postJson('/api/auth/reset-password', [
                 'phone' => $this->phone,
                 'otp' => '000000',
-                'password' => 'NewPassword1!',
-                'password_confirmation' => 'NewPassword1!',
+                'password' => 'NewCl1n1cT3st!2026#',
+                'password_confirmation' => 'NewCl1n1cT3st!2026#',
             ]);
         }
 
@@ -200,8 +200,8 @@ class OtpBruteForceTest extends TestCase
         $response = $this->postJson('/api/auth/reset-password', [
             'phone' => $this->phone,
             'otp' => '000000',
-            'password' => 'NewPassword1!',
-            'password_confirmation' => 'NewPassword1!',
+            'password' => 'NewCl1n1cT3st!2026#',
+            'password_confirmation' => 'NewCl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(429);

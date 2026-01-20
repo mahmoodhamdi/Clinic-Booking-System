@@ -17,8 +17,8 @@ class RegistrationTest extends TestCase
             'name' => 'Ahmed Mohamed',
             'phone' => '01012345678',
             'email' => 'ahmed@example.com',
-            'password' => 'Password1!',
-            'password_confirmation' => 'Password1!',
+            'password' => 'Cl1n1cT3st!2026#',
+            'password_confirmation' => 'Cl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(201)
@@ -42,8 +42,8 @@ class RegistrationTest extends TestCase
     {
         $response = $this->postJson('/api/auth/register', [
             'phone' => '01012345678',
-            'password' => 'Password1!',
-            'password_confirmation' => 'Password1!',
+            'password' => 'Cl1n1cT3st!2026#',
+            'password_confirmation' => 'Cl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(422)
@@ -55,8 +55,8 @@ class RegistrationTest extends TestCase
     {
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Ahmed',
-            'password' => 'Password1!',
-            'password_confirmation' => 'Password1!',
+            'password' => 'Cl1n1cT3st!2026#',
+            'password_confirmation' => 'Cl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(422)
@@ -69,8 +69,8 @@ class RegistrationTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Ahmed',
             'phone' => 'invalid',
-            'password' => 'Password1!',
-            'password_confirmation' => 'Password1!',
+            'password' => 'Cl1n1cT3st!2026#',
+            'password_confirmation' => 'Cl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(422)
@@ -85,8 +85,8 @@ class RegistrationTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Ahmed',
             'phone' => '01012345678',
-            'password' => 'Password1!',
-            'password_confirmation' => 'Password1!',
+            'password' => 'Cl1n1cT3st!2026#',
+            'password_confirmation' => 'Cl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(422)
@@ -126,8 +126,8 @@ class RegistrationTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Ahmed',
             'phone' => '01012345678',
-            'password' => 'Password1!',
-            'password_confirmation' => 'Password1!',
+            'password' => 'Cl1n1cT3st!2026#',
+            'password_confirmation' => 'Cl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(201);
@@ -140,8 +140,8 @@ class RegistrationTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Ahmed',
             'phone' => '01012345678',
-            'password' => 'Password1!',
-            'password_confirmation' => 'Password1!',
+            'password' => 'Cl1n1cT3st!2026#',
+            'password_confirmation' => 'Cl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(201);
@@ -156,8 +156,8 @@ class RegistrationTest extends TestCase
             'name' => 'Ahmed',
             'phone' => '01012345678',
             'email' => 'ahmed@example.com',
-            'password' => 'Password1!',
-            'password_confirmation' => 'Password1!',
+            'password' => 'Cl1n1cT3st!2026#',
+            'password_confirmation' => 'Cl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(422)
