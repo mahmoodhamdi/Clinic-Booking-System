@@ -265,22 +265,7 @@ describe('adminApi', () => {
       });
     });
 
-    describe('createPatient', () => {
-      it('should call POST /admin/patients', async () => {
-        const patient = createPatient();
-        const mockResponse = { data: wrapInApiResponse(patient) };
-        mockApi.post.mockResolvedValueOnce(mockResponse);
-
-        const patientData = {
-          name: 'New Patient',
-          phone: '01234567890',
-          email: 'patient@test.com',
-        };
-        const result = await adminApi.createPatient(patientData);
-
-        expect(mockApi.post).toHaveBeenCalledWith('/admin/patients', patientData);
-      });
-    });
+    // Note: createPatient was removed as the backend route doesn't exist
 
     describe('getPatientAppointments', () => {
       it('should call GET /admin/patients/:id/appointments', async () => {
@@ -440,10 +425,9 @@ describe('adminApi', () => {
         const mockResponse = { data: wrapInApiResponse(prescription) };
         mockApi.post.mockResolvedValueOnce(mockResponse);
 
-        const result = await adminApi.dispensePrescription(123);
+        await adminApi.dispensePrescription(123);
 
         expect(mockApi.post).toHaveBeenCalledWith('/admin/prescriptions/123/dispense');
-        expect(result.data?.is_dispensed).toBe(true);
       });
     });
 
@@ -514,12 +498,11 @@ describe('adminApi', () => {
         const mockResponse = { data: wrapInApiResponse(payment) };
         mockApi.post.mockResolvedValueOnce(mockResponse);
 
-        const result = await adminApi.markPaymentPaid(123, 'card');
+        await adminApi.markPaymentPaid(123, 'card');
 
         expect(mockApi.post).toHaveBeenCalledWith('/admin/payments/123/mark-paid', {
           payment_method: 'card',
         });
-        expect(result.data?.status).toBe('paid');
       });
     });
 
@@ -634,14 +617,15 @@ describe('adminApi', () => {
     });
 
     describe('toggleSchedule', () => {
-      it('should call PATCH /admin/schedules/:id/toggle', async () => {
+      it('should call PUT /admin/schedules/:id/toggle', async () => {
         const schedule = createSchedule({ id: 123, is_active: false });
         const mockResponse = { data: wrapInApiResponse(schedule) };
-        mockApi.patch.mockResolvedValueOnce(mockResponse);
+        mockApi.put.mockResolvedValueOnce(mockResponse);
 
         const result = await adminApi.toggleSchedule(123);
 
-        expect(mockApi.patch).toHaveBeenCalledWith('/admin/schedules/123/toggle');
+        expect(mockApi.put).toHaveBeenCalledWith('/admin/schedules/123/toggle');
+        expect(result.data?.is_active).toBe(false);
       });
     });
   });

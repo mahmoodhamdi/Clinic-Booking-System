@@ -204,6 +204,57 @@ class AppointmentService
         });
     }
 
+    public function reschedule(Appointment $appointment, Carbon $newDatetime): Appointment
+    {
+        if (!$appointment->isActive()) {
+            throw new BusinessLogicException(
+                __('لا يمكن إعادة جدولة هذا الحجز'),
+                'INVALID_STATUS_TRANSITION',
+                ['current_status' => $appointment->status->value, 'expected' => 'active']
+            );
+        }
+
+        $newDate = $newDatetime->copy()->startOfDay();
+        $newTime = $newDatetime->format('H:i');
+
+        return DB::transaction(function () use ($appointment, $newDate, $newTime, $newDatetime) {
+            // Check if new slot is available (excluding current appointment)
+            if (!$this->slotService->isSlotAvailable($newDatetime)) {
+                throw new SlotNotAvailableException($newDate->toDateString(), $newTime, 'outside_hours');
+            }
+
+            // Check if slot is already booked by someone else
+            $existingAppointment = Appointment::where('appointment_date', $newDate->toDateString())
+                ->where('appointment_time', $newTime)
+                ->where('id', '!=', $appointment->id)
+                ->active()
+                ->lockForUpdate()
+                ->first();
+
+            if ($existingAppointment) {
+                throw new SlotNotAvailableException($newDate->toDateString(), $newTime, 'slot_taken');
+            }
+
+            $oldDate = $appointment->appointment_date;
+            $oldTime = $appointment->appointment_time;
+
+            $appointment->update([
+                'appointment_date' => $newDate->toDateString(),
+                'appointment_time' => $newTime,
+            ]);
+
+            $this->logInfo('Appointment rescheduled', [
+                'appointment_id' => $appointment->id,
+                'old_date' => $oldDate,
+                'old_time' => $oldTime,
+                'new_date' => $newDate->toDateString(),
+                'new_time' => $newTime,
+            ]);
+
+            return $appointment->fresh();
+        });
+    }
+
     // ==================== Cancellation Validation ====================
 
     public function canCancel(Appointment $appointment, User $user): array

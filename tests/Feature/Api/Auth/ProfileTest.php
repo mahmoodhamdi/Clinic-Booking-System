@@ -111,13 +111,13 @@ class ProfileTest extends TestCase
     /** @test */
     public function user_can_change_password(): void
     {
-        $user = User::factory()->create(['password' => 'OldPassword1!']);
+        $user = User::factory()->create(['password' => 'OldCl1n1cT3st!2026#']);
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/auth/change-password', [
-            'current_password' => 'OldPassword1!',
-            'password' => 'NewPassword1!',
-            'password_confirmation' => 'NewPassword1!',
+            'current_password' => 'OldCl1n1cT3st!2026#',
+            'password' => 'NewCl1n1cT3st!2026#',
+            'password_confirmation' => 'NewCl1n1cT3st!2026#',
         ]);
 
         $response->assertOk()
@@ -126,19 +126,19 @@ class ProfileTest extends TestCase
             ]);
 
         // Verify new password works
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NewPassword1!', $user->fresh()->password));
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NewCl1n1cT3st!2026#', $user->fresh()->password));
     }
 
     /** @test */
     public function password_change_requires_current_password(): void
     {
-        $user = User::factory()->create(['password' => 'OldPassword1!']);
+        $user = User::factory()->create(['password' => 'OldCl1n1cT3st!2026#']);
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/auth/change-password', [
-            'current_password' => 'WrongPassword1!',
-            'password' => 'NewPassword1!',
-            'password_confirmation' => 'NewPassword1!',
+            'current_password' => 'WrongCl1n1cT3st!2026#',
+            'password' => 'NewCl1n1cT3st!2026#',
+            'password_confirmation' => 'NewCl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(422)

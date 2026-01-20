@@ -278,18 +278,6 @@ export const adminApi = {
     return response.data;
   },
 
-  createPatient: async (data: {
-    name: string;
-    phone: string;
-    email?: string;
-    date_of_birth?: string;
-    gender?: string;
-    address?: string;
-  }): Promise<ApiResponse<User>> => {
-    const response = await api.post<ApiResponse<User>>('/admin/patients', data);
-    return response.data;
-  },
-
   // Medical Records
   getMedicalRecords: async (params?: MedicalRecordListParams): Promise<PaginatedResponse<MedicalRecord>> => {
     const response = await api.get<PaginatedResponse<MedicalRecord>>('/admin/medical-records', { params });
@@ -474,7 +462,7 @@ export const adminApi = {
   },
 
   toggleSchedule: async (id: number): Promise<ApiResponse<Schedule>> => {
-    const response = await api.patch<ApiResponse<Schedule>>(`/admin/schedules/${id}/toggle`);
+    const response = await api.put<ApiResponse<Schedule>>(`/admin/schedules/${id}/toggle`);
     return response.data;
   },
 

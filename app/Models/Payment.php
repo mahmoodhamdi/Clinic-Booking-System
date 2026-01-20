@@ -17,6 +17,7 @@ class Payment extends Model
 
     protected $fillable = [
         'appointment_id',
+        'patient_id',
         'amount',
         'discount',
         'total',
@@ -43,6 +44,14 @@ class Payment extends Model
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);
+    }
+
+    /**
+     * Direct patient relationship for payments without appointments.
+     */
+    public function directPatient(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'patient_id');
     }
 
     // ==================== Accessors ====================
@@ -74,6 +83,11 @@ class Payment extends Model
 
     public function getPatientAttribute(): ?User
     {
+        // For direct payments (no appointment), use the patient_id
+        if ($this->patient_id) {
+            return $this->directPatient;
+        }
+        // For appointment-linked payments
         return $this->appointment?->patient;
     }
 

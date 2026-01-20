@@ -125,8 +125,8 @@ class PasswordResetTest extends TestCase
         $response = $this->postJson('/api/auth/reset-password', [
             'phone' => '01012345678',
             'otp' => $token,
-            'password' => 'NewPassword1!',
-            'password_confirmation' => 'NewPassword1!',
+            'password' => 'NewCl1n1cT3st!2026#',
+            'password_confirmation' => 'NewCl1n1cT3st!2026#',
         ]);
 
         $response->assertOk()
@@ -136,7 +136,7 @@ class PasswordResetTest extends TestCase
 
         // Verify password was changed
         $user = User::where('phone', '01012345678')->first();
-        $this->assertTrue(Hash::check('NewPassword1!', $user->password));
+        $this->assertTrue(Hash::check('NewCl1n1cT3st!2026#', $user->password));
 
         // Verify token was deleted
         $this->assertDatabaseMissing('password_reset_tokens', [
@@ -158,8 +158,8 @@ class PasswordResetTest extends TestCase
         $response = $this->postJson('/api/auth/reset-password', [
             'phone' => '01012345678',
             'otp' => '999999',
-            'password' => 'NewPassword1!',
-            'password_confirmation' => 'NewPassword1!',
+            'password' => 'NewCl1n1cT3st!2026#',
+            'password_confirmation' => 'NewCl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(422)
@@ -183,7 +183,7 @@ class PasswordResetTest extends TestCase
         $response = $this->postJson('/api/auth/reset-password', [
             'phone' => '01012345678',
             'otp' => $token,
-            'password' => 'NewPassword1!',
+            'password' => 'NewCl1n1cT3st!2026#',
         ]);
 
         $response->assertStatus(422)
