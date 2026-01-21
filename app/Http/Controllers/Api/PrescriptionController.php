@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PrescriptionResource;
 use App\Models\Prescription;
+use App\Services\PrescriptionPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -29,5 +30,12 @@ class PrescriptionController extends Controller
         $prescription->load(['medicalRecord', 'items']);
 
         return new PrescriptionResource($prescription);
+    }
+
+    public function downloadPdf(Request $request, Prescription $prescription, PrescriptionPdfService $pdfService)
+    {
+        $this->authorize('view', $prescription);
+
+        return $pdfService->download($prescription);
     }
 }

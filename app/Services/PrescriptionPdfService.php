@@ -6,13 +6,13 @@ use App\Exceptions\BusinessLogicException;
 use App\Models\ClinicSetting;
 use App\Models\Prescription;
 use App\Traits\LogsActivity;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Mpdf\Mpdf;
 
 class PrescriptionPdfService
 {
     use LogsActivity;
 
-    public function generate(Prescription $prescription): \Barryvdh\DomPDF\PDF
+    public function generate(Prescription $prescription): Mpdf
     {
         $this->logInfo('Generating prescription PDF', [
             'prescription_id' => $prescription->id,
@@ -54,28 +54,53 @@ class PrescriptionPdfService
             ],
         ];
 
-        $pdf = Pdf::loadView('pdfs.prescription', $data);
+        // Create mPDF instance with Arabic support
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font' => 'xbriyaz',
+            'default_font_size' => 12,
+            'margin_left' => 15,
+            'margin_right' => 15,
+            'margin_top' => 15,
+            'margin_bottom' => 15,
+            'tempDir' => storage_path('app/mpdf'),
+        ]);
 
-        $pdf->setPaper('a4');
+        // Set RTL direction for Arabic
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->autoScriptToLang = true;
+        $mpdf->autoLangToFont = true;
+
+        // Render the blade template to HTML
+        $html = view('pdfs.prescription-mpdf', $data)->render();
+
+        $mpdf->WriteHTML($html);
 
         $this->logInfo('Prescription PDF generated successfully', [
             'prescription_id' => $prescription->id,
         ]);
 
-        return $pdf;
+        return $mpdf;
     }
 
     public function download(Prescription $prescription)
     {
-        $pdf = $this->generate($prescription);
+        $mpdf = $this->generate($prescription);
 
-        return $pdf->download("prescription-{$prescription->prescription_number}.pdf");
+        return response($mpdf->Output("prescription-{$prescription->prescription_number}.pdf", 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=\"prescription-{$prescription->prescription_number}.pdf\"",
+        ]);
     }
 
     public function stream(Prescription $prescription)
     {
-        $pdf = $this->generate($prescription);
+        $mpdf = $this->generate($prescription);
 
-        return $pdf->stream("prescription-{$prescription->prescription_number}.pdf");
+        return response($mpdf->Output("prescription-{$prescription->prescription_number}.pdf", 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "inline; filename=\"prescription-{$prescription->prescription_number}.pdf\"",
+        ]);
     }
 }

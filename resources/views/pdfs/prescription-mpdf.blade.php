@@ -2,30 +2,16 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>وصفة طبية - {{ $prescription->prescription_number }}</title>
     <style>
-        @font-face {
-            font-family: 'NotoSansArabic';
-            src: url('{{ storage_path('fonts/NotoSansArabic-Regular.ttf') }}') format('truetype');
-            font-weight: normal;
-        }
-        @font-face {
-            font-family: 'NotoSansArabic';
-            src: url('{{ storage_path('fonts/NotoSansArabic-Bold.ttf') }}') format('truetype');
-            font-weight: bold;
-        }
-        * {
-            font-family: 'NotoSansArabic', 'DejaVu Sans', sans-serif;
-        }
         body {
+            font-family: 'xbriyaz', sans-serif;
             direction: rtl;
             text-align: right;
             font-size: 12px;
             line-height: 1.8;
             color: #333;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
         .header {
             text-align: center;
@@ -44,10 +30,12 @@
             color: #666;
         }
         .rx-symbol {
-            font-size: 36px;
+            font-size: 32px;
             color: #2563eb;
             font-weight: bold;
-            margin: 10px 0;
+            font-family: serif;
+            font-style: italic;
+            margin: 15px 0;
         }
         .prescription-number {
             font-size: 14px;
@@ -66,14 +54,15 @@
             color: #2563eb;
             font-size: 14px;
         }
-        .patient-row {
-            display: flex;
-            margin-bottom: 5px;
+        .info-table {
+            width: 100%;
         }
-        .patient-label {
+        .info-table td {
+            padding: 5px 0;
+        }
+        .label {
             font-weight: bold;
-            width: 100px;
-            display: inline-block;
+            color: #333;
         }
         .medications {
             margin-bottom: 20px;
@@ -96,21 +85,27 @@
             font-size: 14px;
             font-weight: bold;
             color: #1e40af;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         .medication-details {
             font-size: 11px;
             color: #4b5563;
         }
-        .medication-details span {
+        .medication-detail {
             display: inline-block;
             margin-left: 15px;
+            margin-bottom: 5px;
+            background: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
         }
         .medication-instructions {
             font-size: 11px;
             color: #dc2626;
-            margin-top: 5px;
-            font-style: italic;
+            margin-top: 8px;
+            padding-top: 5px;
+            border-top: 1px dashed #ddd;
         }
         .notes {
             background-color: #fef3c7;
@@ -131,34 +126,28 @@
             background-color: #ecfdf5;
             border: 1px solid #6ee7b7;
             border-radius: 8px;
+            color: #065f46;
         }
         .footer {
-            border-top: 1px solid #e2e8f0;
-            padding-top: 15px;
-            margin-top: 30px;
-        }
-        .signature {
-            text-align: left;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 20px;
             margin-top: 40px;
         }
+        .signature {
+            text-align: center;
+        }
         .signature-line {
-            width: 200px;
-            border-top: 1px solid #333;
+            width: 180px;
+            border-top: 2px solid #333;
             display: inline-block;
             text-align: center;
-            padding-top: 5px;
+            padding-top: 8px;
+            font-size: 11px;
+            color: #666;
         }
         .date-info {
             font-size: 11px;
             color: #666;
-            margin-top: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        td {
-            padding: 3px 0;
         }
     </style>
 </head>
@@ -166,24 +155,24 @@
     <div class="header">
         <div class="clinic-name">{{ $clinic['name'] }}</div>
         <div class="clinic-info">
-            @if($clinic['address']){{ $clinic['address'] }} | @endif
-            @if($clinic['phone']){{ $clinic['phone'] }} | @endif
-            @if($clinic['email']){{ $clinic['email'] }}@endif
+            @if($clinic['address']){{ $clinic['address'] }}@endif
+            @if($clinic['phone']) | {{ $clinic['phone'] }}@endif
+            @if($clinic['email']) | {{ $clinic['email'] }}@endif
         </div>
-        <div class="rx-symbol">℞</div>
+        <div class="rx-symbol">Rx</div>
         <div class="prescription-number">رقم الوصفة: {{ $prescription->prescription_number }}</div>
     </div>
 
     <div class="patient-info">
         <h3>معلومات المريض</h3>
-        <table>
+        <table class="info-table">
             <tr>
-                <td><span class="patient-label">الاسم:</span> {{ $patient->name }}</td>
-                <td><span class="patient-label">الهاتف:</span> {{ $patient->phone ?? '-' }}</td>
+                <td width="50%"><span class="label">الاسم:</span> {{ $patient->name }}</td>
+                <td width="50%"><span class="label">الهاتف:</span> {{ $patient->phone ?? '-' }}</td>
             </tr>
             <tr>
-                <td><span class="patient-label">التشخيص:</span> {{ $medicalRecord->diagnosis }}</td>
-                <td><span class="patient-label">تاريخ الكشف:</span> {{ $appointment->appointment_date->format('Y-m-d') }}</td>
+                <td><span class="label">التشخيص:</span> {{ $medicalRecord->diagnosis }}</td>
+                <td><span class="label">تاريخ الكشف:</span> {{ $appointment->appointment_date->format('Y-m-d') }}</td>
             </tr>
         </table>
     </div>
@@ -194,16 +183,16 @@
         <div class="medication-item">
             <div class="medication-name">{{ $index + 1 }}. {{ $item->medication_name }}</div>
             <div class="medication-details">
-                <span><strong>الجرعة:</strong> {{ $item->dosage }}</span>
-                <span><strong>المرات:</strong> {{ $item->frequency }}</span>
-                <span><strong>المدة:</strong> {{ $item->duration }}</span>
+                <span class="medication-detail"><strong>الجرعة:</strong> {{ $item->dosage }}</span>
+                <span class="medication-detail"><strong>التكرار:</strong> {{ $item->frequency }}</span>
+                <span class="medication-detail"><strong>المدة:</strong> {{ $item->duration }}</span>
                 @if($item->quantity)
-                <span><strong>الكمية:</strong> {{ $item->quantity }}</span>
+                <span class="medication-detail"><strong>الكمية:</strong> {{ $item->quantity }}</span>
                 @endif
             </div>
             @if($item->instructions)
             <div class="medication-instructions">
-                <strong>تعليمات:</strong> {{ $item->instructions }}
+                <strong>التعليمات:</strong> {{ $item->instructions }}
             </div>
             @endif
         </div>
@@ -213,7 +202,7 @@
     @if($prescription->notes)
     <div class="notes">
         <h4>ملاحظات الطبيب:</h4>
-        <p>{{ $prescription->notes }}</p>
+        <p style="margin: 0;">{{ $prescription->notes }}</p>
     </div>
     @endif
 
@@ -224,12 +213,20 @@
     @endif
 
     <div class="footer">
-        <div class="signature">
-            <div class="signature-line">توقيع الطبيب</div>
-        </div>
-        <div class="date-info">
-            <p>تاريخ إصدار الوصفة: {{ $prescription->created_at->format('Y-m-d H:i') }}</p>
-        </div>
+        <table width="100%">
+            <tr>
+                <td width="50%" style="text-align: right;">
+                    <div class="date-info">
+                        تاريخ إصدار الوصفة: {{ $prescription->created_at->format('Y-m-d H:i') }}
+                    </div>
+                </td>
+                <td width="50%" style="text-align: left;">
+                    <div class="signature">
+                        <div class="signature-line">توقيع الطبيب</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>

@@ -99,9 +99,11 @@ export default function BookAppointmentPage() {
 
   // Check if a date is available
   const isDateAvailable = (date: Date) => {
-    if (!availableDates?.data) return false;
+    // API returns { data: { dates: [...], summary: {...} } }
+    const dates = (availableDates?.data as { dates?: Array<{ date: string }> })?.dates;
+    if (!dates || !Array.isArray(dates)) return false;
     const dateStr = format(date, 'yyyy-MM-dd');
-    return availableDates.data.some((d) => d.date === dateStr);
+    return dates.some((d) => d.date === dateStr);
   };
 
   return (

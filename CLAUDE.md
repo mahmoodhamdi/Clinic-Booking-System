@@ -46,7 +46,7 @@ cd frontend && npm run lint   # Frontend linting
 
 ### Backend
 ```bash
-php artisan test                                           # All tests (827 tests)
+php artisan test                                           # All tests
 composer test                                              # Clears config first
 php artisan test --coverage --min=100                      # With coverage requirement
 php artisan test --filter=TestClassName                    # Single test file
@@ -56,10 +56,10 @@ php artisan test --filter=TestClassName::test_method_name  # Single test method
 ### Frontend
 ```bash
 cd frontend
-npm test                      # Unit tests (Jest, 403 tests)
+npm test                      # Unit tests (Jest)
 npm run test:watch            # Watch mode
 npm run test:coverage         # With coverage
-npm run test:e2e              # E2E tests (Playwright, 7 specs)
+npm run test:e2e              # E2E tests (Playwright)
 npm run test:e2e:ui           # E2E with Playwright UI
 npm run test:e2e:headed       # E2E in headed browser
 ```
@@ -196,6 +196,10 @@ Default: Arabic (ar), Fallback: English (en)
 
 ### Default Admin (after seeding)
 Phone: 01000000000, Password: admin123
+
+### OTP Security
+- Brute force protection: 5 attempts max, 30-minute lockout
+- OTP expires after 10 minutes
 
 ## Environment
 - PHP 8.2+, MySQL 8.0+ or SQLite, Node.js 18+

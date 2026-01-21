@@ -64,7 +64,7 @@ function AppointmentCard({
               </p>
               <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                 <Clock className="h-4 w-4" />
-                <span>{appointment.slot_time}</span>
+                <span>{(appointment as Appointment & { time?: string }).time || appointment.slot_time}</span>
               </div>
               {appointment.reason && (
                 <p className="text-sm text-gray-500 mt-1 line-clamp-1">
@@ -195,19 +195,24 @@ export default function AppointmentsPage() {
     const data = appointments?.data;
     if (!data) return [];
 
-    const now = new Date();
+    // Compare dates only (without time) to fix same-day comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     switch (status) {
       case 'upcoming':
-        return data.filter(
-          (a) =>
-            new Date(a.date) >= now &&
-            (a.status === 'pending' || a.status === 'confirmed')
-        );
+        return data.filter((a) => {
+          const appointmentDate = new Date(a.date);
+          appointmentDate.setHours(0, 0, 0, 0);
+          return appointmentDate >= today &&
+            (a.status === 'pending' || a.status === 'confirmed');
+        });
       case 'past':
-        return data.filter(
-          (a) => a.status === 'completed' || new Date(a.date) < now
-        );
+        return data.filter((a) => {
+          const appointmentDate = new Date(a.date);
+          appointmentDate.setHours(0, 0, 0, 0);
+          return a.status === 'completed' || appointmentDate < today;
+        });
       case 'cancelled':
         return data.filter((a) => a.status === 'cancelled');
       default:
