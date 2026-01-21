@@ -93,6 +93,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('medical-records')->
 Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('prescriptions')->group(function () {
     Route::get('/', [PrescriptionController::class, 'index']);
     Route::get('/{prescription}', [PrescriptionController::class, 'show']);
+    Route::get('/{prescription}/download', [PrescriptionController::class, 'downloadPdf']);
 });
 
 // Patient notifications routes (requires authentication) with API rate limiting

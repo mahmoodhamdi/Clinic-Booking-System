@@ -29,7 +29,7 @@ export default function NotificationsPage() {
 
   // Mark as read mutation
   const markReadMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string | number) => {
       await api.post(`/notifications/${id}/read`);
     },
     onSuccess: () => {
@@ -50,7 +50,7 @@ export default function NotificationsPage() {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string | number) => {
       await api.delete(`/notifications/${id}`);
     },
     onSuccess: () => {
@@ -121,9 +121,11 @@ export default function NotificationsPage() {
                       />
                     </div>
                     <div>
-                      <p className="font-medium">{notification.title}</p>
+                      <p className="font-medium">
+                        {(notification as Notification & { data?: { title?: string; message?: string } }).data?.title || notification.title}
+                      </p>
                       <p className="text-sm text-gray-500 mt-1">
-                        {notification.body}
+                        {(notification as Notification & { data?: { title?: string; message?: string } }).data?.message || notification.body}
                       </p>
                       <p className="text-xs text-gray-400 mt-2">
                         {formatDistanceToNow(new Date(notification.created_at), {

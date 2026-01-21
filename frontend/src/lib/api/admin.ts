@@ -168,7 +168,7 @@ export const adminApi = {
   },
 
   getTodayAppointments: async (): Promise<ApiResponse<Appointment[]>> => {
-    const response = await api.get<ApiResponse<Appointment[]>>('/admin/dashboard/today');
+    const response = await api.get<ApiResponse<Appointment[]>>('/admin/appointments/today');
     return response.data;
   },
 

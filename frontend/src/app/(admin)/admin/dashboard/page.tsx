@@ -112,6 +112,7 @@ function AppointmentRow({ appointment }: AppointmentRowProps) {
 
   const StatusIcon = appointment.status === 'pending' ? Clock : CheckCircle2;
   const patientName = (appointment as Appointment & { patient?: { name: string } }).patient?.name || 'مريض';
+  const appointmentTime = (appointment as Appointment & { time?: string }).time || appointment.slot_time;
 
   return (
     <div className="flex items-center justify-between p-4 rounded-lg border bg-gray-50 dark:bg-gray-800">
@@ -123,7 +124,7 @@ function AppointmentRow({ appointment }: AppointmentRowProps) {
         </div>
         <div>
           <p className="font-medium">{patientName}</p>
-          <p className="text-sm text-gray-500">{appointment.slot_time}</p>
+          <p className="text-sm text-gray-500">{appointmentTime}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -150,6 +151,10 @@ function ActivityRow({ activity }: ActivityRowProps) {
     medical_record: <FileText className="h-4 w-4 text-purple-600" />,
   };
 
+  // Handle different date formats from API
+  const activityDate = (activity as Activity & { date?: string; timestamp?: number }).date
+    || activity.created_at;
+
   return (
     <div className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
       <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
@@ -158,7 +163,7 @@ function ActivityRow({ activity }: ActivityRowProps) {
       <div>
         <p className="text-sm font-medium">{activity.description}</p>
         <p className="text-xs text-gray-400 mt-1">
-          {format(new Date(activity.created_at), 'PPp', { locale: ar })}
+          {activityDate || ''}
         </p>
       </div>
     </div>
