@@ -209,6 +209,27 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                       mobile
                       onNavClick={handleMobileNavClick}
                     />
+                    {/* Mobile Profile & Logout */}
+                    <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <Link
+                        href="/profile"
+                        onClick={handleMobileNavClick}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        <User className="h-4 w-4" />
+                        {t('navigation.profile')}
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleMobileNavClick();
+                          handleLogout();
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        {t('auth.logout')}
+                      </button>
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>

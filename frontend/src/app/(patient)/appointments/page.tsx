@@ -30,6 +30,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { appointmentsApi } from '@/lib/api/appointments';
+import { getErrorMessage } from '@/lib/api/client';
 import { Appointment } from '@/types';
 
 interface AppointmentCardProps {
@@ -144,8 +145,8 @@ export default function AppointmentsPage() {
       setSelectedAppointment(null);
       setCancelReason('');
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
