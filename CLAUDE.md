@@ -22,18 +22,28 @@ cd frontend && npm install
 
 ### Running Development Servers
 ```bash
-# Backend (recommended - runs API + queue + logs + vite concurrently)
+# Backend (runs API + queue + logs + vite concurrently)
 composer dev
 
-# Frontend
+# Frontend (in separate terminal)
 cd frontend && npm run dev
 ```
 
-### Docker Quick Start
+Backend runs on localhost:8000, Frontend on localhost:3000.
+
+### Docker
 ```bash
-docker-start.bat              # Windows
-./docker-start.sh             # Linux/Mac
-make setup                    # First time (build + start + seed)
+docker-start.bat / ./docker-start.sh    # Quick start (Windows/Linux)
+make setup                               # First time (build + start + seed)
+make up / make down                      # Start/stop containers
+make fresh                               # Reset database (migrate:fresh --seed)
+make shell                               # Shell into app container
+make test                                # Run tests in Docker
+make lite-up / make lite-down            # SQLite version (lighter)
+make with-tools                          # Includes phpMyAdmin
+make logs                                # View container logs
+make status                              # Show container status
+make clean                               # Remove all containers and volumes
 ```
 
 ### Code Quality
@@ -46,9 +56,9 @@ cd frontend && npm run lint   # Frontend linting
 
 ### Backend
 ```bash
-php artisan test                                           # All tests
+php artisan test                                           # All tests (791 tests)
 composer test                                              # Clears config first
-php artisan test --coverage --min=100                      # With coverage requirement
+php artisan test --coverage                                # With coverage report
 php artisan test --filter=TestClassName                    # Single test file
 php artisan test --filter=TestClassName::test_method_name  # Single test method
 ```
@@ -56,13 +66,19 @@ php artisan test --filter=TestClassName::test_method_name  # Single test method
 ### Frontend
 ```bash
 cd frontend
-npm test                      # Unit tests (Jest)
+npm test                      # Unit tests (Jest, 321 tests)
 npm run test:watch            # Watch mode
 npm run test:coverage         # With coverage
 npm run test:e2e              # E2E tests (Playwright)
 npm run test:e2e:ui           # E2E with Playwright UI
 npm run test:e2e:headed       # E2E in headed browser
 ```
+
+Test locations:
+- Backend unit tests: `tests/Unit/`
+- Backend feature tests: `tests/Feature/Api/`
+- Frontend unit tests: `frontend/src/__tests__/`
+- E2E tests: `frontend/e2e/`
 
 ## Architecture
 
@@ -87,8 +103,8 @@ routes/api.php → Controllers → Services → Models
 - `throttle:booking` - Rate limiting for appointment booking
 
 ### Custom Middleware (app/Http/Middleware/)
-- `AdminMiddleware` - Restricts routes to admin role
-- `SecretaryMiddleware` - Restricts routes to secretary role
+- `AdminMiddleware` - Restricts routes to admin role (used on /api/admin/* routes, allows both admin and secretary)
+- `SecretaryMiddleware` - Restricts routes to secretary role only
 - `SetLocale` - Sets locale from Accept-Language header or query param
 - `SecurityHeaders` - Adds security headers to responses
 - `CacheApiResponse` - Caches API responses
@@ -150,7 +166,7 @@ __tests__/                    # Jest tests with MSW mocks
 
 ### Frontend Stack
 - **Routing**: Next.js 16 App Router with route groups
-- **State**: Zustand (auth) + React Query (server state)
+- **State**: Zustand (auth) + React Query (server state, 5-min stale time)
 - **Forms**: React Hook Form + Zod validation
 - **UI**: Radix UI primitives + Tailwind CSS
 - **i18n**: next-intl (Arabic default, English fallback)
@@ -158,14 +174,14 @@ __tests__/                    # Jest tests with MSW mocks
 
 ## Development Workflow
 
-### TDD Requirements
-1. Write unit tests for models, services, enums (tests/Unit/)
-2. Write feature tests for API endpoints (tests/Feature/Api/)
-3. **100% code coverage required** before commit
-4. All tests must pass before push
+### Testing Requirements
+- Write unit tests for models, services, enums in `tests/Unit/`
+- Write feature tests for API endpoints in `tests/Feature/Api/`
+- All tests must pass before push
+- Run `php artisan test --coverage` to verify coverage
 
 ### After Each Feature
-1. Run `php artisan test --coverage --min=100`
+1. Run `php artisan test`
 2. Update `lang/ar.json` and `lang/en.json` if new strings added
 3. Update PROGRESS.md
 
@@ -177,6 +193,16 @@ test(scope): description   # Tests
 docs(scope): description   # Documentation
 refactor(scope): description  # Code refactoring
 ```
+
+### Key Paths
+| Task | Path |
+|------|------|
+| Add API endpoint | `routes/api.php` → `app/Http/Controllers/` → `app/Http/Requests/` |
+| Add service | `app/Services/` (bind in `app/Providers/AppServiceProvider.php`) |
+| Add translation | `lang/ar.json`, `lang/en.json` |
+| Add frontend API | `frontend/src/lib/api/` |
+| Add admin page | `frontend/src/app/(admin)/admin/` |
+| Add patient page | `frontend/src/app/(patient)/` |
 
 ## API Details
 
@@ -205,3 +231,9 @@ Phone: 01000000000, Password: admin123
 - PHP 8.2+, MySQL 8.0+ or SQLite, Node.js 18+
 - Queue driver: database (for notifications)
 - Backend: localhost:8000, Frontend: localhost:3000
+
+## Status Flows
+
+**Appointment**: `pending` → `confirmed` → `completed` (can also → `cancelled` or `no_show`)
+
+**Payment**: `pending` → `paid` → `refunded`
