@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { appointmentsApi } from '@/lib/api/appointments';
+import { getErrorMessage } from '@/lib/api/client';
 import { cn } from '@/lib/utils';
 
 type BookingStep = 'date' | 'time' | 'confirm';
@@ -56,8 +57,8 @@ export default function BookAppointmentPage() {
     onSuccess: () => {
       setShowSuccessDialog(true);
     },
-    onError: () => {
-      toast.error(t('patient.booking.bookingFailed'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 

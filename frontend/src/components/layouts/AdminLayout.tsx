@@ -86,8 +86,10 @@ interface SidebarContentProps {
   pathname: string;
   onNavClick?: () => void;
   onCollapseToggle?: () => void;
+  onLogout?: () => void;
   appName: string;
   closeLabel: string;
+  logoutLabel?: string;
 }
 
 function SidebarContent({
@@ -98,8 +100,10 @@ function SidebarContent({
   pathname,
   onNavClick,
   onCollapseToggle,
+  onLogout,
   appName,
   closeLabel,
+  logoutLabel,
 }: SidebarContentProps) {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
@@ -162,6 +166,22 @@ function SidebarContent({
               </>
             )}
           </Button>
+        </div>
+      )}
+
+      {/* Logout Button (Mobile only) */}
+      {mobile && onLogout && (
+        <div className="p-3 border-t">
+          <button
+            onClick={() => {
+              onNavClick?.();
+              onLogout();
+            }}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
+          >
+            <LogOut className="h-4 w-4" />
+            {logoutLabel}
+          </button>
         </div>
       )}
     </div>
@@ -244,8 +264,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             settingsNavigation={settingsNavigation}
             pathname={pathname}
             onNavClick={handleMobileNavClick}
+            onLogout={handleLogout}
             appName={t('common.appName')}
             closeLabel={t('common.close')}
+            logoutLabel={t('auth.logout')}
           />
         </SheetContent>
       </Sheet>

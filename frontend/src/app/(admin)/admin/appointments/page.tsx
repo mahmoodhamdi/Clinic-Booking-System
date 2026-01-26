@@ -47,6 +47,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { adminApi } from '@/lib/api/admin';
+import { getErrorMessage } from '@/lib/api/client';
 import { Appointment } from '@/types';
 
 export default function AdminAppointmentsPage() {
@@ -78,7 +79,7 @@ export default function AdminAppointmentsPage() {
       queryClient.invalidateQueries({ queryKey: ['adminAppointments'] });
       closeStatusDialog();
     },
-    onError: () => toast.error(t('common.error')),
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const completeMutation = useMutation({
@@ -88,7 +89,7 @@ export default function AdminAppointmentsPage() {
       queryClient.invalidateQueries({ queryKey: ['adminAppointments'] });
       closeStatusDialog();
     },
-    onError: () => toast.error(t('common.error')),
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const cancelMutation = useMutation({
@@ -99,7 +100,7 @@ export default function AdminAppointmentsPage() {
       queryClient.invalidateQueries({ queryKey: ['adminAppointments'] });
       closeStatusDialog();
     },
-    onError: () => toast.error(t('common.error')),
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const noShowMutation = useMutation({
@@ -109,7 +110,7 @@ export default function AdminAppointmentsPage() {
       queryClient.invalidateQueries({ queryKey: ['adminAppointments'] });
       closeStatusDialog();
     },
-    onError: () => toast.error(t('common.error')),
+    onError: (error) => toast.error(getErrorMessage(error)),
   });
 
   const closeStatusDialog = () => {
