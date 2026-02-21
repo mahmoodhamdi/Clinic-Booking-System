@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Admin;
 
-use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\ClinicSetting;
 use App\Models\User;
@@ -18,6 +17,8 @@ class AppointmentApiTest extends TestCase
     {
         parent::setUp();
 
+        // Clear any cached schedules from other tests
+        \Illuminate\Support\Facades\Cache::flush();
         ClinicSetting::factory()->create();
     }
 
@@ -372,18 +373,26 @@ class AppointmentApiTest extends TestCase
         $admin = User::factory()->admin()->create();
         Sanctum::actingAs($admin);
 
+        // Ensure known clinic settings with slot_duration=30
+        \App\Models\ClinicSetting::query()->delete();
+        \App\Models\ClinicSetting::factory()->default()->create();
+
         $appointment = Appointment::factory()->pending()->create([
             'appointment_date' => now()->addDays(2)->toDateString(),
             'appointment_time' => '10:00',
         ]);
 
-        // Create schedule for the new date - use a fixed future date to avoid flakiness
         $newDate = now()->addDays(5)->startOfDay();
-        \App\Models\Schedule::factory()->forDay(\App\Enums\DayOfWeek::fromDate($newDate))->create([
+        $dayOfWeek = \App\Enums\DayOfWeek::fromDate($newDate);
+
+        \App\Models\Schedule::factory()->forDay($dayOfWeek)->create([
             'start_time' => '09:00',
             'end_time' => '17:00',
             'is_active' => true,
         ]);
+
+        // Flush ALL cache to ensure fresh state
+        \Illuminate\Support\Facades\Cache::flush();
 
         $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
             'date' => $newDate->toDateString(),
@@ -406,18 +415,26 @@ class AppointmentApiTest extends TestCase
         $admin = User::factory()->admin()->create();
         Sanctum::actingAs($admin);
 
+        // Ensure known clinic settings with slot_duration=30
+        \App\Models\ClinicSetting::query()->delete();
+        \App\Models\ClinicSetting::factory()->default()->create();
+
         $appointment = Appointment::factory()->confirmed()->create([
             'appointment_date' => now()->addDays(2)->toDateString(),
             'appointment_time' => '10:00',
         ]);
 
-        // Use addDays(6) for more deterministic behavior
         $newDate = now()->addDays(6)->startOfDay();
-        \App\Models\Schedule::factory()->forDay(\App\Enums\DayOfWeek::fromDate($newDate))->create([
+        $dayOfWeek = \App\Enums\DayOfWeek::fromDate($newDate);
+
+        \App\Models\Schedule::factory()->forDay($dayOfWeek)->create([
             'start_time' => '09:00',
             'end_time' => '17:00',
             'is_active' => true,
         ]);
+
+        // Flush ALL cache to ensure fresh state
+        \Illuminate\Support\Facades\Cache::flush();
 
         $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
             'date' => $newDate->toDateString(),

@@ -132,6 +132,7 @@ class PaymentService
         return DB::transaction(function () use ($payment, $transactionId) {
             $result = $payment->markAsPaid($transactionId);
             $this->logInfo('Payment marked as paid', ['payment_id' => $payment->id]);
+
             return $result;
         });
     }
@@ -150,6 +151,7 @@ class PaymentService
         return DB::transaction(function () use ($payment, $reason) {
             $result = $payment->refund($reason);
             $this->logInfo('Payment refunded', ['payment_id' => $payment->id]);
+
             return $result;
         });
     }

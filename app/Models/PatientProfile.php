@@ -60,6 +60,7 @@ class PatientProfile extends Model
         if (empty($this->allergies)) {
             return '';
         }
+
         return implode(', ', $this->allergies);
     }
 
@@ -68,6 +69,7 @@ class PatientProfile extends Model
         if (empty($this->chronic_diseases)) {
             return '';
         }
+
         return implode(', ', $this->chronic_diseases);
     }
 
@@ -76,17 +78,18 @@ class PatientProfile extends Model
         if (empty($this->current_medications)) {
             return '';
         }
+
         return implode(', ', $this->current_medications);
     }
 
     public function getHasEmergencyContactAttribute(): bool
     {
-        return !empty($this->emergency_contact_name) && !empty($this->emergency_contact_phone);
+        return ! empty($this->emergency_contact_name) && ! empty($this->emergency_contact_phone);
     }
 
     public function getHasInsuranceAttribute(): bool
     {
-        return !empty($this->insurance_provider) && !empty($this->insurance_number);
+        return ! empty($this->insurance_provider) && ! empty($this->insurance_number);
     }
 
     public function getIsCompleteAttribute(): bool
@@ -102,6 +105,7 @@ class PatientProfile extends Model
         if (empty($this->allergies)) {
             return false;
         }
+
         return in_array(strtolower($allergy), array_map('strtolower', $this->allergies));
     }
 
@@ -110,52 +114,58 @@ class PatientProfile extends Model
         if (empty($this->chronic_diseases)) {
             return false;
         }
+
         return in_array(strtolower($disease), array_map('strtolower', $this->chronic_diseases));
     }
 
     public function addAllergy(string $allergy): self
     {
         $allergies = $this->allergies ?? [];
-        if (!in_array($allergy, $allergies)) {
+        if (! in_array($allergy, $allergies)) {
             $allergies[] = $allergy;
             $this->update(['allergies' => $allergies]);
         }
+
         return $this;
     }
 
     public function removeAllergy(string $allergy): self
     {
         $allergies = $this->allergies ?? [];
-        $allergies = array_filter($allergies, fn($a) => $a !== $allergy);
+        $allergies = array_filter($allergies, fn ($a) => $a !== $allergy);
         $this->update(['allergies' => array_values($allergies)]);
+
         return $this;
     }
 
     public function addChronicDisease(string $disease): self
     {
         $diseases = $this->chronic_diseases ?? [];
-        if (!in_array($disease, $diseases)) {
+        if (! in_array($disease, $diseases)) {
             $diseases[] = $disease;
             $this->update(['chronic_diseases' => $diseases]);
         }
+
         return $this;
     }
 
     public function addMedication(string $medication): self
     {
         $medications = $this->current_medications ?? [];
-        if (!in_array($medication, $medications)) {
+        if (! in_array($medication, $medications)) {
             $medications[] = $medication;
             $this->update(['current_medications' => $medications]);
         }
+
         return $this;
     }
 
     public function removeMedication(string $medication): self
     {
         $medications = $this->current_medications ?? [];
-        $medications = array_filter($medications, fn($m) => $m !== $medication);
+        $medications = array_filter($medications, fn ($m) => $m !== $medication);
         $this->update(['current_medications' => array_values($medications)]);
+
         return $this;
     }
 }

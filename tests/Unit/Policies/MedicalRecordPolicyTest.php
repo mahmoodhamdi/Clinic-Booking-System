@@ -15,17 +15,22 @@ class MedicalRecordPolicyTest extends TestCase
     use RefreshDatabase;
 
     private MedicalRecordPolicy $policy;
+
     private User $admin;
+
     private User $secretary;
+
     private User $patient;
+
     private User $otherPatient;
+
     private MedicalRecord $medicalRecord;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->policy = new MedicalRecordPolicy();
+        $this->policy = new MedicalRecordPolicy;
 
         $this->admin = User::factory()->create(['role' => UserRole::ADMIN]);
         $this->secretary = User::factory()->create(['role' => UserRole::SECRETARY]);

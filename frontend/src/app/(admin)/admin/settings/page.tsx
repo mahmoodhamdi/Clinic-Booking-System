@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -10,7 +10,6 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
-  Settings,
   Building2,
   Clock,
   CalendarOff,
@@ -74,21 +73,19 @@ const vacationSchema = z.object({
 type SettingsFormData = z.infer<typeof settingsSchema>;
 type VacationFormData = z.infer<typeof vacationSchema>;
 
-const DAYS_OF_WEEK = [
-  { value: 0, label: 'الأحد' },
-  { value: 1, label: 'الاثنين' },
-  { value: 2, label: 'الثلاثاء' },
-  { value: 3, label: 'الأربعاء' },
-  { value: 4, label: 'الخميس' },
-  { value: 5, label: 'الجمعة' },
-  { value: 6, label: 'السبت' },
-];
+const DAYS_OF_WEEK_VALUES = [0, 1, 2, 3, 4, 5, 6] as const;
 
 export default function AdminSettingsPage() {
   const t = useTranslations();
   const queryClient = useQueryClient();
   const [vacationDialogOpen, setVacationDialogOpen] = useState(false);
   const [deleteVacationId, setDeleteVacationId] = useState<number | null>(null);
+
+  // Build day labels using translations
+  const daysOfWeek = DAYS_OF_WEEK_VALUES.map((value) => ({
+    value,
+    label: t(`admin.schedules.days.${value}` as Parameters<typeof t>[0]),
+  }));
 
   const settingsForm = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
@@ -114,6 +111,18 @@ export default function AdminSettingsPage() {
     queryKey: ['clinicSettings'],
     queryFn: () => adminApi.getClinicSettings(),
   });
+
+  // Populate form with fetched settings data
+  useEffect(() => {
+    if (settings?.data) {
+      settingsForm.reset({
+        clinic_name: settings.data.clinic_name || '',
+        address: settings.data.clinic_address || '',
+        phone: settings.data.clinic_phone || '',
+        email: settings.data.clinic_email || '',
+      });
+    }
+  }, [settings, settingsForm]);
 
   // Fetch schedules
   const { data: schedules, isLoading: isLoadingSchedules } = useQuery<ApiResponse<Schedule[]>>({
@@ -352,7 +361,7 @@ export default function AdminSettingsPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {DAYS_OF_WEEK.map((day) => {
+                  {daysOfWeek.map((day) => {
                     const schedule = schedules?.data?.find(
                       (s) => s.day_of_week === day.value
                     );

@@ -106,6 +106,7 @@ class MedicalRecord extends Model
 
         if ($weight && $height) {
             $heightInMeters = $height / 100;
+
             return round($weight / ($heightInMeters * $heightInMeters), 1);
         }
 

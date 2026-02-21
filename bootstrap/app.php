@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Helpers\ApiResponse;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -39,6 +40,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return ApiResponse::unauthorized(__('يرجى تسجيل الدخول للمتابعة.'));
+            }
+        });
+
+        // Handle authorization exceptions
+        $exceptions->render(function (AuthorizationException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return ApiResponse::forbidden($e->getMessage() ?: __('الوصول مرفوض.'));
             }
         });
 

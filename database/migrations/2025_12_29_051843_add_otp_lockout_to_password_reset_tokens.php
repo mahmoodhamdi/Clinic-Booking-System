@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('password_reset_tokens', 'attempts')) {
+        if (! Schema::hasColumn('password_reset_tokens', 'attempts')) {
             Schema::table('password_reset_tokens', function (Blueprint $table) {
                 $table->unsignedTinyInteger('attempts')->default(0);
                 $table->timestamp('locked_until')->nullable();

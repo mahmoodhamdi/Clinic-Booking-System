@@ -13,7 +13,6 @@ use App\Models\User;
 use App\Traits\LogsActivity;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ReportService
@@ -69,14 +68,14 @@ class ReportService
 
         // Get summary statistics in a single query
         $summaryQuery = Appointment::query()
-            ->selectRaw("
+            ->selectRaw('
                 COUNT(*) as total,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as confirmed
-            ", [
+            ', [
                 AppointmentStatus::COMPLETED->value,
                 AppointmentStatus::CANCELLED->value,
                 AppointmentStatus::NO_SHOW->value,
@@ -152,7 +151,7 @@ class ReportService
 
         // Validate groupBy parameter
         $validGroupBy = ['day', 'week', 'month'];
-        if (!in_array($groupBy, $validGroupBy)) {
+        if (! in_array($groupBy, $validGroupBy)) {
             throw new BusinessLogicException(
                 __('نوع التجميع غير صالح'),
                 'INVALID_GROUP_BY',
@@ -171,14 +170,14 @@ class ReportService
 
         // Get summary and by_method in a single query
         $summaryStats = Payment::query()
-            ->selectRaw("
+            ->selectRaw('
                 COALESCE(SUM(total), 0) as total_revenue,
                 COALESCE(SUM(discount), 0) as total_discount,
                 COUNT(*) as total_payments,
                 COALESCE(SUM(CASE WHEN method = ? THEN total ELSE 0 END), 0) as cash_total,
                 COALESCE(SUM(CASE WHEN method = ? THEN total ELSE 0 END), 0) as card_total,
                 COALESCE(SUM(CASE WHEN method = ? THEN total ELSE 0 END), 0) as wallet_total
-            ", [
+            ', [
                 PaymentMethod::CASH->value,
                 PaymentMethod::CARD->value,
                 PaymentMethod::WALLET->value,
@@ -354,6 +353,7 @@ class ReportService
                 ];
                 $current->addDay();
             }
+
             return $breakdown;
         }
 
@@ -376,13 +376,14 @@ class ReportService
 
                 $breakdown[] = [
                     'period' => $current->toDateString(),
-                    'label' => $current->format('d M') . ' - ' . $weekEnd->format('d M'),
+                    'label' => $current->format('d M').' - '.$weekEnd->format('d M'),
                     'total' => (float) ($dbRow->total ?? 0),
                     'count' => (int) ($dbRow->count ?? 0),
                 ];
 
                 $current->addWeek();
             }
+
             return $breakdown;
         }
 
@@ -411,6 +412,7 @@ class ReportService
 
                 $current->addMonth();
             }
+
             return $breakdown;
         }
 

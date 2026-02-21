@@ -78,7 +78,7 @@ class SlotApiTest extends TestCase
             'break_end' => null,
         ]);
 
-        $response = $this->getJson('/api/slots/' . $tomorrow->toDateString());
+        $response = $this->getJson('/api/slots/'.$tomorrow->toDateString());
 
         $response->assertOk()
             ->assertJson([
@@ -112,7 +112,7 @@ class SlotApiTest extends TestCase
         // Verify vacation is found by the model method
         $this->assertTrue(Vacation::isVacationDay($tomorrow));
 
-        $response = $this->getJson('/api/slots/' . $tomorrow->toDateString());
+        $response = $this->getJson('/api/slots/'.$tomorrow->toDateString());
 
         $response->assertOk()
             ->assertJson([
@@ -131,7 +131,7 @@ class SlotApiTest extends TestCase
 
         // No schedule for tomorrow
 
-        $response = $this->getJson('/api/slots/' . $tomorrow->toDateString());
+        $response = $this->getJson('/api/slots/'.$tomorrow->toDateString());
 
         $response->assertOk()
             ->assertJson([
@@ -148,7 +148,7 @@ class SlotApiTest extends TestCase
     {
         $yesterday = now()->subDay();
 
-        $response = $this->getJson('/api/slots/' . $yesterday->toDateString());
+        $response = $this->getJson('/api/slots/'.$yesterday->toDateString());
 
         $response->assertStatus(422)
             ->assertJson([
@@ -161,7 +161,7 @@ class SlotApiTest extends TestCase
     {
         $farFuture = now()->addDays(60);
 
-        $response = $this->getJson('/api/slots/' . $farFuture->toDateString());
+        $response = $this->getJson('/api/slots/'.$farFuture->toDateString());
 
         $response->assertStatus(422)
             ->assertJson([
@@ -259,7 +259,7 @@ class SlotApiTest extends TestCase
             'break_end' => '10:30',
         ]);
 
-        $response = $this->getJson('/api/slots/' . $tomorrow->toDateString());
+        $response = $this->getJson('/api/slots/'.$tomorrow->toDateString());
 
         $response->assertOk();
 

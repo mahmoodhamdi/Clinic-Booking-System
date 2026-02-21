@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\ApiResponse;
+use App\Http\Requests\Admin\RecordPaymentRequest;
 use App\Http\Requests\Admin\StorePaymentRequest;
 use App\Http\Requests\Admin\UpdatePaymentRequest;
 use App\Http\Resources\PaymentResource;
@@ -13,7 +15,6 @@ use App\Models\Payment;
 use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PaymentController extends Controller
 {
@@ -21,7 +22,7 @@ class PaymentController extends Controller
         private PaymentService $paymentService
     ) {}
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $query = Payment::with(['appointment.patient'])
             ->when($request->status, function ($q, $status) {
@@ -55,7 +56,7 @@ class PaymentController extends Controller
         $perPage = $request->per_page ?? 15;
         $payments = $query->paginate($perPage);
 
-        return PaymentResource::collection($payments);
+        return ApiResponse::paginated($payments, PaymentResource::class);
     }
 
     public function store(StorePaymentRequest $request): JsonResponse
@@ -65,10 +66,7 @@ class PaymentController extends Controller
         // Check if appointment already has a payment
         $existingPayment = $appointment->payment;
         if ($existingPayment) {
-            return response()->json([
-                'message' => 'يوجد دفعة مسجلة لهذا الموعد بالفعل',
-                'data' => new PaymentResource($existingPayment),
-            ], 422);
+            return ApiResponse::error('يوجد دفعة مسجلة لهذا الموعد بالفعل', 422);
         }
 
         $payment = $this->paymentService->createPayment(
@@ -86,65 +84,48 @@ class PaymentController extends Controller
 
         $payment->load(['appointment.patient']);
 
-        return response()->json([
-            'message' => 'تم تسجيل الدفعة بنجاح',
-            'data' => new PaymentResource($payment),
-        ], 201);
+        return ApiResponse::created(new PaymentResource($payment), 'تم تسجيل الدفعة بنجاح');
     }
 
-    public function show(Payment $payment): PaymentResource
+    public function show(Payment $payment): JsonResponse
     {
         $payment->load(['appointment.patient']);
 
-        return new PaymentResource($payment);
+        return ApiResponse::success(new PaymentResource($payment));
     }
 
     public function update(UpdatePaymentRequest $request, Payment $payment): JsonResponse
     {
         if ($payment->isPaid()) {
-            return response()->json([
-                'message' => 'لا يمكن تعديل دفعة تمت بالفعل',
-            ], 422);
+            return ApiResponse::error('لا يمكن تعديل دفعة تمت بالفعل', 422);
         }
 
         if ($payment->isRefunded()) {
-            return response()->json([
-                'message' => 'لا يمكن تعديل دفعة مستردة',
-            ], 422);
+            return ApiResponse::error('لا يمكن تعديل دفعة مستردة', 422);
         }
 
         $payment = $this->paymentService->updatePayment($payment, $request->validated());
 
         $payment->load(['appointment.patient']);
 
-        return response()->json([
-            'message' => 'تم تحديث الدفعة بنجاح',
-            'data' => new PaymentResource($payment),
-        ]);
+        return ApiResponse::success(new PaymentResource($payment), 'تم تحديث الدفعة بنجاح');
     }
 
     public function markAsPaid(Request $request, Payment $payment): JsonResponse
     {
         if ($payment->isPaid()) {
-            return response()->json([
-                'message' => 'الدفعة مدفوعة بالفعل',
-            ], 422);
+            return ApiResponse::error('الدفعة مدفوعة بالفعل', 422);
         }
 
         if ($payment->isRefunded()) {
-            return response()->json([
-                'message' => 'لا يمكن تعديل دفعة مستردة',
-            ], 422);
+            return ApiResponse::error('لا يمكن تعديل دفعة مستردة', 422);
         }
 
         $this->paymentService->markAsPaid($payment, $request->transaction_id);
 
         $payment->load(['appointment.patient']);
 
-        return response()->json([
-            'message' => 'تم تأكيد الدفع بنجاح',
-            'data' => new PaymentResource($payment),
-        ]);
+        return ApiResponse::success(new PaymentResource($payment), 'تم تأكيد الدفع بنجاح');
     }
 
     public function refund(Request $request, Payment $payment): JsonResponse
@@ -156,20 +137,15 @@ class PaymentController extends Controller
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
 
-        if (!$payment->isPaid()) {
-            return response()->json([
-                'message' => 'لا يمكن استرداد دفعة غير مدفوعة',
-            ], 422);
+        if (! $payment->isPaid()) {
+            return ApiResponse::error('لا يمكن استرداد دفعة غير مدفوعة', 422);
         }
 
         $this->paymentService->refund($payment, $request->reason);
 
         $payment->load(['appointment.patient']);
 
-        return response()->json([
-            'message' => 'تم استرداد الدفعة بنجاح',
-            'data' => new PaymentResource($payment),
-        ]);
+        return ApiResponse::success(new PaymentResource($payment), 'تم استرداد الدفعة بنجاح');
     }
 
     public function statistics(Request $request): JsonResponse
@@ -179,9 +155,7 @@ class PaymentController extends Controller
 
         $statistics = $this->paymentService->getStatistics($from, $to);
 
-        return response()->json([
-            'data' => $statistics,
-        ]);
+        return ApiResponse::success($statistics);
     }
 
     public function report(Request $request): JsonResponse
@@ -191,49 +165,34 @@ class PaymentController extends Controller
 
         $report = $this->paymentService->getRevenueReport($period, $year);
 
-        return response()->json([
-            'data' => $report,
-        ]);
+        return ApiResponse::success($report);
     }
 
     public function todayStatistics(): JsonResponse
     {
         $statistics = $this->paymentService->getTodayStatistics();
 
-        return response()->json([
-            'data' => $statistics,
-        ]);
+        return ApiResponse::success($statistics);
     }
 
     public function byAppointment(Appointment $appointment): JsonResponse
     {
         $payment = $appointment->payment;
 
-        if (!$payment) {
-            return response()->json([
-                'message' => 'لا توجد دفعة لهذا الموعد',
-            ], 404);
+        if (! $payment) {
+            return ApiResponse::notFound('لا توجد دفعة لهذا الموعد');
         }
 
         $payment->load(['appointment.patient']);
 
-        return response()->json([
-            'data' => new PaymentResource($payment),
-        ]);
+        return ApiResponse::success(new PaymentResource($payment));
     }
 
     /**
      * Record a direct payment for a patient (without appointment).
      */
-    public function record(Request $request): JsonResponse
+    public function record(RecordPaymentRequest $request): JsonResponse
     {
-        $request->validate([
-            'patient_id' => ['required', 'integer', 'exists:users,id'],
-            'amount' => ['required', 'numeric', 'min:0'],
-            'payment_method' => ['nullable', 'string', 'in:cash,card,wallet'],
-            'notes' => ['nullable', 'string', 'max:500'],
-        ]);
-
         $amount = $request->amount;
         $payment = Payment::create([
             'appointment_id' => null,
@@ -247,10 +206,6 @@ class PaymentController extends Controller
             'notes' => $request->notes,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم تسجيل الدفعة بنجاح',
-            'data' => new PaymentResource($payment),
-        ], 201);
+        return ApiResponse::created(new PaymentResource($payment), 'تم تسجيل الدفعة بنجاح');
     }
 }

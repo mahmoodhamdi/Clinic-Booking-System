@@ -30,7 +30,26 @@
     "notes": "ملاحظات",
     "date": "التاريخ",
     "active": "نشط",
-    "currency": "ج.م"
+    "currency": "ج.م",
+    "viewAll": "عرض الكل",
+    "download": "تحميل",
+    "noMedications": "لا توجد أدوية",
+    "noNotes": "لا توجد ملاحظات",
+    "notFound": "لم يتم العثور على العنصر",
+    "patient": "مريض",
+    "name": "الاسم",
+    "phone": "الهاتف",
+    "units": {
+      "bpm": "نبضة/دقيقة",
+      "kg": "كجم",
+      "cm": "سم"
+    },
+    "pagination": "التنقل بين الصفحات",
+    "page": "صفحة",
+    "status": "الحالة",
+    "time": "الوقت",
+    "reason": "السبب",
+    "createdAt": "تاريخ الإنشاء"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -164,6 +183,13 @@
       "insuranceProvider": "شركة التأمين",
       "policyNumber": "رقم البوليصة",
       "updateSuccess": "تم تحديث الملف الشخصي بنجاح"
+    },
+    "prescriptions": {
+      "notFound": "لم يتم العثور على الوصفة الطبية",
+      "dispensedAt": "تم صرف هذه الوصفة في"
+    },
+    "medicalRecords": {
+      "notFound": "لم يتم العثور على السجل الطبي"
     }
   },
   "admin": {
@@ -178,7 +204,30 @@
       "todayRevenue": "إيرادات اليوم",
       "recentActivity": "النشاط الأخير",
       "weeklyStats": "إحصائيات الأسبوع",
-      "monthlyStats": "إحصائيات الشهر"
+      "monthlyStats": "إحصائيات الشهر",
+      "pendingConfirmation": "في انتظار التأكيد",
+      "noTodayAppointments": "لا توجد مواعيد اليوم",
+      "noRecentActivity": "لا يوجد نشاط حديث",
+      "appointmentTrend": "اتجاه المواعيد",
+      "statusDistribution": "توزيع الحالات",
+      "revenueTrend": "اتجاه الإيرادات",
+      "appointments": "المواعيد",
+      "revenue": "الإيرادات",
+      "completed": "مكتمل",
+      "newPatients": "مرضى جدد",
+      "thisWeek": "هذا الأسبوع",
+      "paymentStats": "إحصائيات المدفوعات",
+      "totalRevenueAll": "إجمالي الإيرادات",
+      "monthRevenue": "هذا الشهر",
+      "todayRevenueLabel": "اليوم",
+      "pendingPayments": "مدفوعات معلقة",
+      "chartLoadError": "فشل تحميل بيانات الرسم البياني",
+      "noChartData": "لا توجد بيانات لهذه الفترة",
+      "statusConfirmed": "مؤكد",
+      "statusPending": "معلق",
+      "statusCompleted": "مكتمل",
+      "statusCancelled": "ملغى",
+      "statusNoShow": "لم يحضر"
     },
     "appointments": {
       "title": "إدارة المواعيد",
@@ -193,7 +242,23 @@
       "changeStatus": "تغيير الحالة",
       "changeStatusDescription": "هل أنت متأكد من تغيير حالة هذا الموعد؟",
       "confirm": "تأكيد",
-      "markCompleted": "تسجيل كمكتمل"
+      "markCompleted": "تسجيل كمكتمل",
+      "appointmentDetail": "تفاصيل الموعد",
+      "appointmentInfo": "معلومات الموعد",
+      "timeline": "التسلسل الزمني",
+      "created": "تم الإنشاء",
+      "adminNotes": "ملاحظات الإدارة",
+      "cancellationReason": "سبب الإلغاء",
+      "reason": "سبب الزيارة",
+      "notFound": "الموعد غير موجود",
+      "actions": "الإجراءات",
+      "status": {
+        "confirmed": "مؤكد",
+        "pending": "معلق",
+        "completed": "مكتمل",
+        "cancelled": "ملغى",
+        "no_show": "لم يحضر"
+      }
     },
     "patients": {
       "title": "إدارة المرضى",
@@ -202,7 +267,8 @@
       "patientHistory": "سجل المريض",
       "addNotes": "إضافة ملاحظات",
       "toggleStatus": "تغيير الحالة",
-      "searchPlaceholder": "ابحث بالاسم أو رقم الهاتف..."
+      "searchPlaceholder": "ابحث بالاسم أو رقم الهاتف...",
+      "viewProfile": "عرض الملف الشخصي"
     },
     "medicalRecords": {
       "title": "السجلات الطبية",
@@ -238,7 +304,12 @@
       "instructions": "التعليمات",
       "addMedication": "إضافة دواء",
       "markDispensed": "تسجيل الصرف",
-      "downloadPdf": "تحميل PDF"
+      "downloadPdf": "تحميل PDF",
+      "dispensed": "تم الصرف",
+      "notDispensed": "لم يصرف",
+      "frequencyPlaceholder": "3 مرات يوميا",
+      "durationPlaceholder": "7 أيام",
+      "instructionsPlaceholder": "بعد الأكل"
     },
     "payments": {
       "title": "المدفوعات",
@@ -316,9 +387,17 @@
       "revenueReport": "تقرير الإيرادات",
       "appointmentsReport": "تقرير المواعيد",
       "patientsReport": "تقرير المرضى",
-      "dateRange": "النطاق الزمني",
+      "dateRange": "اختر نطاق زمني لعرض التقرير",
       "export": "تصدير",
-      "exportPdf": "تصدير PDF"
+      "exportPdf": "تصدير PDF",
+      "thisWeek": "هذا الأسبوع",
+      "thisMonth": "هذا الشهر",
+      "lastMonth": "الشهر الماضي",
+      "last3Months": "آخر 3 أشهر",
+      "completionRate": "نسبة الإكمال",
+      "cancellationRate": "نسبة الإلغاء",
+      "statusDistribution": "توزيع الحالات",
+      "inactivePatients": "مرضى غير نشطين"
     }
   },
   "notifications": {

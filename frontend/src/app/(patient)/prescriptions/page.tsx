@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { Pill, Calendar, Download, Eye, CheckCircle2, Clock } from 'lucide-react';
+import { Pill, Calendar, Eye, CheckCircle2, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -67,12 +67,12 @@ export default function PrescriptionsPage() {
                     {prescription.is_dispensed ? (
                       <Badge className="bg-green-100 text-green-800">
                         <CheckCircle2 className="h-3 w-3 me-1" />
-                        تم الصرف
+                        {t('admin.prescriptions.dispensed')}
                       </Badge>
                     ) : (
                       <Badge className="bg-yellow-100 text-yellow-800">
                         <Clock className="h-3 w-3 me-1" />
-                        لم يصرف
+                        {t('admin.prescriptions.notDispensed')}
                       </Badge>
                     )}
                     <div className="flex gap-2">

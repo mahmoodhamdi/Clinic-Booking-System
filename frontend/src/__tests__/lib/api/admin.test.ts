@@ -53,14 +53,14 @@ describe('adminApi', () => {
     });
 
     describe('getTodayAppointments', () => {
-      it('should call GET /admin/dashboard/today', async () => {
+      it('should call GET /admin/appointments/today', async () => {
         const appointments = createMany(() => createAppointment(), 5);
         const mockResponse = { data: wrapInApiResponse(appointments) };
         mockApi.get.mockResolvedValueOnce(mockResponse);
 
         const result = await adminApi.getTodayAppointments();
 
-        expect(mockApi.get).toHaveBeenCalledWith('/admin/dashboard/today');
+        expect(mockApi.get).toHaveBeenCalledWith('/admin/appointments/today');
         expect(result.data).toEqual(appointments);
       });
     });

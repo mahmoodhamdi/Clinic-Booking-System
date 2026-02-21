@@ -65,6 +65,11 @@ export const authApi = {
     return response.data;
   },
 
+  refresh: async (): Promise<ApiResponse<{ user: User }>> => {
+    const response = await api.post<ApiResponse<{ user: User }>>('/auth/refresh');
+    return response.data;
+  },
+
   forgotPassword: async (data: ForgotPasswordData): Promise<ApiResponse<null>> => {
     const response = await api.post<ApiResponse<null>>('/auth/forgot-password', data);
     return response.data;

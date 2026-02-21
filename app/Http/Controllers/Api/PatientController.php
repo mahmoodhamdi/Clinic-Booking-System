@@ -18,6 +18,7 @@ class PatientController extends Controller
     public function __construct(
         protected PatientStatisticsService $statisticsService
     ) {}
+
     public function dashboard(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -44,7 +45,7 @@ class PatientController extends Controller
         $user = $request->user();
         $profile = $user->profile;
 
-        if (!$profile) {
+        if (! $profile) {
             return response()->json([
                 'success' => true,
                 'data' => null,
@@ -86,7 +87,7 @@ class PatientController extends Controller
         $user = $request->user();
         $profile = $user->profile;
 
-        if (!$profile) {
+        if (! $profile) {
             // Create profile if it doesn't exist
             $profile = PatientProfile::create([
                 'user_id' => $user->id,

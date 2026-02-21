@@ -115,7 +115,7 @@ class SlotController extends Controller
     {
         $nextSlot = $this->slotService->getNextAvailableSlot();
 
-        if (!$nextSlot) {
+        if (! $nextSlot) {
             return response()->json([
                 'success' => false,
                 'message' => 'لا توجد مواعيد متاحة حالياً.',

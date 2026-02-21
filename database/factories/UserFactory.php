@@ -28,7 +28,7 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'phone' => '010' . fake()->unique()->numerify('########'),
+            'phone' => '010'.fake()->unique()->numerify('########'),
             'password' => static::$password ??= Hash::make('password'),
             'role' => UserRole::PATIENT,
             'date_of_birth' => fake()->dateTimeBetween('-60 years', '-18 years'),

@@ -33,6 +33,21 @@ const RETRYABLE_METHODS = ['get', 'head', 'options', 'put', 'delete'];
 // Retryable status codes (server errors and specific client errors)
 const RETRYABLE_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
+// Token refresh state
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (value: unknown) => void; reject: (reason?: unknown) => void }> = [];
+
+const processQueue = (error: unknown, token: unknown = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -120,16 +135,53 @@ api.interceptors.response.use(
     if (error.response) {
       const { status, data } = error.response as { status: number; data: Record<string, unknown> };
 
-      // Unauthorized - redirect to login
+      // Unauthorized - attempt token refresh before redirecting to login
       if (status === 401) {
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
+        const requestUrl = config.url || '';
+
+        // Do not attempt refresh for auth endpoints themselves
+        if (requestUrl.includes('/auth/login') || requestUrl.includes('/auth/refresh')) {
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+          return Promise.reject(new ApiError(
+            'Session expired. Please login again.',
+            401,
+            'UNAUTHORIZED'
+          ));
         }
-        return Promise.reject(new ApiError(
-          'Session expired. Please login again.',
-          401,
-          'UNAUTHORIZED'
-        ));
+
+        // If already refreshing, queue this request
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          }).then(() => {
+            return api(config);
+          }).catch((err) => {
+            return Promise.reject(err);
+          });
+        }
+
+        isRefreshing = true;
+
+        try {
+          // Attempt to refresh the session
+          await api.post('/auth/refresh');
+          processQueue(null);
+          return api(config);
+        } catch (refreshError) {
+          processQueue(refreshError);
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+          return Promise.reject(new ApiError(
+            'Session expired. Please login again.',
+            401,
+            'UNAUTHORIZED'
+          ));
+        } finally {
+          isRefreshing = false;
+        }
       }
 
       // Forbidden - insufficient permissions

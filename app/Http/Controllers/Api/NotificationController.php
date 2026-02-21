@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\ApiResponse;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Notifications\DatabaseNotification;
 
 class NotificationController extends Controller
 {
@@ -22,6 +22,7 @@ class NotificationController extends Controller
         );
 
         return response()->json([
+            'success' => true,
             'data' => $notifications->items(),
             'meta' => [
                 'current_page' => $notifications->currentPage(),
@@ -36,11 +37,7 @@ class NotificationController extends Controller
     {
         $count = $this->notificationService->getUnreadCount($request->user());
 
-        return response()->json([
-            'data' => [
-                'unread_count' => $count,
-            ],
-        ]);
+        return ApiResponse::success(['unread_count' => $count]);
     }
 
     public function markAsRead(Request $request, string $id): JsonResponse
@@ -51,18 +48,14 @@ class NotificationController extends Controller
 
         $this->notificationService->markAsRead($notification);
 
-        return response()->json([
-            'message' => 'تم تحديد الإشعار كمقروء',
-        ]);
+        return ApiResponse::success(null, 'تم تحديد الإشعار كمقروء');
     }
 
     public function markAllAsRead(Request $request): JsonResponse
     {
         $this->notificationService->markAllAsRead($request->user());
 
-        return response()->json([
-            'message' => 'تم تحديد جميع الإشعارات كمقروءة',
-        ]);
+        return ApiResponse::success(null, 'تم تحديد جميع الإشعارات كمقروءة');
     }
 
     public function destroy(Request $request, string $id): JsonResponse
@@ -73,8 +66,6 @@ class NotificationController extends Controller
 
         $this->notificationService->deleteNotification($notification);
 
-        return response()->json([
-            'message' => 'تم حذف الإشعار بنجاح',
-        ]);
+        return ApiResponse::success(null, 'تم حذف الإشعار بنجاح');
     }
 }

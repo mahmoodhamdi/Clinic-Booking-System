@@ -84,12 +84,19 @@ Test locations:
 
 ### Backend Flow
 ```
-routes/api.php → Controllers → Services → Models
-                     ↓
-              Form Requests (validation)
+routes/api.php → Controllers → Services → Models → Observers (side effects)
+                     ↓                                    ↓
+              Form Requests (validation)           Notifications
                      ↓
               Resources (API response transformation)
+                     ↓
+              ApiResponse helper (consistent JSON format)
 ```
+
+### Controller Organization
+- `app/Http/Controllers/Api/` - Patient-facing controllers (AppointmentController, AuthController, etc.)
+- `app/Http/Controllers/Api/Admin/` - Admin-facing controllers (aliased to avoid name collisions, e.g., `AdminAppointmentController`)
+- `app/Http/Controllers/Web/` - Cookie-based auth controller for SPA login/logout
 
 ### Route Groups (routes/api.php)
 - **Public**: `/api/auth/*`, `/api/slots/*`, `/api/health` (health check)
@@ -106,9 +113,10 @@ routes/api.php → Controllers → Services → Models
 - `AdminMiddleware` - Restricts routes to admin role (used on /api/admin/* routes, allows both admin and secretary)
 - `SecretaryMiddleware` - Restricts routes to secretary role only
 - `SetLocale` - Sets locale from Accept-Language header or query param
-- `SecurityHeaders` - Adds security headers to responses
-- `CacheApiResponse` - Caches API responses
-- `AuthenticateFromCookie` - Cookie-based auth for SPA
+- `SecurityHeaders` - Adds security headers to responses (appended to all API responses)
+- `AddRequestId` - Adds unique request ID to all API responses (appended to all API responses)
+- `CacheApiResponse` - Caches API responses (alias: `cache.api`)
+- `AuthenticateFromCookie` - Cookie-based auth for SPA (prepended to all API requests)
 
 ### Core Services (app/Services/)
 | Service | Responsibility |
@@ -121,6 +129,29 @@ routes/api.php → Controllers → Services → Models
 | DashboardService | Statistics and charts |
 | ReportService | Appointment, revenue, patient reports |
 | LocalizationService | Multi-language support (ar/en) |
+
+### Model Observers (app/Observers/)
+Observers auto-trigger side effects on model lifecycle events. Registered in `AppServiceProvider::boot()`.
+- `AppointmentObserver` - Handles appointment creation/update side effects
+- `PaymentObserver` - Payment event handling
+- `UserObserver` - User lifecycle events
+- `ScheduleObserver` - Schedule change side effects
+- `VacationObserver` - Vacation change handling
+- `MedicalRecordObserver` - Medical record lifecycle events
+
+### ApiResponse Helper (app/Http/Helpers/ApiResponse.php)
+All controllers use `ApiResponse` for consistent JSON responses:
+- `ApiResponse::success($data, $message, $code)` - Standard success
+- `ApiResponse::created($data, $message)` - 201 response
+- `ApiResponse::error($message, $code, $errors)` - Error response
+- `ApiResponse::paginated($paginator, $resourceClass)` - Paginated response with `meta` (current_page, last_page, per_page, total) and `links` (first, last, prev, next)
+- Shortcut methods: `notFound()`, `unauthorized()`, `forbidden()`, `validationError()`, `tooManyRequests()`, `serverError()`
+
+### Custom Exceptions (app/Exceptions/)
+Handled globally in `bootstrap/app.php`:
+- `BusinessLogicException` - Domain logic errors with `error_code` and `context`
+- `PaymentException` - Payment-specific errors with `appointment_id` and `amount`
+- `SlotNotAvailableException` - Thrown when booking an unavailable slot
 
 ### Key Model Relationships
 ```
@@ -136,6 +167,10 @@ Schedule (day_of_week 0-6, break times)
 Vacation (single dates that block booking)
 ClinicSetting (singleton)
 ```
+
+### Authorization Policies (app/Policies/)
+Registered via `Gate::policy()` in `AppServiceProvider::boot()`:
+- `AppointmentPolicy`, `MedicalRecordPolicy`, `PrescriptionPolicy`, `PaymentPolicy`, `PatientProfilePolicy`
 
 ### Enums (app/Enums/)
 - UserRole, AppointmentStatus, CancelledBy
@@ -166,11 +201,17 @@ __tests__/                    # Jest tests with MSW mocks
 
 ### Frontend Stack
 - **Routing**: Next.js 16 App Router with route groups
-- **State**: Zustand (auth) + React Query (server state, 5-min stale time)
+- **State**: Zustand (auth, persisted to localStorage) + React Query (server state, 5-min stale time)
 - **Forms**: React Hook Form + Zod validation
 - **UI**: Radix UI primitives + Tailwind CSS
 - **i18n**: next-intl (Arabic default, English fallback)
 - **Testing**: Jest + Testing Library + MSW (mocks) + Playwright (E2E)
+
+### Frontend API Client (frontend/src/lib/api/client.ts)
+- Axios instance with `withCredentials: true` (cookie auth)
+- Auto-retry: up to 3 retries with exponential backoff on idempotent methods (GET/PUT/DELETE) for status codes 408, 429, 500, 502, 503, 504
+- Custom `ApiError` class with `status`, `code`, and `details` (validation errors)
+- Locale sent via `Accept-Language` header from `localStorage`
 
 ## Development Workflow
 
@@ -214,7 +255,9 @@ refactor(scope): description  # Code refactoring
 ```
 
 ### Authentication
-Header: `Authorization: Bearer {token}` (Laravel Sanctum)
+- **SPA (frontend)**: HttpOnly cookies via `AuthenticateFromCookie` middleware. Frontend uses `withCredentials: true` on axios — no Bearer token in JS.
+- **External API**: `Authorization: Bearer {token}` header (Laravel Sanctum)
+- On 401, frontend auto-redirects to `/login`
 
 ### Localization
 Header: `Accept-Language: ar|en` or query: `?lang=ar`

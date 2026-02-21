@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\ApiResponse;
 use App\Services\ReportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,9 +23,7 @@ class ReportController extends Controller
             $request->status
         );
 
-        return response()->json([
-            'data' => $data,
-        ]);
+        return ApiResponse::success($data);
     }
 
     public function revenue(Request $request): JsonResponse
@@ -35,9 +34,7 @@ class ReportController extends Controller
             $request->group_by ?? 'day'
         );
 
-        return response()->json([
-            'data' => $data,
-        ]);
+        return ApiResponse::success($data);
     }
 
     public function patients(Request $request): JsonResponse
@@ -47,9 +44,7 @@ class ReportController extends Controller
             $request->to_date
         );
 
-        return response()->json([
-            'data' => $data,
-        ]);
+        return ApiResponse::success($data);
     }
 
     public function exportAppointments(Request $request): Response
@@ -60,7 +55,7 @@ class ReportController extends Controller
             $request->status
         );
 
-        $filename = 'appointments-report-' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'appointments-report-'.now()->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
     }
@@ -72,7 +67,7 @@ class ReportController extends Controller
             $request->to_date
         );
 
-        $filename = 'revenue-report-' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'revenue-report-'.now()->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
     }
@@ -84,7 +79,7 @@ class ReportController extends Controller
             $request->to_date
         );
 
-        $filename = 'patients-report-' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'patients-report-'.now()->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
     }

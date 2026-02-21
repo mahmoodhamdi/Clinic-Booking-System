@@ -17,6 +17,7 @@ class SlotGeneratorService
     use LogsActivity;
 
     protected ?ClinicSetting $settings = null;
+
     protected int $cacheTtl;
 
     public function __construct()
@@ -32,6 +33,7 @@ class SlotGeneratorService
         if ($this->settings === null) {
             $this->settings = ClinicSetting::getInstance();
         }
+
         return $this->settings;
     }
 
@@ -56,6 +58,9 @@ class SlotGeneratorService
      */
     public function invalidateCache(): void
     {
+        // Invalidate the batch schedules cache key
+        Cache::forget('all_schedules');
+
         // Invalidate schedule cache for all days
         for ($i = 0; $i <= 6; $i++) {
             Cache::forget($this->getScheduleCacheKey($i));
@@ -83,8 +88,8 @@ class SlotGeneratorService
         $endDate = now()->addDays($days)->toDateString();
         $vacationDates = $this->getVacationDatesInRange($startDate, $endDate);
 
-        // Preload schedules for all days of week (cached)
-        $schedules = $this->getAllSchedules();
+        // Preload schedules for all days of week (cached as a single batch)
+        $schedules = $this->getAllSchedulesGrouped();
 
         $dates = collect();
 
@@ -101,7 +106,7 @@ class SlotGeneratorService
             $dayOfWeek = DayOfWeek::fromDate($date)->value;
             $schedule = $schedules[$dayOfWeek] ?? null;
 
-            if (!$schedule) {
+            if (! $schedule) {
                 continue;
             }
 
@@ -125,11 +130,24 @@ class SlotGeneratorService
             ->where('is_active', true)
             ->whereBetween('date', [$startDate, $endDate])
             ->pluck('date')
-            ->map(fn($date) => Carbon::parse($date)->toDateString());
+            ->map(fn ($date) => Carbon::parse($date)->toDateString());
     }
 
     /**
-     * Get all schedules indexed by day of week (cached).
+     * Get all active schedules grouped by day_of_week (single batch cache).
+     */
+    protected function getAllSchedulesGrouped(): array
+    {
+        return Cache::remember('all_schedules', $this->cacheTtl, function () {
+            return Schedule::where('is_active', true)
+                ->get()
+                ->keyBy('day_of_week')
+                ->toArray();
+        });
+    }
+
+    /**
+     * Get all schedules indexed by day of week (per-day cached fallback for individual lookups).
      */
     protected function getAllSchedules(): array
     {
@@ -138,9 +156,10 @@ class SlotGeneratorService
             $schedules[$i] = Cache::remember(
                 $this->getScheduleCacheKey($i),
                 $this->cacheTtl,
-                fn() => Schedule::active()->forDay(DayOfWeek::from($i))->first()
+                fn () => Schedule::active()->forDay(DayOfWeek::from($i))->first()
             );
         }
+
         return $schedules;
     }
 
@@ -155,7 +174,7 @@ class SlotGeneratorService
         $isVacation = Cache::remember(
             $this->getVacationCacheKey($dateString),
             $this->cacheTtl,
-            fn() => Vacation::isVacationDay($date)
+            fn () => Vacation::isVacationDay($date)
         );
 
         if ($isVacation) {
@@ -167,7 +186,7 @@ class SlotGeneratorService
         $schedule = Cache::remember(
             $this->getScheduleCacheKey($dayOfWeek),
             $this->cacheTtl,
-            fn() => Schedule::active()->forDay(DayOfWeek::from($dayOfWeek))->first()
+            fn () => Schedule::active()->forDay(DayOfWeek::from($dayOfWeek))->first()
         );
 
         return $schedule !== null;
@@ -184,7 +203,7 @@ class SlotGeneratorService
         $isVacation = Cache::remember(
             $this->getVacationCacheKey($dateString),
             $this->cacheTtl,
-            fn() => Vacation::isVacationDay($date)
+            fn () => Vacation::isVacationDay($date)
         );
 
         if ($isVacation) {
@@ -196,10 +215,10 @@ class SlotGeneratorService
         $schedule = Cache::remember(
             $this->getScheduleCacheKey($dayOfWeek),
             $this->cacheTtl,
-            fn() => Schedule::active()->forDay(DayOfWeek::from($dayOfWeek))->first()
+            fn () => Schedule::active()->forDay(DayOfWeek::from($dayOfWeek))->first()
         );
 
-        if (!$schedule) {
+        if (! $schedule) {
             return collect();
         }
 
@@ -220,10 +239,11 @@ class SlotGeneratorService
         return $slots->map(function ($time) use ($date, $bookedTimes) {
             $normalizedTime = Carbon::parse($time)->format('H:i');
             $isBooked = $bookedTimes->contains($normalizedTime);
+
             return [
                 'time' => $time,
                 'datetime' => $date->copy()->setTimeFromTimeString($time)->toIso8601String(),
-                'is_available' => !$isBooked,
+                'is_available' => ! $isBooked,
             ];
         })->values();
     }
@@ -237,7 +257,7 @@ class SlotGeneratorService
             ->whereDate('appointment_date', $date->toDateString())
             ->active()
             ->pluck('appointment_time')
-            ->map(fn($time) => Carbon::parse($time)->format('H:i'));
+            ->map(fn ($time) => Carbon::parse($time)->format('H:i'));
     }
 
     /**
@@ -249,7 +269,7 @@ class SlotGeneratorService
         $time = $datetime->format('H:i');
 
         // Check if date is available
-        if (!$this->isDateAvailable($date)) {
+        if (! $this->isDateAvailable($date)) {
             return false;
         }
 
@@ -257,7 +277,7 @@ class SlotGeneratorService
         $slots = $this->getSlotsForDate($date);
         $slotExists = $slots->contains('time', $time);
 
-        if (!$slotExists) {
+        if (! $slotExists) {
             return false;
         }
 
@@ -286,7 +306,7 @@ class SlotGeneratorService
             $slots = $this->getSlotsForDate($date);
 
             // Find first available slot (not booked)
-            $availableSlot = $slots->first(fn($slot) => $slot['is_available']);
+            $availableSlot = $slots->first(fn ($slot) => $slot['is_available']);
 
             if ($availableSlot) {
                 return [
@@ -345,6 +365,7 @@ class SlotGeneratorService
     public function refreshSettings(): self
     {
         $this->settings = ClinicSetting::getInstance()->fresh();
+
         return $this;
     }
 }

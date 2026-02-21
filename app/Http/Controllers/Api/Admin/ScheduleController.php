@@ -14,8 +14,8 @@ class ScheduleController extends Controller
 {
     public function __construct(
         protected SlotGeneratorService $slotService
-    ) {
-    }
+    ) {}
+
     /**
      * List all schedules.
      */
@@ -95,7 +95,7 @@ class ScheduleController extends Controller
      */
     public function toggle(Schedule $schedule): JsonResponse
     {
-        $schedule->update(['is_active' => !$schedule->is_active]);
+        $schedule->update(['is_active' => ! $schedule->is_active]);
 
         // Invalidate slot cache when schedule changes
         $this->slotService->invalidateCache();

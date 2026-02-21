@@ -30,7 +30,7 @@ class AppointmentCancelled extends Notification
         );
 
         if ($this->reason) {
-            $message .= '. السبب: ' . $this->reason;
+            $message .= '. السبب: '.$this->reason;
         }
 
         return [

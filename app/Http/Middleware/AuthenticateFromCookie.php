@@ -26,7 +26,7 @@ class AuthenticateFromCookie
 
         if ($token) {
             // Add the token as a Bearer token header
-            $request->headers->set('Authorization', 'Bearer ' . $token);
+            $request->headers->set('Authorization', 'Bearer '.$token);
         }
 
         return $next($request);

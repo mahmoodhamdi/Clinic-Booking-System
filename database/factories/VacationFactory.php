@@ -12,7 +12,7 @@ class VacationFactory extends Factory
     public function definition(): array
     {
         $startDate = fake()->dateTimeBetween('now', '+3 months');
-        $endDate = fake()->dateTimeBetween($startDate, $startDate->format('Y-m-d') . ' +7 days');
+        $endDate = fake()->dateTimeBetween($startDate, $startDate->format('Y-m-d').' +7 days');
 
         return [
             'title' => fake()->randomElement([
@@ -67,6 +67,7 @@ class VacationFactory extends Factory
     public function singleDay(): static
     {
         $date = fake()->dateTimeBetween('now', '+1 month');
+
         return $this->state(fn (array $attributes) => [
             'start_date' => $date,
             'end_date' => $date,

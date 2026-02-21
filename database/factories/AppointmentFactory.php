@@ -34,28 +34,28 @@ class AppointmentFactory extends Factory
 
     public function forPatient(User $patient): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'user_id' => $patient->id,
         ]);
     }
 
     public function forDate(string $date): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'appointment_date' => $date,
         ]);
     }
 
     public function forTime(string $time): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'appointment_time' => $time,
         ]);
     }
 
     public function forDateTime(string $date, string $time): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'appointment_date' => $date,
             'appointment_time' => $time,
         ]);
@@ -63,14 +63,14 @@ class AppointmentFactory extends Factory
 
     public function pending(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => AppointmentStatus::PENDING,
         ]);
     }
 
     public function confirmed(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => AppointmentStatus::CONFIRMED,
             'confirmed_at' => now(),
         ]);
@@ -78,7 +78,7 @@ class AppointmentFactory extends Factory
 
     public function completed(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => AppointmentStatus::COMPLETED,
             'confirmed_at' => now()->subHour(),
             'completed_at' => now(),
@@ -87,7 +87,7 @@ class AppointmentFactory extends Factory
 
     public function cancelled(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => AppointmentStatus::CANCELLED,
             'cancellation_reason' => $this->faker->sentence(),
             'cancelled_by' => $this->faker->randomElement(CancelledBy::cases()),
@@ -97,7 +97,7 @@ class AppointmentFactory extends Factory
 
     public function cancelledByPatient(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => AppointmentStatus::CANCELLED,
             'cancellation_reason' => $this->faker->sentence(),
             'cancelled_by' => CancelledBy::PATIENT,
@@ -107,7 +107,7 @@ class AppointmentFactory extends Factory
 
     public function cancelledByAdmin(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => AppointmentStatus::CANCELLED,
             'cancellation_reason' => $this->faker->sentence(),
             'cancelled_by' => CancelledBy::ADMIN,
@@ -117,21 +117,21 @@ class AppointmentFactory extends Factory
 
     public function noShow(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => AppointmentStatus::NO_SHOW,
         ]);
     }
 
     public function today(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'appointment_date' => now()->toDateString(),
         ]);
     }
 
     public function tomorrow(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'appointment_date' => now()->addDay()->toDateString(),
         ]);
     }
@@ -139,7 +139,8 @@ class AppointmentFactory extends Factory
     public function past(): static
     {
         $date = $this->faker->dateTimeBetween('-30 days', '-1 day');
-        return $this->state(fn(array $attributes) => [
+
+        return $this->state(fn (array $attributes) => [
             'appointment_date' => $date->format('Y-m-d'),
         ]);
     }
@@ -147,21 +148,22 @@ class AppointmentFactory extends Factory
     public function future(): static
     {
         $date = $this->faker->dateTimeBetween('+1 day', '+30 days');
-        return $this->state(fn(array $attributes) => [
+
+        return $this->state(fn (array $attributes) => [
             'appointment_date' => $date->format('Y-m-d'),
         ]);
     }
 
-    public function withNotes(string $notes = null): static
+    public function withNotes(?string $notes = null): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'notes' => $notes ?? $this->faker->paragraph(),
         ]);
     }
 
-    public function withAdminNotes(string $notes = null): static
+    public function withAdminNotes(?string $notes = null): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'admin_notes' => $notes ?? $this->faker->paragraph(),
         ]);
     }
@@ -171,7 +173,7 @@ class AppointmentFactory extends Factory
      */
     public function deleted(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'deleted_at' => now(),
         ]);
     }

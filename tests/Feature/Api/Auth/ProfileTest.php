@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Auth;
 
-use App\Enums\Gender;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -25,7 +24,7 @@ class ProfileTest extends TestCase
         $response->assertOk()
             ->assertJsonStructure([
                 'success',
-                'data' => ['id', 'name', 'email', 'phone', 'role']
+                'data' => ['id', 'name', 'email', 'phone', 'role'],
             ])
             ->assertJson([
                 'success' => true,

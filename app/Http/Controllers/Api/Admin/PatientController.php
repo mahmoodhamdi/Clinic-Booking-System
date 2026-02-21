@@ -183,7 +183,7 @@ class PatientController extends Controller
 
         $profile = $patient->profile;
 
-        if (!$profile) {
+        if (! $profile) {
             $profile = $patient->profile()->create($request->validated());
         } else {
             $profile->update($request->validated());
@@ -206,7 +206,7 @@ class PatientController extends Controller
         }
 
         $patient->update([
-            'is_active' => !$patient->is_active,
+            'is_active' => ! $patient->is_active,
         ]);
 
         $statusMessage = $patient->is_active
@@ -235,14 +235,14 @@ class PatientController extends Controller
 
         $profile = $patient->profile;
 
-        if (!$profile) {
+        if (! $profile) {
             $profile = $patient->profile()->create([
                 'medical_notes' => $request->medical_notes,
             ]);
         } else {
             $existingNotes = $profile->medical_notes ?? '';
             $newNotes = $existingNotes
-                ? $existingNotes . "\n\n---\n\n" . now()->format('Y-m-d H:i') . ":\n" . $request->medical_notes
+                ? $existingNotes."\n\n---\n\n".now()->format('Y-m-d H:i').":\n".$request->medical_notes
                 : $request->medical_notes;
 
             $profile->update(['medical_notes' => $newNotes]);

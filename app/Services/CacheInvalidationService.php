@@ -16,6 +16,7 @@ class CacheInvalidationService
     use LogsActivity;
 
     protected SlotGeneratorService $slotService;
+
     protected DashboardService $dashboardService;
 
     public function __construct(

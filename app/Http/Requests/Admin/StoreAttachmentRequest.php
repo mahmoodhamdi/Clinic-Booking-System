@@ -41,7 +41,7 @@ class StoreAttachmentRequest extends FormRequest
                 'required',
                 'file',
                 'max:10240', // 10MB in KB
-                'mimetypes:' . implode(',', self::ALLOWED_MIME_TYPES),
+                'mimetypes:'.implode(',', self::ALLOWED_MIME_TYPES),
                 function ($attribute, $value, $fail) {
                     $this->validateFileExtension($value, $fail);
                     $this->validateFileContent($value, $fail);
@@ -65,7 +65,7 @@ class StoreAttachmentRequest extends FormRequest
         // Check for double extensions (e.g., file.php.jpg)
         $filename = $file->getClientOriginalName();
         foreach (self::BLOCKED_EXTENSIONS as $blockedExt) {
-            if (preg_match('/\.' . preg_quote($blockedExt, '/') . '\./i', $filename)) {
+            if (preg_match('/\.'.preg_quote($blockedExt, '/').'\./i', $filename)) {
                 $fail('اسم الملف يحتوي على امتداد غير مسموح به.');
             }
         }
@@ -93,6 +93,7 @@ class StoreAttachmentRequest extends FormRequest
         foreach ($dangerousPatterns as $pattern) {
             if (preg_match($pattern, $content)) {
                 $fail('الملف يحتوي على محتوى غير آمن.');
+
                 return;
             }
         }

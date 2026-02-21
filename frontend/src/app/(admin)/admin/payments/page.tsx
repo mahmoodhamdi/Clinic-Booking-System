@@ -18,7 +18,6 @@ import {
   DollarSign,
   CheckCircle2,
   Clock,
-  Filter,
 } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -50,7 +49,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
-import type { Payment, User, ApiResponse, PaginatedResponse } from '@/types';
+import { useDebounce } from '@/hooks/useDebounce';
+import type { Payment, User, PaginatedResponse } from '@/types';
 
 const paymentSchema = z.object({
   patient_id: z.string().min(1, 'Patient is required'),
@@ -68,6 +68,8 @@ export default function AdminPaymentsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -80,7 +82,7 @@ export default function AdminPaymentsPage() {
 
   // Fetch payments
   const { data: payments, isLoading } = useQuery<PaginatedResponse<Payment>>({
-    queryKey: ['adminPayments', statusFilter],
+    queryKey: ['adminPayments', statusFilter, debouncedSearch],
     queryFn: () =>
       adminApi.getPayments({
         status: statusFilter !== 'all' ? statusFilter : undefined,
@@ -160,8 +162,8 @@ export default function AdminPaymentsPage() {
   };
 
   const filteredPayments = payments?.data?.filter((payment) => {
-    if (!searchQuery) return true;
-    const search = searchQuery.toLowerCase();
+    if (!debouncedSearch) return true;
+    const search = debouncedSearch.toLowerCase();
     return (payment as Payment & { patient?: User }).patient?.name?.toLowerCase().includes(search);
   });
 
@@ -174,6 +176,8 @@ export default function AdminPaymentsPage() {
     filteredPayments
       ?.filter((p) => p.status === 'paid')
       .reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+
+  const currency = t('common.currency');
 
   return (
     <div className="space-y-6">
@@ -192,7 +196,7 @@ export default function AdminPaymentsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">{t('admin.payments.totalPayments')}</p>
-                <p className="text-2xl font-bold">{totalAmount.toFixed(2)} ج.م</p>
+                <p className="text-2xl font-bold">{totalAmount.toFixed(2)} {currency}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
                 <DollarSign className="h-5 w-5 text-blue-600" />
@@ -205,7 +209,7 @@ export default function AdminPaymentsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">{t('admin.payments.completedPayments')}</p>
-                <p className="text-2xl font-bold">{completedAmount.toFixed(2)} ج.م</p>
+                <p className="text-2xl font-bold">{completedAmount.toFixed(2)} {currency}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -292,7 +296,7 @@ export default function AdminPaymentsPage() {
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <span className="text-lg font-bold text-green-600">
-                      {payment.amount?.toFixed(2)} ج.م
+                      {payment.amount?.toFixed(2)} {currency}
                     </span>
                     {getStatusBadge(payment.status)}
                   </div>

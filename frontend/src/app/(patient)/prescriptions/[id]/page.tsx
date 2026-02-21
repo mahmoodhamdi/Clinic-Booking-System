@@ -16,7 +16,6 @@ import type { Prescription, PrescriptionItem, ApiResponse } from '@/types';
 import {
   ArrowRight,
   Pill,
-  Calendar,
   FileText,
   Download,
   CheckCircle,
@@ -51,7 +50,7 @@ export default function PrescriptionDetailPage() {
     return (
       <div className="text-center py-12">
         <Pill className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-muted-foreground">لم يتم العثور على الوصفة الطبية</p>
+        <p className="text-muted-foreground">{t('patient.prescriptions.notFound')}</p>
         <Button onClick={() => router.back()} variant="outline" className="mt-4">
           {t('common.back')}
         </Button>
@@ -83,12 +82,12 @@ export default function PrescriptionDetailPage() {
           {prescription.is_dispensed ? (
             <>
               <CheckCircle className="h-3 w-3" />
-              تم الصرف
+              {t('admin.prescriptions.dispensed')}
             </>
           ) : (
             <>
               <XCircle className="h-3 w-3" />
-              لم يصرف
+              {t('admin.prescriptions.notDispensed')}
             </>
           )}
         </Badge>
@@ -101,8 +100,8 @@ export default function PrescriptionDetailPage() {
             <div className="flex items-center gap-2 text-green-700">
               <CheckCircle className="h-5 w-5" />
               <span>
-                تم صرف هذه الوصفة في{' '}
-                {format(new Date(prescription.dispensed_at), 'd MMMM yyyy الساعة h:mm a', {
+                {t('patient.prescriptions.dispensedAt')}{' '}
+                {format(new Date(prescription.dispensed_at), 'd MMMM yyyy', {
                   locale: ar,
                 })}
               </span>
@@ -143,7 +142,7 @@ export default function PrescriptionDetailPage() {
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground text-center py-4">لا توجد أدوية</p>
+            <p className="text-muted-foreground text-center py-4">{t('common.noMedications')}</p>
           )}
         </CardContent>
       </Card>

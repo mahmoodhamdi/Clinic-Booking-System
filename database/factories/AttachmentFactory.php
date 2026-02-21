@@ -28,8 +28,8 @@ class AttachmentFactory extends Factory
         return [
             'attachable_type' => MedicalRecord::class,
             'attachable_id' => MedicalRecord::factory(),
-            'file_name' => $file['name'] . '_' . fake()->unique()->randomNumber(5) . '.' . $file['ext'],
-            'file_path' => 'attachments/' . fake()->uuid() . '.' . $file['ext'],
+            'file_name' => $file['name'].'_'.fake()->unique()->randomNumber(5).'.'.$file['ext'],
+            'file_path' => 'attachments/'.fake()->uuid().'.'.$file['ext'],
             'file_type' => $file['type'],
             'file_size' => fake()->numberBetween(10240, 5242880), // 10KB to 5MB
             'description' => fake()->optional()->sentence(),
@@ -55,8 +55,8 @@ class AttachmentFactory extends Factory
     public function image(): static
     {
         return $this->state(fn (array $attributes) => [
-            'file_name' => 'صورة_' . fake()->randomNumber(5) . '.jpg',
-            'file_path' => 'attachments/' . fake()->uuid() . '.jpg',
+            'file_name' => 'صورة_'.fake()->randomNumber(5).'.jpg',
+            'file_path' => 'attachments/'.fake()->uuid().'.jpg',
             'file_type' => 'image',
         ]);
     }
@@ -64,8 +64,8 @@ class AttachmentFactory extends Factory
     public function pdf(): static
     {
         return $this->state(fn (array $attributes) => [
-            'file_name' => 'تقرير_' . fake()->randomNumber(5) . '.pdf',
-            'file_path' => 'attachments/' . fake()->uuid() . '.pdf',
+            'file_name' => 'تقرير_'.fake()->randomNumber(5).'.pdf',
+            'file_path' => 'attachments/'.fake()->uuid().'.pdf',
             'file_type' => 'pdf',
         ]);
     }
@@ -73,8 +73,8 @@ class AttachmentFactory extends Factory
     public function document(): static
     {
         return $this->state(fn (array $attributes) => [
-            'file_name' => 'مستند_' . fake()->randomNumber(5) . '.docx',
-            'file_path' => 'attachments/' . fake()->uuid() . '.docx',
+            'file_name' => 'مستند_'.fake()->randomNumber(5).'.docx',
+            'file_path' => 'attachments/'.fake()->uuid().'.docx',
             'file_type' => 'document',
         ]);
     }

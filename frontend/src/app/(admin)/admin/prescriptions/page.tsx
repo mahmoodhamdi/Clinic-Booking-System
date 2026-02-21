@@ -50,6 +50,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { Prescription, PrescriptionItem, User, ApiResponse, PaginatedResponse } from '@/types';
 
 const prescriptionSchema = z.object({
@@ -77,6 +78,8 @@ export default function AdminPrescriptionsPage() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
 
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
   const form = useForm<PrescriptionFormData>({
     resolver: zodResolver(prescriptionSchema),
     defaultValues: {
@@ -102,7 +105,7 @@ export default function AdminPrescriptionsPage() {
 
   // Fetch prescriptions
   const { data: prescriptions, isLoading } = useQuery<ApiResponse<Prescription[]>>({
-    queryKey: ['adminPrescriptions'],
+    queryKey: ['adminPrescriptions', debouncedSearch],
     queryFn: () => adminApi.getPrescriptions(),
   });
 
@@ -155,8 +158,8 @@ export default function AdminPrescriptionsPage() {
   };
 
   const filteredPrescriptions = prescriptions?.data?.filter((prescription) => {
-    if (!searchQuery) return true;
-    const search = searchQuery.toLowerCase();
+    if (!debouncedSearch) return true;
+    const search = debouncedSearch.toLowerCase();
     return (
       (prescription as Prescription & { patient?: User }).patient?.name?.toLowerCase().includes(search) ||
       prescription.diagnosis?.toLowerCase().includes(search)
@@ -227,12 +230,12 @@ export default function AdminPrescriptionsPage() {
                     {prescription.is_dispensed ? (
                       <Badge className="bg-green-100 text-green-800">
                         <CheckCircle2 className="h-3 w-3 me-1" />
-                        تم الصرف
+                        {t('admin.prescriptions.dispensed')}
                       </Badge>
                     ) : (
                       <Badge className="bg-yellow-100 text-yellow-800">
                         <Clock className="h-3 w-3 me-1" />
-                        لم يصرف
+                        {t('admin.prescriptions.notDispensed')}
                       </Badge>
                     )}
                     <Button
@@ -378,7 +381,7 @@ export default function AdminPrescriptionsPage() {
                             <FormItem>
                               <FormLabel>{t('admin.prescriptions.frequency')}</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="3 مرات يوميا" />
+                                <Input {...field} placeholder={t('admin.prescriptions.frequencyPlaceholder')} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -391,7 +394,7 @@ export default function AdminPrescriptionsPage() {
                             <FormItem>
                               <FormLabel>{t('admin.prescriptions.duration')}</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="7 أيام" />
+                                <Input {...field} placeholder={t('admin.prescriptions.durationPlaceholder')} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -405,7 +408,7 @@ export default function AdminPrescriptionsPage() {
                           <FormItem>
                             <FormLabel>{t('admin.prescriptions.instructions')}</FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="بعد الأكل" />
+                              <Input {...field} placeholder={t('admin.prescriptions.instructionsPlaceholder')} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -475,7 +478,7 @@ export default function AdminPrescriptionsPage() {
               <div>
                 <p className="text-sm text-gray-500 mb-2">{t('admin.prescriptions.medications')}</p>
                 <div className="space-y-2">
-                  {selectedPrescription.items?.map((item, index) => (
+                  {selectedPrescription.items?.map((item: PrescriptionItem, index: number) => (
                     <div key={index} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="font-medium">{item.medication_name}</p>
                       <div className="text-sm text-gray-500 mt-1 space-x-2 rtl:space-x-reverse">

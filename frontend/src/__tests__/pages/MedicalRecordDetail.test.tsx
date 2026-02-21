@@ -127,7 +127,8 @@ describe('MedicalRecordDetailPage', () => {
     render(<MedicalRecordDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('لم يتم العثور على السجل الطبي')).toBeInTheDocument();
+      // Translation mock returns the key, so we check for the translation key
+      expect(screen.getByText('patient.medicalRecords.notFound')).toBeInTheDocument();
     });
   });
 
@@ -137,7 +138,8 @@ describe('MedicalRecordDetailPage', () => {
     render(<MedicalRecordDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('لم يتم العثور على السجل الطبي')).toBeInTheDocument();
+      // Translation mock returns the key, so we check for the translation key
+      expect(screen.getByText('patient.medicalRecords.notFound')).toBeInTheDocument();
     });
   });
 
@@ -178,7 +180,8 @@ describe('MedicalRecordDetailPage', () => {
     render(<MedicalRecordDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('لا توجد ملاحظات')).toBeInTheDocument();
+      // Translation mock returns the key, so we check for the translation key
+      expect(screen.getByText('common.noNotes')).toBeInTheDocument();
     });
   });
 });

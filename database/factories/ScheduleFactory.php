@@ -28,6 +28,7 @@ class ScheduleFactory extends Factory
     public function forDay(DayOfWeek|int $day): static
     {
         $dayValue = $day instanceof DayOfWeek ? $day->value : $day;
+
         return $this->state(fn (array $attributes) => [
             'day_of_week' => $dayValue,
         ]);

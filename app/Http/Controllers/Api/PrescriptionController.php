@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\ApiResponse;
 use App\Http\Resources\PrescriptionResource;
 use App\Models\Prescription;
 use App\Services\PrescriptionPdfService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PrescriptionController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $prescriptions = Prescription::with(['medicalRecord', 'items'])
             ->forPatient($request->user()->id)
@@ -20,16 +21,16 @@ class PrescriptionController extends Controller
             ->latest()
             ->paginate($request->per_page ?? 15);
 
-        return PrescriptionResource::collection($prescriptions);
+        return ApiResponse::paginated($prescriptions, PrescriptionResource::class);
     }
 
-    public function show(Request $request, Prescription $prescription): PrescriptionResource
+    public function show(Request $request, Prescription $prescription): JsonResponse
     {
         $this->authorize('view', $prescription);
 
         $prescription->load(['medicalRecord', 'items']);
 
-        return new PrescriptionResource($prescription);
+        return ApiResponse::success(new PrescriptionResource($prescription));
     }
 
     public function downloadPdf(Request $request, Prescription $prescription, PrescriptionPdfService $pdfService)

@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import {
   FileText,
   Download,
@@ -12,7 +10,25 @@ import {
   DollarSign,
   Users,
   TrendingUp,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertTriangle,
+  Loader2,
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +37,153 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { adminApi } from '@/lib/api/admin';
+import { toast } from 'sonner';
+
+const STATUS_COLORS: Record<string, string> = {
+  completed: '#22c55e',
+  confirmed: '#3b82f6',
+  pending: '#eab308',
+  cancelled: '#ef4444',
+  no_show: '#6b7280',
+};
+
+function getQuickDateRange(period: string): { from: string; to: string } {
+  const today = new Date();
+  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+
+  switch (period) {
+    case 'this_week': {
+      const start = new Date(today);
+      start.setDate(today.getDate() - today.getDay());
+      return { from: formatDate(start), to: formatDate(today) };
+    }
+    case 'this_month': {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      return { from: formatDate(start), to: formatDate(today) };
+    }
+    case 'last_month': {
+      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const end = new Date(today.getFullYear(), today.getMonth(), 0);
+      return { from: formatDate(start), to: formatDate(end) };
+    }
+    case 'last_3_months': {
+      const start = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+      return { from: formatDate(start), to: formatDate(today) };
+    }
+    default:
+      return { from: '', to: '' };
+  }
+}
+
+interface DateRangePickerProps {
+  startDate: string;
+  endDate: string;
+  onStartDateChange: (date: string) => void;
+  onEndDateChange: (date: string) => void;
+  onExport: () => void;
+  isExporting: boolean;
+  exportDisabled: boolean;
+  t: ReturnType<typeof useTranslations>;
+}
+
+function DateRangePicker({
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
+  onExport,
+  isExporting,
+  exportDisabled,
+  t,
+}: DateRangePickerProps) {
+  const quickRanges = [
+    { key: 'this_week', label: t('admin.reports.thisWeek') },
+    { key: 'this_month', label: t('admin.reports.thisMonth') },
+    { key: 'last_month', label: t('admin.reports.lastMonth') },
+    { key: 'last_3_months', label: t('admin.reports.last3Months') },
+  ];
+
+  const handleQuickRange = (period: string) => {
+    const { from, to } = getQuickDateRange(period);
+    onStartDateChange(from);
+    onEndDateChange(to);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {quickRanges.map((range) => (
+          <Button
+            key={range.key}
+            variant="outline"
+            size="sm"
+            onClick={() => handleQuickRange(range.key)}
+          >
+            {range.label}
+          </Button>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>{t('admin.settings.startDate')}</Label>
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => onStartDateChange(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>{t('admin.settings.endDate')}</Label>
+          <Input
+            type="date"
+            value={endDate}
+            onChange={(e) => onEndDateChange(e.target.value)}
+          />
+        </div>
+        <div className="flex items-end">
+          <Button
+            onClick={onExport}
+            disabled={exportDisabled || isExporting}
+            className="w-full"
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 me-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 me-2" />
+            )}
+            {t('admin.reports.exportPdf')}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  title,
+  value,
+  icon,
+  color = 'text-gray-900',
+}: {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  color?: string;
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+          {icon}
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className={`text-2xl font-bold ${color}`}>{value}</p>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function ReportsPage() {
   const t = useTranslations();
@@ -30,6 +193,9 @@ export default function ReportsPage() {
   const [appointmentsEndDate, setAppointmentsEndDate] = useState('');
   const [patientsStartDate, setPatientsStartDate] = useState('');
   const [patientsEndDate, setPatientsEndDate] = useState('');
+  const [exportingRevenue, setExportingRevenue] = useState(false);
+  const [exportingAppointments, setExportingAppointments] = useState(false);
+  const [exportingPatients, setExportingPatients] = useState(false);
 
   // Fetch revenue report
   const { data: revenueReport, isLoading: isLoadingRevenue } = useQuery({
@@ -64,65 +230,61 @@ export default function ReportsPage() {
     enabled: !!patientsStartDate && !!patientsEndDate,
   });
 
-  const handleExportRevenue = async () => {
-    if (!revenueStartDate || !revenueEndDate) return;
+  const handleExport = async (
+    exportFn: (params: { from_date: string; to_date: string }) => Promise<Blob>,
+    startDate: string,
+    endDate: string,
+    filename: string,
+    setExporting: (v: boolean) => void
+  ) => {
+    if (!startDate || !endDate) return;
+    setExporting(true);
     try {
-      const blob = await adminApi.exportRevenueReport({
-        from_date: revenueStartDate,
-        to_date: revenueEndDate,
-      });
+      const blob = await exportFn({ from_date: startDate, to_date: endDate });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `revenue-report-${revenueStartDate}-${revenueEndDate}.pdf`;
+      a.download = `${filename}-${startDate}-${endDate}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
-      console.error('Export failed:', error);
+      toast.success(t('common.success'));
+    } catch {
+      toast.error(t('common.error'));
+    } finally {
+      setExporting(false);
     }
   };
 
-  const handleExportAppointments = async () => {
-    if (!appointmentsStartDate || !appointmentsEndDate) return;
-    try {
-      const blob = await adminApi.exportAppointmentsReport({
-        from_date: appointmentsStartDate,
-        to_date: appointmentsEndDate,
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `appointments-report-${appointmentsStartDate}-${appointmentsEndDate}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Export failed:', error);
-    }
-  };
+  // Prepare chart data from backend response
+  // Backend appointments response: { summary: { total, completed, cancelled, no_show, pending, confirmed }, completion_rate, cancellation_rate, appointments: [] }
+  const appointmentsSummary = appointmentsReport?.data?.summary;
+  const appointmentStatusData = appointmentsSummary
+    ? [
+        { name: t('patient.appointments.status.completed'), value: appointmentsSummary.completed, color: STATUS_COLORS.completed },
+        { name: t('patient.appointments.status.confirmed'), value: appointmentsSummary.confirmed, color: STATUS_COLORS.confirmed },
+        { name: t('patient.appointments.status.pending'), value: appointmentsSummary.pending, color: STATUS_COLORS.pending },
+        { name: t('patient.appointments.status.cancelled'), value: appointmentsSummary.cancelled, color: STATUS_COLORS.cancelled },
+        { name: t('patient.appointments.status.no_show'), value: appointmentsSummary.no_show, color: STATUS_COLORS.no_show },
+      ].filter((d) => d.value > 0)
+    : [];
 
-  const handleExportPatients = async () => {
-    if (!patientsStartDate || !patientsEndDate) return;
-    try {
-      const blob = await adminApi.exportPatientsReport({
-        from_date: patientsStartDate,
-        to_date: patientsEndDate,
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `patients-report-${patientsStartDate}-${patientsEndDate}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Export failed:', error);
-    }
-  };
+  // Backend revenue response: { summary: { total_revenue, total_discount, total_payments, average_payment }, by_method: { cash, card, wallet }, breakdown: [{period, label, total, count}], payments: [] }
+  const revenueSummary = revenueReport?.data?.summary;
+  const revenueByMethod = revenueReport?.data?.by_method;
+  const revenueBreakdown = revenueReport?.data?.breakdown || [];
+
+  const paymentMethodData = revenueByMethod
+    ? [
+        { name: t('admin.payments.cash'), value: revenueByMethod.cash || 0, color: '#22c55e' },
+        { name: t('admin.payments.card'), value: revenueByMethod.card || 0, color: '#3b82f6' },
+        { name: t('admin.payments.wallet'), value: revenueByMethod.wallet || 0, color: '#a855f7' },
+      ].filter((d) => d.value > 0)
+    : [];
+
+  // Backend patients response: { summary: { total_patients, active_patients, inactive_patients }, patients: [] }
+  const patientsSummary = patientsReport?.data?.summary;
 
   return (
     <div className="space-y-6">
@@ -153,79 +315,109 @@ export default function ReportsPage() {
               <CardTitle>{t('admin.reports.revenueReport')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>{t('admin.settings.startDate')}</Label>
-                  <Input
-                    type="date"
-                    value={revenueStartDate}
-                    onChange={(e) => setRevenueStartDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('admin.settings.endDate')}</Label>
-                  <Input
-                    type="date"
-                    value={revenueEndDate}
-                    onChange={(e) => setRevenueEndDate(e.target.value)}
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button
-                    onClick={handleExportRevenue}
-                    disabled={!revenueStartDate || !revenueEndDate}
-                    className="w-full"
-                  >
-                    <Download className="h-4 w-4 me-2" />
-                    {t('admin.reports.exportPdf')}
-                  </Button>
-                </div>
-              </div>
+              <DateRangePicker
+                startDate={revenueStartDate}
+                endDate={revenueEndDate}
+                onStartDateChange={setRevenueStartDate}
+                onEndDateChange={setRevenueEndDate}
+                onExport={() =>
+                  handleExport(adminApi.exportRevenueReport, revenueStartDate, revenueEndDate, 'revenue-report', setExportingRevenue)
+                }
+                isExporting={exportingRevenue}
+                exportDisabled={!revenueStartDate || !revenueEndDate}
+                t={t}
+              />
 
               {isLoadingRevenue ? (
                 <div className="space-y-4">
-                  <Skeleton className="h-32" />
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
+                  </div>
+                  <Skeleton className="h-64" />
                 </div>
-              ) : revenueReport?.data ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('admin.payments.totalPayments')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold">
-                        {revenueReport.data.total_revenue?.toLocaleString() || 0} {t('common.currency')}
-                      </p>
-                    </CardContent>
-                  </Card>
+              ) : revenueSummary ? (
+                <div className="space-y-6">
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <StatCard
+                      title={t('admin.dashboard.totalRevenue')}
+                      value={`${revenueSummary.total_revenue?.toLocaleString() || 0} ${t('common.currency')}`}
+                      icon={<DollarSign className="h-4 w-4" />}
+                      color="text-green-600"
+                    />
+                    <StatCard
+                      title={t('admin.payments.transactionsCount')}
+                      value={revenueSummary.total_payments || 0}
+                      icon={<FileText className="h-4 w-4" />}
+                    />
+                    <StatCard
+                      title={t('admin.payments.discount')}
+                      value={`${revenueSummary.total_discount?.toLocaleString() || 0} ${t('common.currency')}`}
+                      icon={<TrendingUp className="h-4 w-4" />}
+                      color="text-orange-600"
+                    />
+                    <StatCard
+                      title={t('admin.payments.amount')}
+                      value={`${revenueSummary.average_payment?.toLocaleString() || 0} ${t('common.currency')}`}
+                      icon={<DollarSign className="h-4 w-4" />}
+                    />
+                  </div>
 
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('admin.payments.completedPayments')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold">
-                        {revenueReport.data.total_paid?.toLocaleString() || 0} {t('common.currency')}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  {/* Revenue Trend Chart */}
+                  {revenueBreakdown.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">{t('admin.reports.revenueReport')}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-72">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={revenueBreakdown}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="label" fontSize={12} />
+                              <YAxis fontSize={12} />
+                              <Tooltip
+                                formatter={(value) => [`${Number(value).toLocaleString()} ${t('common.currency')}`, t('admin.dashboard.totalRevenue')]}
+                              />
+                              <Bar dataKey="total" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('admin.payments.pending')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold">
-                        {revenueReport.data.total_pending?.toLocaleString() || 0} {t('common.currency')}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  {/* Payment Methods Pie Chart */}
+                  {paymentMethodData.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">{t('admin.payments.paymentMethod')}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-64">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={paymentMethodData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                dataKey="value"
+                                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                              >
+                                {paymentMethodData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip formatter={(value) => `${Number(value).toLocaleString()} ${t('common.currency')}`} />
+                              <Legend />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8">
@@ -244,92 +436,122 @@ export default function ReportsPage() {
               <CardTitle>{t('admin.reports.appointmentsReport')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>{t('admin.settings.startDate')}</Label>
-                  <Input
-                    type="date"
-                    value={appointmentsStartDate}
-                    onChange={(e) => setAppointmentsStartDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('admin.settings.endDate')}</Label>
-                  <Input
-                    type="date"
-                    value={appointmentsEndDate}
-                    onChange={(e) => setAppointmentsEndDate(e.target.value)}
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button
-                    onClick={handleExportAppointments}
-                    disabled={!appointmentsStartDate || !appointmentsEndDate}
-                    className="w-full"
-                  >
-                    <Download className="h-4 w-4 me-2" />
-                    {t('admin.reports.exportPdf')}
-                  </Button>
-                </div>
-              </div>
+              <DateRangePicker
+                startDate={appointmentsStartDate}
+                endDate={appointmentsEndDate}
+                onStartDateChange={setAppointmentsStartDate}
+                onEndDateChange={setAppointmentsEndDate}
+                onExport={() =>
+                  handleExport(adminApi.exportAppointmentsReport, appointmentsStartDate, appointmentsEndDate, 'appointments-report', setExportingAppointments)
+                }
+                isExporting={exportingAppointments}
+                exportDisabled={!appointmentsStartDate || !appointmentsEndDate}
+                t={t}
+              />
 
               {isLoadingAppointments ? (
                 <div className="space-y-4">
-                  <Skeleton className="h-32" />
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
+                  </div>
+                  <Skeleton className="h-64" />
                 </div>
-              ) : appointmentsReport?.data ? (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('admin.dashboard.totalAppointments')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold">
-                        {appointmentsReport.data.total || 0}
-                      </p>
-                    </CardContent>
-                  </Card>
+              ) : appointmentsSummary ? (
+                <div className="space-y-6">
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard
+                      title={t('admin.dashboard.totalAppointments')}
+                      value={appointmentsSummary.total || 0}
+                      icon={<Calendar className="h-4 w-4" />}
+                    />
+                    <StatCard
+                      title={t('patient.appointments.status.completed')}
+                      value={appointmentsSummary.completed || 0}
+                      icon={<CheckCircle2 className="h-4 w-4" />}
+                      color="text-green-600"
+                    />
+                    <StatCard
+                      title={t('patient.appointments.status.cancelled')}
+                      value={appointmentsSummary.cancelled || 0}
+                      icon={<XCircle className="h-4 w-4" />}
+                      color="text-red-600"
+                    />
+                    <StatCard
+                      title={t('patient.appointments.status.no_show')}
+                      value={appointmentsSummary.no_show || 0}
+                      icon={<AlertTriangle className="h-4 w-4" />}
+                      color="text-orange-600"
+                    />
+                  </div>
 
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('patient.appointments.status.completed')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold text-green-600">
-                        {appointmentsReport.data.by_status?.completed || 0}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  {/* Rates */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">{t('admin.reports.completionRate')}</span>
+                          <span className="text-2xl font-bold text-green-600">
+                            {appointmentsReport?.data?.completion_rate || 0}%
+                          </span>
+                        </div>
+                        <div className="mt-2 h-2 bg-gray-200 rounded-full">
+                          <div
+                            className="h-full bg-green-500 rounded-full transition-all"
+                            style={{ width: `${Math.min(appointmentsReport?.data?.completion_rate || 0, 100)}%` }}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">{t('admin.reports.cancellationRate')}</span>
+                          <span className="text-2xl font-bold text-red-600">
+                            {appointmentsReport?.data?.cancellation_rate || 0}%
+                          </span>
+                        </div>
+                        <div className="mt-2 h-2 bg-gray-200 rounded-full">
+                          <div
+                            className="h-full bg-red-500 rounded-full transition-all"
+                            style={{ width: `${Math.min(appointmentsReport?.data?.cancellation_rate || 0, 100)}%` }}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
 
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('patient.appointments.status.cancelled')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold text-red-600">
-                        {appointmentsReport.data.by_status?.cancelled || 0}
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('patient.appointments.status.no_show')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold text-orange-600">
-                        {appointmentsReport.data.by_status?.no_show || 0}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  {/* Status Distribution Pie Chart */}
+                  {appointmentStatusData.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">{t('admin.reports.statusDistribution')}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-72">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={appointmentStatusData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={90}
+                                dataKey="value"
+                                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                              >
+                                {appointmentStatusData.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip />
+                              <Legend />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8">
@@ -348,80 +570,82 @@ export default function ReportsPage() {
               <CardTitle>{t('admin.reports.patientsReport')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>{t('admin.settings.startDate')}</Label>
-                  <Input
-                    type="date"
-                    value={patientsStartDate}
-                    onChange={(e) => setPatientsStartDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('admin.settings.endDate')}</Label>
-                  <Input
-                    type="date"
-                    value={patientsEndDate}
-                    onChange={(e) => setPatientsEndDate(e.target.value)}
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button
-                    onClick={handleExportPatients}
-                    disabled={!patientsStartDate || !patientsEndDate}
-                    className="w-full"
-                  >
-                    <Download className="h-4 w-4 me-2" />
-                    {t('admin.reports.exportPdf')}
-                  </Button>
-                </div>
-              </div>
+              <DateRangePicker
+                startDate={patientsStartDate}
+                endDate={patientsEndDate}
+                onStartDateChange={setPatientsStartDate}
+                onEndDateChange={setPatientsEndDate}
+                onExport={() =>
+                  handleExport(adminApi.exportPatientsReport, patientsStartDate, patientsEndDate, 'patients-report', setExportingPatients)
+                }
+                isExporting={exportingPatients}
+                exportDisabled={!patientsStartDate || !patientsEndDate}
+                t={t}
+              />
 
               {isLoadingPatients ? (
                 <div className="space-y-4">
-                  <Skeleton className="h-32" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24" />)}
+                  </div>
                 </div>
-              ) : patientsReport?.data ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('admin.dashboard.totalPatients')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold">
-                        {patientsReport.data.total_patients || 0}
-                      </p>
-                    </CardContent>
-                  </Card>
+              ) : patientsSummary ? (
+                <div className="space-y-6">
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <StatCard
+                      title={t('admin.dashboard.totalPatients')}
+                      value={patientsSummary.total_patients || 0}
+                      icon={<Users className="h-4 w-4" />}
+                    />
+                    <StatCard
+                      title={t('common.active')}
+                      value={patientsSummary.active_patients || 0}
+                      icon={<CheckCircle2 className="h-4 w-4" />}
+                      color="text-green-600"
+                    />
+                    <StatCard
+                      title={t('admin.reports.inactivePatients')}
+                      value={patientsSummary.inactive_patients || 0}
+                      icon={<Clock className="h-4 w-4" />}
+                      color="text-gray-500"
+                    />
+                  </div>
 
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {t('common.add')} {t('navigation.patients')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold text-green-600">
-                        {patientsReport.data.new_patients || 0}
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        <TrendingUp className="h-4 w-4 inline me-1" />
-                        {t('common.active')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-2xl font-bold">
-                        {patientsReport.data.returning_patients || 0}
-                      </p>
-                    </CardContent>
-                  </Card>
+                  {/* Patients Table */}
+                  {patientsReport?.data?.patients && patientsReport.data.patients.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">{t('admin.patients.allPatients')}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-start p-3 font-medium text-gray-600">{t('auth.name')}</th>
+                                <th className="text-start p-3 font-medium text-gray-600">{t('auth.phone')}</th>
+                                <th className="text-start p-3 font-medium text-gray-600">{t('admin.dashboard.totalAppointments')}</th>
+                                <th className="text-start p-3 font-medium text-gray-600">{t('patient.appointments.status.completed')}</th>
+                                <th className="text-start p-3 font-medium text-gray-600">{t('common.date')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {patientsReport.data.patients.slice(0, 20).map((patient) => (
+                                <tr key={patient.id} className="border-b hover:bg-gray-50">
+                                  <td className="p-3 font-medium">{patient.name}</td>
+                                  <td className="p-3 text-gray-600" dir="ltr">{patient.phone}</td>
+                                  <td className="p-3">{patient.total_appointments}</td>
+                                  <td className="p-3 text-green-600">{patient.completed_appointments}</td>
+                                  <td className="p-3 text-gray-500">{patient.registered_at}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8">

@@ -14,17 +14,22 @@ class AppointmentPolicyTest extends TestCase
     use RefreshDatabase;
 
     private AppointmentPolicy $policy;
+
     private User $admin;
+
     private User $secretary;
+
     private User $patient;
+
     private User $otherPatient;
+
     private Appointment $appointment;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->policy = new AppointmentPolicy();
+        $this->policy = new AppointmentPolicy;
 
         $this->admin = User::factory()->create(['role' => UserRole::ADMIN]);
         $this->secretary = User::factory()->create(['role' => UserRole::SECRETARY]);

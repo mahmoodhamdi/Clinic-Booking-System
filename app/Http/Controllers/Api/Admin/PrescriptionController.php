@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\ApiResponse;
 use App\Http\Requests\Admin\StorePrescriptionRequest;
 use App\Http\Requests\Admin\UpdatePrescriptionRequest;
 use App\Http\Resources\PrescriptionResource;
@@ -11,12 +12,11 @@ use App\Models\PrescriptionItem;
 use App\Services\PrescriptionPdfService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 
 class PrescriptionController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $query = Prescription::with(['medicalRecord.patient', 'items'])
             ->when($request->patient_id, fn ($q, $patientId) => $q->forPatient($patientId))
@@ -32,7 +32,7 @@ class PrescriptionController extends Controller
         $perPage = $request->per_page ?? 15;
         $prescriptions = $query->paginate($perPage);
 
-        return PrescriptionResource::collection($prescriptions);
+        return ApiResponse::paginated($prescriptions, PrescriptionResource::class);
     }
 
     public function store(StorePrescriptionRequest $request): JsonResponse
@@ -60,17 +60,14 @@ class PrescriptionController extends Controller
 
         $prescription->load(['medicalRecord.patient', 'items']);
 
-        return response()->json([
-            'message' => 'تم إنشاء الوصفة الطبية بنجاح',
-            'data' => new PrescriptionResource($prescription),
-        ], 201);
+        return ApiResponse::created(new PrescriptionResource($prescription), 'تم إنشاء الوصفة الطبية بنجاح');
     }
 
-    public function show(Prescription $prescription): PrescriptionResource
+    public function show(Prescription $prescription): JsonResponse
     {
         $prescription->load(['medicalRecord.patient', 'medicalRecord.appointment', 'items']);
 
-        return new PrescriptionResource($prescription);
+        return ApiResponse::success(new PrescriptionResource($prescription));
     }
 
     public function update(UpdatePrescriptionRequest $request, Prescription $prescription): JsonResponse
@@ -119,10 +116,7 @@ class PrescriptionController extends Controller
 
         $prescription->load(['medicalRecord.patient', 'items']);
 
-        return response()->json([
-            'message' => 'تم تحديث الوصفة الطبية بنجاح',
-            'data' => new PrescriptionResource($prescription),
-        ]);
+        return ApiResponse::success(new PrescriptionResource($prescription), 'تم تحديث الوصفة الطبية بنجاح');
     }
 
     public function destroy(Prescription $prescription): JsonResponse
@@ -132,9 +126,7 @@ class PrescriptionController extends Controller
 
         $prescription->delete();
 
-        return response()->json([
-            'message' => 'تم حذف الوصفة الطبية بنجاح',
-        ]);
+        return ApiResponse::success(null, 'تم حذف الوصفة الطبية بنجاح');
     }
 
     public function markAsDispensed(Prescription $prescription): JsonResponse
@@ -143,20 +135,17 @@ class PrescriptionController extends Controller
 
         $prescription->load(['medicalRecord.patient', 'items']);
 
-        return response()->json([
-            'message' => 'تم تحديث حالة الصرف بنجاح',
-            'data' => new PrescriptionResource($prescription),
-        ]);
+        return ApiResponse::success(new PrescriptionResource($prescription), 'تم تحديث حالة الصرف بنجاح');
     }
 
-    public function byPatient(int $patientId): AnonymousResourceCollection
+    public function byPatient(int $patientId): JsonResponse
     {
         $prescriptions = Prescription::with(['medicalRecord', 'items'])
             ->forPatient($patientId)
             ->latest()
             ->get();
 
-        return PrescriptionResource::collection($prescriptions);
+        return ApiResponse::success(PrescriptionResource::collection($prescriptions));
     }
 
     public function downloadPdf(Prescription $prescription, PrescriptionPdfService $pdfService)

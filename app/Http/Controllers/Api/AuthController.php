@@ -59,14 +59,14 @@ class AuthController extends Controller
     {
         $user = User::where('phone', $request->phone)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'بيانات الدخول غير صحيحة.',
             ], 401);
         }
 
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             return response()->json([
                 'success' => false,
                 'message' => 'الحساب غير مفعل. يرجى التواصل مع الإدارة.',
@@ -100,7 +100,7 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'تم تسجيل الخروج بنجاح.',
         ])->withCookie(cookie()->forget('auth_token'))
-          ->withCookie(cookie()->forget('user'));
+            ->withCookie(cookie()->forget('user'));
     }
 
     /**
@@ -169,7 +169,7 @@ class AuthController extends Controller
 
         // Generate a secure random filename to prevent path traversal
         $extension = $request->file('avatar')->getClientOriginalExtension();
-        $filename = Str::uuid() . '.' . $extension;
+        $filename = Str::uuid().'.'.$extension;
         $path = $request->file('avatar')->storeAs('avatars', $filename, 'public');
         $user->update(['avatar' => $path]);
 

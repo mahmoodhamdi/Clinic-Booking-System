@@ -23,7 +23,7 @@ class ScheduleTest extends TestCase
             'break_end',
         ];
 
-        $schedule = new Schedule();
+        $schedule = new Schedule;
         $this->assertEquals($fillable, $schedule->getFillable());
     }
 

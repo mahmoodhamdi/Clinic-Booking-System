@@ -15,8 +15,8 @@ class VacationController extends Controller
 {
     public function __construct(
         protected SlotGeneratorService $slotService
-    ) {
-    }
+    ) {}
+
     /**
      * List all vacations.
      */

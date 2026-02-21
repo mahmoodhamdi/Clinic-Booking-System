@@ -66,7 +66,7 @@ class ClinicSetting extends Model
         return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
             $settings = self::first();
 
-            if (!$settings) {
+            if (! $settings) {
                 $settings = self::create([
                     'clinic_name' => 'العيادة',
                     'doctor_name' => 'الدكتور',
@@ -104,7 +104,7 @@ class ClinicSetting extends Model
      */
     public function getLogoUrlAttribute(): ?string
     {
-        if (!$this->logo) {
+        if (! $this->logo) {
             return null;
         }
 
