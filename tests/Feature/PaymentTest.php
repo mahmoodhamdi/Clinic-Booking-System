@@ -16,6 +16,7 @@ class PaymentTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $patient;
 
     protected function setUp(): void
@@ -88,7 +89,7 @@ class PaymentTest extends TestCase
 
         Sanctum::actingAs($this->admin);
 
-        $response = $this->getJson('/api/admin/payments?' . http_build_query([
+        $response = $this->getJson('/api/admin/payments?'.http_build_query([
             'from_date' => now()->subDays(5)->toDateString(),
             'to_date' => now()->toDateString(),
         ]));

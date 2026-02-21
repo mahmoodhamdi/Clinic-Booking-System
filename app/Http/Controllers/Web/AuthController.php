@@ -31,11 +31,11 @@ class AuthController extends Controller
     {
         $user = User::where('phone', $request->phone)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return back()->withInput()->with('error', 'بيانات الدخول غير صحيحة.');
         }
 
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             return back()->withInput()->with('error', 'الحساب غير مفعل. يرجى التواصل مع الإدارة.');
         }
 
@@ -144,7 +144,7 @@ class AuthController extends Controller
             ->where('phone', $request->phone)
             ->first();
 
-        if (!$record || !Hash::check($request->token, $record->token)) {
+        if (! $record || ! Hash::check($request->token, $record->token)) {
             return back()->with('error', 'رمز التحقق غير صحيح.');
         }
 
@@ -187,7 +187,7 @@ class AuthController extends Controller
             ->where('phone', $request->phone)
             ->first();
 
-        if (!$record || !Hash::check($request->token, $record->token)) {
+        if (! $record || ! Hash::check($request->token, $record->token)) {
             return back()->with('error', 'رمز التحقق غير صحيح.');
         }
 

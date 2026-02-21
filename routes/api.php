@@ -1,5 +1,16 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AppointmentController as AdminAppointmentController;
+use App\Http\Controllers\Api\Admin\AttachmentController;
+use App\Http\Controllers\Api\Admin\ClinicSettingController;
+use App\Http\Controllers\Api\Admin\DashboardController;
+use App\Http\Controllers\Api\Admin\MedicalRecordController as AdminMedicalRecordController;
+use App\Http\Controllers\Api\Admin\PatientController as AdminPatientController;
+use App\Http\Controllers\Api\Admin\PaymentController;
+use App\Http\Controllers\Api\Admin\PrescriptionController as AdminPrescriptionController;
+use App\Http\Controllers\Api\Admin\ReportController;
+use App\Http\Controllers\Api\Admin\ScheduleController;
+use App\Http\Controllers\Api\Admin\VacationController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MedicalRecordController;
@@ -7,17 +18,6 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\PrescriptionController;
 use App\Http\Controllers\Api\SlotController;
-use App\Http\Controllers\Api\Admin\AppointmentController as AdminAppointmentController;
-use App\Http\Controllers\Api\Admin\AttachmentController;
-use App\Http\Controllers\Api\Admin\ClinicSettingController;
-use App\Http\Controllers\Api\Admin\MedicalRecordController as AdminMedicalRecordController;
-use App\Http\Controllers\Api\Admin\PatientController as AdminPatientController;
-use App\Http\Controllers\Api\Admin\DashboardController;
-use App\Http\Controllers\Api\Admin\PaymentController;
-use App\Http\Controllers\Api\Admin\PrescriptionController as AdminPrescriptionController;
-use App\Http\Controllers\Api\Admin\ReportController;
-use App\Http\Controllers\Api\Admin\ScheduleController;
-use App\Http\Controllers\Api\Admin\VacationController;
 use Illuminate\Support\Facades\Route;
 
 /*

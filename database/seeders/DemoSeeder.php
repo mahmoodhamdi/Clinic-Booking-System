@@ -12,15 +12,15 @@ use App\Enums\UserRole;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use App\Models\PatientProfile;
-use Illuminate\Notifications\DatabaseNotification;
-use Illuminate\Support\Str;
 use App\Models\Payment;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
 use App\Models\User;
 use App\Models\Vacation;
 use Illuminate\Database\Seeder;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DemoSeeder extends Seeder
 {
@@ -46,11 +46,11 @@ class DemoSeeder extends Seeder
 
         // Create Patients with full profiles
         $patients = $this->createPatients();
-        $this->command->info('✓ Created ' . count($patients) . ' patients with full profiles');
+        $this->command->info('✓ Created '.count($patients).' patients with full profiles');
 
         // Create Appointments with various statuses
         $appointments = $this->createAppointments($patients);
-        $this->command->info('✓ Created ' . count($appointments) . ' appointments');
+        $this->command->info('✓ Created '.count($appointments).' appointments');
 
         // Create Medical Records with Prescriptions
         $this->createMedicalRecords($appointments);
@@ -374,7 +374,7 @@ class DemoSeeder extends Seeder
             'مضاد حيوي لمدة 7 أيام',
         ];
 
-        $completedAppointments = array_filter($appointments, fn($a) => $a->status === AppointmentStatus::COMPLETED);
+        $completedAppointments = array_filter($appointments, fn ($a) => $a->status === AppointmentStatus::COMPLETED);
 
         foreach ($completedAppointments as $appointment) {
             $record = MedicalRecord::create([
@@ -387,7 +387,7 @@ class DemoSeeder extends Seeder
                 'follow_up_date' => rand(0, 1) ? now()->addWeeks(rand(1, 4))->toDateString() : null,
                 'follow_up_notes' => rand(0, 1) ? 'متابعة الحالة بعد العلاج' : null,
                 'vital_signs' => [
-                    'blood_pressure' => rand(110, 140) . '/' . rand(70, 90),
+                    'blood_pressure' => rand(110, 140).'/'.rand(70, 90),
                     'heart_rate' => rand(60, 100),
                     'temperature' => round(rand(365, 385) / 10, 1),
                     'weight' => rand(50, 120),
@@ -422,7 +422,7 @@ class DemoSeeder extends Seeder
 
         $numItems = rand(1, 4);
         $selectedMeds = array_rand($medications, $numItems);
-        if (!is_array($selectedMeds)) {
+        if (! is_array($selectedMeds)) {
             $selectedMeds = [$selectedMeds];
         }
 
@@ -442,7 +442,7 @@ class DemoSeeder extends Seeder
 
     private function createPayments(array $appointments): void
     {
-        $completedAppointments = array_filter($appointments, fn($a) => $a->status === AppointmentStatus::COMPLETED);
+        $completedAppointments = array_filter($appointments, fn ($a) => $a->status === AppointmentStatus::COMPLETED);
 
         foreach ($completedAppointments as $appointment) {
             $amount = rand(15, 50) * 10; // 150-500 in increments of 10
@@ -458,14 +458,14 @@ class DemoSeeder extends Seeder
                 'total' => $total,
                 'method' => PaymentMethod::cases()[array_rand(PaymentMethod::cases())],
                 'status' => $isPaid ? PaymentStatus::PAID : PaymentStatus::PENDING,
-                'transaction_id' => $isPaid ? 'TXN-' . rand(10000000, 99999999) : null,
+                'transaction_id' => $isPaid ? 'TXN-'.rand(10000000, 99999999) : null,
                 'notes' => $discount > 0 ? 'خصم للمرضى المتكررين' : null,
                 'paid_at' => $isPaid ? $appointment->completed_at : null,
             ]);
         }
 
         // Add some refunded payments
-        $paidAppointments = array_slice(array_filter($appointments, fn($a) => $a->status === AppointmentStatus::COMPLETED), 0, 2);
+        $paidAppointments = array_slice(array_filter($appointments, fn ($a) => $a->status === AppointmentStatus::COMPLETED), 0, 2);
         foreach ($paidAppointments as $appointment) {
             // Check if payment already exists
             if (Payment::where('appointment_id', $appointment->id)->exists()) {
@@ -479,7 +479,7 @@ class DemoSeeder extends Seeder
                 'total' => 200,
                 'method' => PaymentMethod::CARD,
                 'status' => PaymentStatus::REFUNDED,
-                'transaction_id' => 'TXN-REF-' . rand(10000000, 99999999),
+                'transaction_id' => 'TXN-REF-'.rand(10000000, 99999999),
                 'notes' => 'تم الاسترداد بسبب إلغاء الخدمة',
                 'paid_at' => now()->subWeek(),
                 'refunded_at' => now()->subDays(3),

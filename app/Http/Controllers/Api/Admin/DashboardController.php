@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\ApiResponse;
 use App\Http\Resources\AppointmentResource;
 use App\Services\DashboardService;
 use Illuminate\Http\JsonResponse;
@@ -18,27 +19,21 @@ class DashboardController extends Controller
     {
         $statistics = $this->dashboardService->getOverviewStatistics();
 
-        return response()->json([
-            'data' => $statistics,
-        ]);
+        return ApiResponse::success($statistics);
     }
 
     public function today(): JsonResponse
     {
         $statistics = $this->dashboardService->getTodayStatistics();
 
-        return response()->json([
-            'data' => $statistics,
-        ]);
+        return ApiResponse::success($statistics);
     }
 
     public function weekly(): JsonResponse
     {
         $statistics = $this->dashboardService->getWeeklyStatistics();
 
-        return response()->json([
-            'data' => $statistics,
-        ]);
+        return ApiResponse::success($statistics);
     }
 
     public function monthly(Request $request): JsonResponse
@@ -48,9 +43,7 @@ class DashboardController extends Controller
 
         $statistics = $this->dashboardService->getMonthlyStatistics($month, $year);
 
-        return response()->json([
-            'data' => $statistics,
-        ]);
+        return ApiResponse::success($statistics);
     }
 
     public function chart(Request $request): JsonResponse
@@ -59,9 +52,7 @@ class DashboardController extends Controller
 
         $chartData = $this->dashboardService->getChartData($period);
 
-        return response()->json([
-            'data' => $chartData,
-        ]);
+        return ApiResponse::success($chartData);
     }
 
     public function recentActivity(Request $request): JsonResponse
@@ -70,9 +61,7 @@ class DashboardController extends Controller
 
         $activity = $this->dashboardService->getRecentActivity($limit);
 
-        return response()->json([
-            'data' => $activity,
-        ]);
+        return ApiResponse::success($activity);
     }
 
     public function upcomingAppointments(Request $request): JsonResponse
@@ -81,8 +70,6 @@ class DashboardController extends Controller
 
         $appointments = $this->dashboardService->getUpcomingAppointments($limit);
 
-        return response()->json([
-            'data' => AppointmentResource::collection($appointments),
-        ]);
+        return ApiResponse::success(AppointmentResource::collection($appointments));
     }
 }

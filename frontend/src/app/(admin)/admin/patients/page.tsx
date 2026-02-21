@@ -15,9 +15,8 @@ import {
   FileText,
   Pill,
 } from 'lucide-react';
-import Link from 'next/link';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +30,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { adminApi } from '@/lib/api/admin';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { User, Appointment, MedicalRecord, Prescription, PaginatedResponse } from '@/types';
 
 export default function AdminPatientsPage() {
@@ -39,10 +39,12 @@ export default function AdminPatientsPage() {
   const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
   // Fetch patients
   const { data: patients, isLoading } = useQuery<PaginatedResponse<User>>({
-    queryKey: ['adminPatients', searchQuery],
-    queryFn: () => adminApi.getPatients({ search: searchQuery || undefined }),
+    queryKey: ['adminPatients', debouncedSearch],
+    queryFn: () => adminApi.getPatients({ search: debouncedSearch || undefined }),
   });
 
   // Fetch patient details when selected
@@ -228,7 +230,7 @@ export default function AdminPatientsPage() {
                                 : 'bg-yellow-100 text-yellow-800'
                             }
                           >
-                            {apt.status}
+                            {t(`admin.appointments.status.${apt.status}` as Parameters<typeof t>[0]) || apt.status}
                           </Badge>
                         </div>
                       ))}
@@ -275,7 +277,9 @@ export default function AdminPatientsPage() {
                                   : 'bg-yellow-100 text-yellow-800'
                               }
                             >
-                              {prescription.is_dispensed ? 'تم الصرف' : 'لم يصرف'}
+                              {prescription.is_dispensed
+                                ? t('admin.prescriptions.dispensed')
+                                : t('admin.prescriptions.notDispensed')}
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-500 mt-1">

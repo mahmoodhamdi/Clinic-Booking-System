@@ -55,14 +55,23 @@ export interface Appointment {
   id: number;
   patient_id: number;
   date: string;
+  time: string;
   slot_time: string;
   end_time: string;
+  datetime: string;
+  day_name?: string;
   status: AppointmentStatus;
+  status_label?: string;
+  status_color?: string;
   reason: string | null;
   notes: string | null;
   admin_notes: string | null;
+  can_cancel?: boolean;
+  is_upcoming?: boolean;
+  is_today?: boolean;
   cancellation_reason: string | null;
   cancelled_at: string | null;
+  cancelled_by?: string | null;
   confirmed_at: string | null;
   completed_at: string | null;
   created_at: string;
@@ -171,7 +180,11 @@ export interface Notification {
   title: string;
   body: string;
   type: string;
-  data: Record<string, unknown> | null;
+  data: {
+    title?: string;
+    message?: string;
+    [key: string]: unknown;
+  } | null;
   read_at: string | null;
   created_at: string;
 }
@@ -212,6 +225,8 @@ export interface Schedule {
   start_time: string;
   end_time: string;
   is_active: boolean;
+  break_start: string | null;
+  break_end: string | null;
 }
 
 // Vacation types
@@ -220,6 +235,7 @@ export interface Vacation {
   start_date: string;
   end_date: string;
   reason: string | null;
+  title: string | null;
 }
 
 // Dashboard types
@@ -233,33 +249,135 @@ export interface DashboardStats {
   today_revenue: number;
 }
 
+export interface ChartDataPoint {
+  date: string;
+  day: string;
+  count: number;
+}
+
+export interface RevenueDataPoint {
+  date: string;
+  day: string;
+  amount: number;
+}
+
+export interface DashboardChartData {
+  appointments_trend: ChartDataPoint[];
+  revenue_trend: RevenueDataPoint[];
+  status_distribution: Record<string, number>;
+  payment_methods: Record<string, number>;
+}
+
+export interface WeeklyStats {
+  appointments: number;
+  completed: number;
+  revenue: number;
+  new_patients: number;
+}
+
+export interface MonthlyStats {
+  appointments: number;
+  completed: number;
+  cancelled: number;
+  revenue: number;
+  new_patients: number;
+  average_daily_appointments: number;
+}
+
+export interface TodayStats {
+  appointments: {
+    total: number;
+    pending: number;
+    confirmed: number;
+    completed: number;
+    cancelled: number;
+    no_show: number;
+  };
+  revenue: {
+    total: number;
+    paid: number;
+    pending: number;
+  };
+  next_appointment: Appointment | null;
+}
+
+export interface PaymentStatistics {
+  total_revenue: number;
+  total_pending: number;
+  total_paid: number;
+  total_refunded: number;
+  today_revenue: number;
+  this_month_revenue: number;
+}
+
 // Report types
 export interface AppointmentsReport {
-  total: number;
-  by_status: Record<AppointmentStatus, number>;
-  by_day: Array<{ date: string; count: number }>;
+  period: { from: string; to: string };
+  summary: {
+    total: number;
+    completed: number;
+    cancelled: number;
+    no_show: number;
+    pending: number;
+    confirmed: number;
+  };
   completion_rate: number;
   cancellation_rate: number;
-  no_show_rate: number;
+  appointments: Array<{
+    id: number;
+    patient_name: string;
+    patient_phone: string;
+    date: string;
+    time: string;
+    status: string;
+    status_label: string;
+  }>;
 }
 
 export interface RevenueReport {
-  total_revenue: number;
-  total_paid: number;
-  total_pending: number;
-  total_refunded: number;
-  by_method: Record<PaymentMethod, number>;
-  by_day: Array<{ date: string; amount: number }>;
-  average_per_appointment: number;
+  period: { from: string; to: string };
+  summary: {
+    total_revenue: number;
+    total_discount: number;
+    total_payments: number;
+    average_payment: number;
+  };
+  by_method: Record<string, number>;
+  breakdown: Array<{
+    period: string;
+    label: string;
+    total: number;
+    count: number;
+  }>;
+  payments: Array<{
+    id: number;
+    patient_name: string | null;
+    amount: number;
+    discount: number;
+    total: number;
+    method: string;
+    method_label: string;
+    paid_at: string;
+  }>;
 }
 
 export interface PatientsReport {
-  total_patients: number;
-  new_patients: number;
-  returning_patients: number;
-  by_gender: Record<string, number>;
-  by_age_group: Record<string, number>;
-  most_frequent: Array<{ patient_id: number; name: string; visit_count: number }>;
+  period: { from: string; to: string };
+  summary: {
+    total_patients: number;
+    active_patients: number;
+    inactive_patients: number;
+  };
+  patients: Array<{
+    id: number;
+    name: string;
+    phone: string;
+    email: string | null;
+    gender: string | null;
+    registered_at: string;
+    total_appointments: number;
+    completed_appointments: number;
+  }>;
 }
 
 // Activity types

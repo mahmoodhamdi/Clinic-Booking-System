@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\Gender;
 use App\Enums\UserRole;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -136,7 +135,7 @@ class User extends Authenticatable
     public function getAvatarUrlAttribute(): ?string
     {
         if ($this->avatar) {
-            return asset('storage/' . $this->avatar);
+            return asset('storage/'.$this->avatar);
         }
 
         return null;

@@ -22,7 +22,7 @@ class PrescriptionPdfService
         $prescription->load(['medicalRecord.patient', 'medicalRecord.appointment', 'items']);
 
         // Validate prescription has required data
-        if (!$prescription->medicalRecord) {
+        if (! $prescription->medicalRecord) {
             throw new BusinessLogicException(
                 __('الوصفة غير مرتبطة بسجل طبي'),
                 'PRESCRIPTION_NO_MEDICAL_RECORD',
@@ -30,7 +30,7 @@ class PrescriptionPdfService
             );
         }
 
-        if (!$prescription->medicalRecord->patient) {
+        if (! $prescription->medicalRecord->patient) {
             throw new BusinessLogicException(
                 __('السجل الطبي غير مرتبط بمريض'),
                 'MEDICAL_RECORD_NO_PATIENT',

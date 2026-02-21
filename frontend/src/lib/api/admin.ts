@@ -11,6 +11,10 @@ import type {
   Vacation,
   ClinicSettings,
   DashboardStats,
+  DashboardChartData,
+  WeeklyStats,
+  MonthlyStats,
+  TodayStats,
   AppointmentsReport,
   RevenueReport,
   PatientsReport,
@@ -182,6 +186,30 @@ export const adminApi = {
     return response.data;
   },
 
+  getDashboardChart: async (period?: string): Promise<ApiResponse<DashboardChartData>> => {
+    const response = await api.get<ApiResponse<DashboardChartData>>('/admin/dashboard/chart', {
+      params: period ? { period } : undefined,
+    });
+    return response.data;
+  },
+
+  getWeeklyStats: async (): Promise<ApiResponse<WeeklyStats>> => {
+    const response = await api.get<ApiResponse<WeeklyStats>>('/admin/dashboard/weekly');
+    return response.data;
+  },
+
+  getMonthlyStats: async (month?: number, year?: number): Promise<ApiResponse<MonthlyStats>> => {
+    const response = await api.get<ApiResponse<MonthlyStats>>('/admin/dashboard/monthly', {
+      params: { month, year },
+    });
+    return response.data;
+  },
+
+  getTodayStats: async (): Promise<ApiResponse<TodayStats>> => {
+    const response = await api.get<ApiResponse<TodayStats>>('/admin/dashboard/today');
+    return response.data;
+  },
+
   // Appointments
   getAppointments: async (params?: AppointmentListParams): Promise<PaginatedResponse<Appointment>> => {
     const response = await api.get<PaginatedResponse<Appointment>>('/admin/appointments', { params });
@@ -228,6 +256,11 @@ export const adminApi = {
       date,
       slot_time: slotTime,
     });
+    return response.data;
+  },
+
+  getAppointmentPayment: async (appointmentId: number): Promise<ApiResponse<Payment>> => {
+    const response = await api.get<ApiResponse<Payment>>(`/admin/appointments/${appointmentId}/payment`);
     return response.data;
   },
 
@@ -301,6 +334,13 @@ export const adminApi = {
 
   deleteMedicalRecord: async (id: number): Promise<ApiResponse<null>> => {
     const response = await api.delete<ApiResponse<null>>(`/admin/medical-records/${id}`);
+    return response.data;
+  },
+
+  getFollowUpsDue: async (page?: number): Promise<ApiResponse<MedicalRecord[]>> => {
+    const response = await api.get<ApiResponse<MedicalRecord[]>>('/admin/medical-records/follow-ups-due', {
+      params: page ? { page } : undefined,
+    });
     return response.data;
   },
 

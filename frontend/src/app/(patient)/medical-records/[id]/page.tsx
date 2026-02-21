@@ -5,10 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import Link from 'next/link';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { patientApi } from '@/lib/api/patient';
@@ -17,7 +15,6 @@ import {
   ArrowRight,
   Calendar,
   FileText,
-  Pill,
   Stethoscope,
   Heart,
   Thermometer,
@@ -26,8 +23,6 @@ import {
   Ruler,
   Paperclip,
   Download,
-  CheckCircle,
-  XCircle,
 } from 'lucide-react';
 
 export default function MedicalRecordDetailPage() {
@@ -50,7 +45,7 @@ export default function MedicalRecordDetailPage() {
     return (
       <div className="text-center py-12">
         <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-muted-foreground">لم يتم العثور على السجل الطبي</p>
+        <p className="text-muted-foreground">{t('patient.medicalRecords.notFound')}</p>
         <Button onClick={() => router.back()} variant="outline" className="mt-4">
           {t('common.back')}
         </Button>
@@ -114,7 +109,7 @@ export default function MedicalRecordDetailPage() {
                     icon={<Activity className="h-4 w-4" />}
                     label={t('admin.medicalRecords.heartRate')}
                     value={record.heart_rate}
-                    unit="نبضة/دقيقة"
+                    unit={t('common.units.bpm')}
                   />
                 )}
                 {record.temperature && (
@@ -130,7 +125,7 @@ export default function MedicalRecordDetailPage() {
                     icon={<Scale className="h-4 w-4" />}
                     label={t('admin.medicalRecords.weight')}
                     value={record.weight}
-                    unit="كجم"
+                    unit={t('common.units.kg')}
                   />
                 )}
                 {record.height && (
@@ -138,7 +133,7 @@ export default function MedicalRecordDetailPage() {
                     icon={<Ruler className="h-4 w-4" />}
                     label={t('admin.medicalRecords.height')}
                     value={record.height}
-                    unit="سم"
+                    unit={t('common.units.cm')}
                   />
                 )}
               </div>
@@ -158,7 +153,7 @@ export default function MedicalRecordDetailPage() {
             {record.notes ? (
               <p>{record.notes}</p>
             ) : (
-              <p className="text-muted-foreground">لا توجد ملاحظات</p>
+              <p className="text-muted-foreground">{t('common.noNotes')}</p>
             )}
           </CardContent>
         </Card>
@@ -227,7 +222,7 @@ export default function MedicalRecordDetailPage() {
                     >
                       <Button variant="outline" size="sm">
                         <Download className="h-4 w-4 ml-2" />
-                        تحميل
+                        {t('common.download')}
                       </Button>
                     </a>
                   </div>

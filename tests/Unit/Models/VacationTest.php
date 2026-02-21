@@ -16,7 +16,7 @@ class VacationTest extends TestCase
     {
         $fillable = ['title', 'start_date', 'end_date', 'reason'];
 
-        $vacation = new Vacation();
+        $vacation = new Vacation;
         $this->assertEquals($fillable, $vacation->getFillable());
     }
 

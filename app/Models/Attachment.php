@@ -48,7 +48,7 @@ class Attachment extends Model
 
     public function getFullUrlAttribute(): string
     {
-        return asset('storage/' . $this->file_path);
+        return asset('storage/'.$this->file_path);
     }
 
     public function getSizeFormattedAttribute(): string
@@ -56,12 +56,12 @@ class Attachment extends Model
         $bytes = $this->file_size;
 
         if ($bytes >= 1048576) {
-            return round($bytes / 1048576, 2) . ' MB';
+            return round($bytes / 1048576, 2).' MB';
         } elseif ($bytes >= 1024) {
-            return round($bytes / 1024, 2) . ' KB';
+            return round($bytes / 1024, 2).' KB';
         }
 
-        return $bytes . ' bytes';
+        return $bytes.' bytes';
     }
 
     public function getIsImageAttribute(): bool

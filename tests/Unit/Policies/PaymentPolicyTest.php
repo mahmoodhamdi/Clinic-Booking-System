@@ -15,17 +15,22 @@ class PaymentPolicyTest extends TestCase
     use RefreshDatabase;
 
     private PaymentPolicy $policy;
+
     private User $admin;
+
     private User $secretary;
+
     private User $patient;
+
     private User $otherPatient;
+
     private Payment $payment;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->policy = new PaymentPolicy();
+        $this->policy = new PaymentPolicy;
 
         $this->admin = User::factory()->create(['role' => UserRole::ADMIN]);
         $this->secretary = User::factory()->create(['role' => UserRole::SECRETARY]);

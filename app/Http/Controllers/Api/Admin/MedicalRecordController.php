@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\ApiResponse;
 use App\Http\Requests\Admin\StoreMedicalRecordRequest;
 use App\Http\Requests\Admin\UpdateMedicalRecordRequest;
 use App\Http\Resources\MedicalRecordResource;
@@ -10,11 +11,10 @@ use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class MedicalRecordController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $query = MedicalRecord::with(['patient', 'appointment'])
             ->when($request->patient_id, fn ($q) => $q->forPatient($request->patient_id))
@@ -34,7 +34,7 @@ class MedicalRecordController extends Controller
         $perPage = $request->per_page ?? 15;
         $records = $query->paginate($perPage);
 
-        return MedicalRecordResource::collection($records);
+        return ApiResponse::paginated($records, MedicalRecordResource::class);
     }
 
     public function store(StoreMedicalRecordRequest $request): JsonResponse
@@ -55,17 +55,14 @@ class MedicalRecordController extends Controller
 
         $medicalRecord->load(['patient', 'appointment']);
 
-        return response()->json([
-            'message' => 'تم إنشاء السجل الطبي بنجاح',
-            'data' => new MedicalRecordResource($medicalRecord),
-        ], 201);
+        return ApiResponse::created(new MedicalRecordResource($medicalRecord), 'تم إنشاء السجل الطبي بنجاح');
     }
 
-    public function show(MedicalRecord $medicalRecord): MedicalRecordResource
+    public function show(MedicalRecord $medicalRecord): JsonResponse
     {
         $medicalRecord->load(['patient', 'appointment', 'prescriptions.items', 'attachments.uploader']);
 
-        return new MedicalRecordResource($medicalRecord);
+        return ApiResponse::success(new MedicalRecordResource($medicalRecord));
     }
 
     public function update(UpdateMedicalRecordRequest $request, MedicalRecord $medicalRecord): JsonResponse
@@ -74,10 +71,7 @@ class MedicalRecordController extends Controller
 
         $medicalRecord->load(['patient', 'appointment']);
 
-        return response()->json([
-            'message' => 'تم تحديث السجل الطبي بنجاح',
-            'data' => new MedicalRecordResource($medicalRecord),
-        ]);
+        return ApiResponse::success(new MedicalRecordResource($medicalRecord), 'تم تحديث السجل الطبي بنجاح');
     }
 
     public function destroy(MedicalRecord $medicalRecord): JsonResponse
@@ -92,28 +86,26 @@ class MedicalRecordController extends Controller
 
         $medicalRecord->delete();
 
-        return response()->json([
-            'message' => 'تم حذف السجل الطبي بنجاح',
-        ]);
+        return ApiResponse::success(null, 'تم حذف السجل الطبي بنجاح');
     }
 
-    public function byPatient(int $patientId): AnonymousResourceCollection
+    public function byPatient(int $patientId): JsonResponse
     {
         $records = MedicalRecord::with(['appointment', 'prescriptions'])
             ->forPatient($patientId)
             ->latest()
             ->get();
 
-        return MedicalRecordResource::collection($records);
+        return ApiResponse::success(MedicalRecordResource::collection($records));
     }
 
-    public function followUpsDue(): AnonymousResourceCollection
+    public function followUpsDue(): JsonResponse
     {
         $records = MedicalRecord::with(['patient', 'appointment'])
             ->followUpDue()
             ->orderBy('follow_up_date')
             ->get();
 
-        return MedicalRecordResource::collection($records);
+        return ApiResponse::success(MedicalRecordResource::collection($records));
     }
 }

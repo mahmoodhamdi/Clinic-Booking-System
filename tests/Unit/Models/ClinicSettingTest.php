@@ -28,7 +28,7 @@ class ClinicSettingTest extends TestCase
             'cancellation_hours',
         ];
 
-        $setting = new ClinicSetting();
+        $setting = new ClinicSetting;
         $this->assertEquals($fillable, $setting->getFillable());
     }
 

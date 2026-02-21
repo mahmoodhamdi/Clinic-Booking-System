@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Vacation extends Model
 {
@@ -37,6 +37,7 @@ class Vacation extends Model
     public function scopeActive($query)
     {
         $today = now()->toDateString();
+
         return $query->where('start_date', '<=', $today)
             ->where('end_date', '>=', $today);
     }
@@ -47,6 +48,7 @@ class Vacation extends Model
     public function scopeForDate($query, Carbon|string $date)
     {
         $checkDate = $date instanceof Carbon ? $date->startOfDay() : Carbon::parse($date)->startOfDay();
+
         return $query->whereDate('start_date', '<=', $checkDate)
             ->whereDate('end_date', '>=', $checkDate);
     }
@@ -57,6 +59,7 @@ class Vacation extends Model
     public function isActive(): bool
     {
         $today = now()->startOfDay();
+
         return $this->start_date->lte($today) && $this->end_date->gte($today);
     }
 
@@ -82,6 +85,7 @@ class Vacation extends Model
     public function includesDate(Carbon|string $date): bool
     {
         $checkDate = $date instanceof Carbon ? $date : Carbon::parse($date);
+
         return $checkDate->between($this->start_date, $this->end_date);
     }
 

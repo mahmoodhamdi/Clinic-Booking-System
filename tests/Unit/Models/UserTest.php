@@ -15,7 +15,7 @@ class UserTest extends TestCase
     /** @test */
     public function user_has_correct_fillable_attributes(): void
     {
-        $user = new User();
+        $user = new User;
 
         $this->assertEquals([
             'name',
@@ -35,7 +35,7 @@ class UserTest extends TestCase
     /** @test */
     public function user_has_correct_hidden_attributes(): void
     {
-        $user = new User();
+        $user = new User;
 
         $this->assertEquals([
             'password',

@@ -12,6 +12,7 @@ class ScheduleSeeder extends Seeder
     {
         if (Schedule::count() > 0) {
             $this->command->info('Schedules already exist, skipping.');
+
             return;
         }
 

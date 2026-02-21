@@ -59,14 +59,14 @@ class DashboardService
 
         // Single query for all appointment stats
         $appointmentStats = Appointment::query()
-            ->selectRaw("
+            ->selectRaw('
                 COUNT(*) as total,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as confirmed,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show
-            ", [
+            ', [
                 AppointmentStatus::PENDING->value,
                 AppointmentStatus::CONFIRMED->value,
                 AppointmentStatus::COMPLETED->value,
@@ -78,11 +78,11 @@ class DashboardService
 
         // Single query for all payment stats
         $paymentStats = Payment::query()
-            ->selectRaw("
+            ->selectRaw('
                 COALESCE(SUM(total), 0) as total,
                 COALESCE(SUM(CASE WHEN status = ? THEN total ELSE 0 END), 0) as paid,
                 COALESCE(SUM(CASE WHEN status = ? THEN total ELSE 0 END), 0) as pending
-            ", [
+            ', [
                 PaymentStatus::PAID->value,
                 PaymentStatus::PENDING->value,
             ])
@@ -177,7 +177,7 @@ class DashboardService
     {
         // Validate period
         $validPeriods = ['week', 'month'];
-        if (!in_array($period, $validPeriods)) {
+        if (! in_array($period, $validPeriods)) {
             throw new BusinessLogicException(
                 __('الفترة غير صالحة'),
                 'INVALID_PERIOD',
@@ -262,14 +262,14 @@ class DashboardService
 
         // Single query for all status counts
         $stats = Appointment::query()
-            ->selectRaw("
+            ->selectRaw('
                 COUNT(*) as total,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as confirmed,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show
-            ", [
+            ', [
                 AppointmentStatus::PENDING->value,
                 AppointmentStatus::CONFIRMED->value,
                 AppointmentStatus::COMPLETED->value,
@@ -451,7 +451,7 @@ class DashboardService
             ->orderBy('appointment_time')
             ->first();
 
-        if (!$next) {
+        if (! $next) {
             return null;
         }
 

@@ -26,7 +26,7 @@ class SlotGeneratorServiceTest extends TestCase
             'advance_booking_days' => 7,
         ]);
 
-        $this->service = new SlotGeneratorService();
+        $this->service = new SlotGeneratorService;
     }
 
     /** @test */

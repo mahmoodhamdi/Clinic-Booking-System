@@ -16,17 +16,22 @@ class PrescriptionPolicyTest extends TestCase
     use RefreshDatabase;
 
     private PrescriptionPolicy $policy;
+
     private User $admin;
+
     private User $secretary;
+
     private User $patient;
+
     private User $otherPatient;
+
     private Prescription $prescription;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->policy = new PrescriptionPolicy();
+        $this->policy = new PrescriptionPolicy;
 
         $this->admin = User::factory()->create(['role' => UserRole::ADMIN]);
         $this->secretary = User::factory()->create(['role' => UserRole::SECRETARY]);

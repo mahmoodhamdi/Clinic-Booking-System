@@ -16,9 +16,7 @@ use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
-    public function __construct(protected AppointmentService $appointmentService)
-    {
-    }
+    public function __construct(protected AppointmentService $appointmentService) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -93,7 +91,7 @@ class AppointmentController extends Controller
 
         $canCancel = $this->appointmentService->canCancel($appointment, $request->user());
 
-        if (!$canCancel['can_cancel']) {
+        if (! $canCancel['can_cancel']) {
             return response()->json([
                 'success' => false,
                 'message' => $canCancel['reason'],

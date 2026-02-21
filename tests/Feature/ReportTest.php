@@ -15,6 +15,7 @@ class ReportTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $patient;
 
     protected function setUp(): void
@@ -65,7 +66,7 @@ class ReportTest extends TestCase
 
         Sanctum::actingAs($this->admin);
 
-        $response = $this->getJson('/api/admin/reports/appointments?' . http_build_query([
+        $response = $this->getJson('/api/admin/reports/appointments?'.http_build_query([
             'from_date' => now()->startOfMonth()->toDateString(),
             'to_date' => now()->endOfMonth()->toDateString(),
         ]));
@@ -134,7 +135,7 @@ class ReportTest extends TestCase
 
         Sanctum::actingAs($this->admin);
 
-        $response = $this->getJson('/api/admin/reports/revenue?' . http_build_query([
+        $response = $this->getJson('/api/admin/reports/revenue?'.http_build_query([
             'from_date' => now()->startOfMonth()->toDateString(),
             'to_date' => now()->endOfMonth()->toDateString(),
         ]));
@@ -208,7 +209,7 @@ class ReportTest extends TestCase
 
         Sanctum::actingAs($this->admin);
 
-        $response = $this->getJson('/api/admin/reports/patients?' . http_build_query([
+        $response = $this->getJson('/api/admin/reports/patients?'.http_build_query([
             'from_date' => now()->startOfYear()->toDateString(),
             'to_date' => now()->endOfYear()->toDateString(),
         ]));

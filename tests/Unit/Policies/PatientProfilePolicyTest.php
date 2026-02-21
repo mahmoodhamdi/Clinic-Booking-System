@@ -14,17 +14,22 @@ class PatientProfilePolicyTest extends TestCase
     use RefreshDatabase;
 
     private PatientProfilePolicy $policy;
+
     private User $admin;
+
     private User $secretary;
+
     private User $patient;
+
     private User $otherPatient;
+
     private PatientProfile $patientProfile;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->policy = new PatientProfilePolicy();
+        $this->policy = new PatientProfilePolicy;
 
         $this->admin = User::factory()->create(['role' => UserRole::ADMIN]);
         $this->secretary = User::factory()->create(['role' => UserRole::SECRETARY]);

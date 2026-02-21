@@ -22,7 +22,7 @@ class CacheApiResponse
         $response = $next($request);
 
         // Only cache GET requests with successful responses (2xx)
-        if (!$request->isMethod('GET') || $response->getStatusCode() >= 300) {
+        if (! $request->isMethod('GET') || $response->getStatusCode() >= 300) {
             return $response;
         }
 

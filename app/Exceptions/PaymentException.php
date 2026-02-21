@@ -5,6 +5,7 @@ namespace App\Exceptions;
 class PaymentException extends BusinessLogicException
 {
     protected ?int $appointmentId;
+
     protected ?float $amount;
 
     public function __construct(

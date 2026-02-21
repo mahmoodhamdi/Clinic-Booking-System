@@ -18,7 +18,7 @@ class PatientStatisticsServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new PatientStatisticsService();
+        $this->service = new PatientStatisticsService;
     }
 
     /** @test */

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api;
 
-use App\Enums\AppointmentStatus;
 use App\Enums\DayOfWeek;
 use App\Models\Appointment;
 use App\Models\ClinicSetting;

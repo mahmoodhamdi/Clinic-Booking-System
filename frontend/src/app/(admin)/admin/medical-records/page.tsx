@@ -20,7 +20,7 @@ import {
   Upload,
 } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,7 +48,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
-import type { MedicalRecord, User, Attachment, ApiResponse, PaginatedResponse } from '@/types';
+import { useDebounce } from '@/hooks/useDebounce';
+import type { MedicalRecord, User, ApiResponse, PaginatedResponse } from '@/types';
 
 const recordSchema = z.object({
   patient_id: z.string().min(1, 'Patient is required'),
@@ -67,6 +68,8 @@ export default function AdminMedicalRecordsPage() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
 
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
   const form = useForm<RecordFormData>({
     resolver: zodResolver(recordSchema),
     defaultValues: {
@@ -79,7 +82,7 @@ export default function AdminMedicalRecordsPage() {
 
   // Fetch medical records
   const { data: records, isLoading } = useQuery<ApiResponse<MedicalRecord[]>>({
-    queryKey: ['adminMedicalRecords'],
+    queryKey: ['adminMedicalRecords', debouncedSearch],
     queryFn: () => adminApi.getMedicalRecords(),
   });
 
@@ -119,8 +122,8 @@ export default function AdminMedicalRecordsPage() {
   };
 
   const filteredRecords = records?.data?.filter((record) => {
-    if (!searchQuery) return true;
-    const search = searchQuery.toLowerCase();
+    if (!debouncedSearch) return true;
+    const search = debouncedSearch.toLowerCase();
     return (
       (record as MedicalRecord & { patient?: User }).patient?.name?.toLowerCase().includes(search) ||
       record.diagnosis?.toLowerCase().includes(search)

@@ -65,7 +65,7 @@ class Prescription extends Model
 
     public function getIsExpiredAttribute(): bool
     {
-        return !$this->is_valid;
+        return ! $this->is_valid;
     }
 
     public function getItemsCountAttribute(): int

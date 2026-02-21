@@ -3,29 +3,30 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\ApiResponse;
 use App\Http\Resources\MedicalRecordResource;
 use App\Models\MedicalRecord;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class MedicalRecordController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): JsonResponse
     {
         $records = MedicalRecord::with(['appointment', 'prescriptions'])
             ->forPatient($request->user()->id)
             ->latest()
             ->paginate($request->per_page ?? 15);
 
-        return MedicalRecordResource::collection($records);
+        return ApiResponse::paginated($records, MedicalRecordResource::class);
     }
 
-    public function show(Request $request, MedicalRecord $medicalRecord): MedicalRecordResource
+    public function show(Request $request, MedicalRecord $medicalRecord): JsonResponse
     {
         $this->authorize('view', $medicalRecord);
 
         $medicalRecord->load(['appointment', 'prescriptions.items', 'attachments']);
 
-        return new MedicalRecordResource($medicalRecord);
+        return ApiResponse::success(new MedicalRecordResource($medicalRecord));
     }
 }

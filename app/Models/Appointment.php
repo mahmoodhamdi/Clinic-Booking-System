@@ -102,6 +102,7 @@ class Appointment extends Model
     public function scopeForDate($query, Carbon|string $date)
     {
         $dateString = $date instanceof Carbon ? $date->toDateString() : $date;
+
         return $query->whereDate('appointment_date', $dateString);
     }
 
@@ -155,6 +156,7 @@ class Appointment extends Model
     {
         $fromDate = $from instanceof Carbon ? $from->toDateString() : $from;
         $toDate = $to instanceof Carbon ? $to->toDateString() : $to;
+
         return $query->whereBetween('appointment_date', [$fromDate, $toDate]);
     }
 
@@ -225,6 +227,7 @@ class Appointment extends Model
 
     /**
      * Scope for full detail view with all relations.
+     *
      * @deprecated Use withDetailRelations() instead
      */
     public function scopeWithFullDetails(Builder $query): Builder
@@ -234,6 +237,7 @@ class Appointment extends Model
 
     /**
      * Scope to include common relations for listings.
+     *
      * @deprecated Use withListingRelations() instead
      */
     public function scopeWithCommonRelations(Builder $query): Builder
@@ -397,7 +401,7 @@ class Appointment extends Model
                 // Match time regardless of seconds
                 $query->whereRaw("strftime('%H:%M', appointment_time) = ?", [$normalizedTime])
                     ->orWhere('appointment_time', $normalizedTime)
-                    ->orWhere('appointment_time', $normalizedTime . ':00');
+                    ->orWhere('appointment_time', $normalizedTime.':00');
             })
             ->active()
             ->exists();

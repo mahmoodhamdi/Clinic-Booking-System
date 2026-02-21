@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use App\Enums\DayOfWeek;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Carbon\Carbon;
 
 class Schedule extends Model
 {
@@ -44,6 +44,7 @@ class Schedule extends Model
     public function scopeForDay($query, DayOfWeek|int $day)
     {
         $dayValue = $day instanceof DayOfWeek ? $day->value : $day;
+
         return $query->where('day_of_week', $dayValue);
     }
 
@@ -124,6 +125,7 @@ class Schedule extends Model
                 $overlapsBreak = $current->lt($breakEnd) && $slotEnd->gt($breakStart);
                 if ($overlapsBreak) {
                     $current = $breakEnd->copy();
+
                     continue;
                 }
             }

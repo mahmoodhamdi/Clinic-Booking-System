@@ -17,7 +17,7 @@ class PatientProfileFactory extends Factory
             'user_id' => User::factory()->patient(),
             'blood_type' => $this->faker->randomElement(BloodType::cases()),
             'emergency_contact_name' => $this->faker->name(),
-            'emergency_contact_phone' => '+20' . $this->faker->numerify('1#########'),
+            'emergency_contact_phone' => '+20'.$this->faker->numerify('1#########'),
             'allergies' => $this->faker->optional(0.3)->randomElements(
                 ['البنسلين', 'الأسبرين', 'السلفا', 'اللاتكس', 'الغلوتين'],
                 $this->faker->numberBetween(1, 3)
@@ -38,29 +38,29 @@ class PatientProfileFactory extends Factory
 
     public function forUser(User $user): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'user_id' => $user->id,
         ]);
     }
 
     public function withBloodType(BloodType $bloodType): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'blood_type' => $bloodType,
         ]);
     }
 
-    public function withEmergencyContact(string $name = null, string $phone = null): static
+    public function withEmergencyContact(?string $name = null, ?string $phone = null): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'emergency_contact_name' => $name ?? $this->faker->name(),
-            'emergency_contact_phone' => $phone ?? '+20' . $this->faker->numerify('1#########'),
+            'emergency_contact_phone' => $phone ?? '+20'.$this->faker->numerify('1#########'),
         ]);
     }
 
     public function withoutEmergencyContact(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'emergency_contact_name' => null,
             'emergency_contact_phone' => null,
         ]);
@@ -68,28 +68,28 @@ class PatientProfileFactory extends Factory
 
     public function withAllergies(array $allergies): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'allergies' => $allergies,
         ]);
     }
 
     public function withChronicDiseases(array $diseases): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'chronic_diseases' => $diseases,
         ]);
     }
 
     public function withMedications(array $medications): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'current_medications' => $medications,
         ]);
     }
 
-    public function withInsurance(string $provider = null, string $number = null): static
+    public function withInsurance(?string $provider = null, ?string $number = null): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'insurance_provider' => $provider ?? $this->faker->company(),
             'insurance_number' => $number ?? $this->faker->numerify('INS-######'),
         ]);
@@ -97,7 +97,7 @@ class PatientProfileFactory extends Factory
 
     public function withoutInsurance(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'insurance_provider' => null,
             'insurance_number' => null,
         ]);
@@ -105,16 +105,16 @@ class PatientProfileFactory extends Factory
 
     public function complete(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'blood_type' => $this->faker->randomElement(BloodType::cases()),
             'emergency_contact_name' => $this->faker->name(),
-            'emergency_contact_phone' => '+20' . $this->faker->numerify('1#########'),
+            'emergency_contact_phone' => '+20'.$this->faker->numerify('1#########'),
         ]);
     }
 
     public function incomplete(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'blood_type' => null,
             'emergency_contact_name' => null,
             'emergency_contact_phone' => null,

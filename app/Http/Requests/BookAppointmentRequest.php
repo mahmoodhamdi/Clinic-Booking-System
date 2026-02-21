@@ -22,7 +22,7 @@ class BookAppointmentRequest extends FormRequest
                 'required',
                 'date',
                 'after:now',
-                'before_or_equal:' . $maxDate . ' 23:59:59',
+                'before_or_equal:'.$maxDate.' 23:59:59',
             ],
             'notes' => 'nullable|string|max:500',
         ];

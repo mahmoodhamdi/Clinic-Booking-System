@@ -36,7 +36,7 @@ class LogoutTest extends TestCase
 
         // Logout using the token
         $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson('/api/auth/logout');
 
         // Token should be deleted

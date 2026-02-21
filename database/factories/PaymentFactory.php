@@ -75,7 +75,7 @@ class PaymentFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => PaymentStatus::PAID,
             'paid_at' => fake()->dateTimeBetween('-1 month', 'now'),
-            'transaction_id' => 'TXN-' . fake()->unique()->randomNumber(8),
+            'transaction_id' => 'TXN-'.fake()->unique()->randomNumber(8),
         ]);
     }
 
@@ -114,7 +114,7 @@ class PaymentFactory extends Factory
      */
     public function deleted(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'deleted_at' => now(),
         ]);
     }

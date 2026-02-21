@@ -25,7 +25,7 @@ class RegistrationTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'message',
-                'data' => ['user', 'token']
+                'data' => ['user', 'token'],
             ])
             ->assertJson([
                 'success' => true,

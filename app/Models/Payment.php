@@ -58,17 +58,17 @@ class Payment extends Model
 
     public function getFormattedAmountAttribute(): string
     {
-        return number_format($this->amount, 2) . ' ج.م';
+        return number_format($this->amount, 2).' ج.م';
     }
 
     public function getFormattedDiscountAttribute(): string
     {
-        return number_format($this->discount, 2) . ' ج.م';
+        return number_format($this->discount, 2).' ج.م';
     }
 
     public function getFormattedTotalAttribute(): string
     {
-        return number_format($this->total, 2) . ' ج.م';
+        return number_format($this->total, 2).' ج.م';
     }
 
     public function getStatusLabelAttribute(): string
@@ -87,6 +87,7 @@ class Payment extends Model
         if ($this->patient_id) {
             return $this->directPatient;
         }
+
         // For appointment-linked payments
         return $this->appointment?->patient;
     }
@@ -131,7 +132,7 @@ class Payment extends Model
 
     public function scopeForDateRange($query, string $from, string $to)
     {
-        return $query->whereBetween('paid_at', [$from . ' 00:00:00', $to . ' 23:59:59']);
+        return $query->whereBetween('paid_at', [$from.' 00:00:00', $to.' 23:59:59']);
     }
 
     public function scopeByMethod($query, PaymentMethod $method)

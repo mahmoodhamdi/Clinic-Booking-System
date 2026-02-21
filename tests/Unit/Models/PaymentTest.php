@@ -2,12 +2,10 @@
 
 namespace Tests\Unit\Models;
 
-use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Models\Appointment;
 use App\Models\Payment;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -12,10 +12,10 @@ class ClinicSettingFactory extends Factory
     public function definition(): array
     {
         return [
-            'clinic_name' => 'عيادة ' . fake()->lastName(),
-            'doctor_name' => 'د. ' . fake()->name(),
+            'clinic_name' => 'عيادة '.fake()->lastName(),
+            'doctor_name' => 'د. '.fake()->name(),
             'specialization' => fake()->randomElement(['طب عام', 'طب أطفال', 'طب باطني', 'جراحة', 'عظام']),
-            'phone' => '010' . fake()->numerify('########'),
+            'phone' => '010'.fake()->numerify('########'),
             'email' => fake()->unique()->safeEmail(),
             'address' => fake()->address(),
             'logo' => null,

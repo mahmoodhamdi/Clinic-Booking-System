@@ -11,15 +11,16 @@ use App\Models\ClinicSetting;
 use App\Models\User;
 use App\Traits\LogsActivity;
 use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class AppointmentService
 {
     use LogsActivity;
 
     protected SlotGeneratorService $slotService;
+
     protected ClinicSetting $settings;
 
     public function __construct(SlotGeneratorService $slotService)
@@ -84,7 +85,7 @@ class AppointmentService
         $time = $datetime->format('H:i');
 
         // Check if slot is available (working hours, vacation, etc.)
-        if (!$this->slotService->isSlotAvailable($datetime)) {
+        if (! $this->slotService->isSlotAvailable($datetime)) {
             throw new SlotNotAvailableException($date->toDateString(), $time, 'outside_hours');
         }
 
@@ -124,6 +125,7 @@ class AppointmentService
     {
         try {
             $this->validateBooking($patient, $datetime);
+
             return ['can_book' => true, 'reason' => null];
         } catch (BusinessLogicException $e) {
             return ['can_book' => false, 'reason' => $e->getMessage(), 'error_code' => $e->getErrorCode()];
@@ -134,7 +136,7 @@ class AppointmentService
 
     public function confirm(Appointment $appointment): Appointment
     {
-        if (!$appointment->isPending()) {
+        if (! $appointment->isPending()) {
             throw new BusinessLogicException(
                 __('لا يمكن تأكيد هذا الحجز'),
                 'INVALID_STATUS_TRANSITION',
@@ -145,13 +147,14 @@ class AppointmentService
         return DB::transaction(function () use ($appointment) {
             $result = $appointment->confirm();
             $this->logInfo('Appointment confirmed', ['appointment_id' => $appointment->id]);
+
             return $result;
         });
     }
 
     public function complete(Appointment $appointment, ?string $adminNotes = null): Appointment
     {
-        if (!$appointment->isConfirmed()) {
+        if (! $appointment->isConfirmed()) {
             throw new BusinessLogicException(
                 __('لا يمكن إتمام هذا الحجز'),
                 'INVALID_STATUS_TRANSITION',
@@ -162,13 +165,14 @@ class AppointmentService
         return DB::transaction(function () use ($appointment, $adminNotes) {
             $result = $appointment->complete($adminNotes);
             $this->logInfo('Appointment completed', ['appointment_id' => $appointment->id]);
+
             return $result;
         });
     }
 
     public function cancel(Appointment $appointment, string $reason, CancelledBy $cancelledBy): Appointment
     {
-        if (!$appointment->isActive()) {
+        if (! $appointment->isActive()) {
             throw new BusinessLogicException(
                 __('لا يمكن إلغاء هذا الحجز'),
                 'INVALID_STATUS_TRANSITION',
@@ -183,13 +187,14 @@ class AppointmentService
                 'cancelled_by' => $cancelledBy->value,
                 'reason' => $reason,
             ]);
+
             return $result;
         });
     }
 
     public function markNoShow(Appointment $appointment): Appointment
     {
-        if (!$appointment->isConfirmed()) {
+        if (! $appointment->isConfirmed()) {
             throw new BusinessLogicException(
                 __('لا يمكن تسجيل عدم الحضور لهذا الحجز'),
                 'INVALID_STATUS_TRANSITION',
@@ -200,13 +205,14 @@ class AppointmentService
         return DB::transaction(function () use ($appointment) {
             $result = $appointment->markNoShow();
             $this->logInfo('Appointment marked as no-show', ['appointment_id' => $appointment->id]);
+
             return $result;
         });
     }
 
     public function reschedule(Appointment $appointment, Carbon $newDatetime): Appointment
     {
-        if (!$appointment->isActive()) {
+        if (! $appointment->isActive()) {
             throw new BusinessLogicException(
                 __('لا يمكن إعادة جدولة هذا الحجز'),
                 'INVALID_STATUS_TRANSITION',
@@ -219,7 +225,7 @@ class AppointmentService
 
         return DB::transaction(function () use ($appointment, $newDate, $newTime, $newDatetime) {
             // Check if new slot is available (excluding current appointment)
-            if (!$this->slotService->isSlotAvailable($newDatetime)) {
+            if (! $this->slotService->isSlotAvailable($newDatetime)) {
                 throw new SlotNotAvailableException($newDate->toDateString(), $newTime, 'outside_hours');
             }
 
@@ -259,7 +265,7 @@ class AppointmentService
 
     public function canCancel(Appointment $appointment, User $user): array
     {
-        if (!$appointment->isActive()) {
+        if (! $appointment->isActive()) {
             return ['can_cancel' => false, 'reason' => __('لا يمكن إلغاء هذا الحجز')];
         }
 
@@ -336,26 +342,26 @@ class AppointmentService
             ->withListingRelations();
 
         // Filter by status
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
         // Filter by date
-        if (!empty($filters['date'])) {
+        if (! empty($filters['date'])) {
             $query->forDate($filters['date']);
         }
 
         // Filter by date range
-        if (!empty($filters['from_date']) && !empty($filters['to_date'])) {
+        if (! empty($filters['from_date']) && ! empty($filters['to_date'])) {
             $query->betweenDates($filters['from_date'], $filters['to_date']);
-        } elseif (!empty($filters['from_date'])) {
+        } elseif (! empty($filters['from_date'])) {
             $query->whereDate('appointment_date', '>=', $filters['from_date']);
-        } elseif (!empty($filters['to_date'])) {
+        } elseif (! empty($filters['to_date'])) {
             $query->whereDate('appointment_date', '<=', $filters['to_date']);
         }
 
         // Filter by patient
-        if (!empty($filters['patient_id'])) {
+        if (! empty($filters['patient_id'])) {
             $query->forPatient($filters['patient_id']);
         }
 
@@ -450,7 +456,7 @@ class AppointmentService
     public function getDailyStatistics(Carbon $from, Carbon $to): Collection
     {
         // Fetch all stats in a single query grouped by date
-        $results = DB::select("
+        $results = DB::select('
             SELECT
                 appointment_date as date,
                 COUNT(*) as total,
@@ -462,7 +468,7 @@ class AppointmentService
               AND appointment_date BETWEEN ? AND ?
             GROUP BY appointment_date
             ORDER BY appointment_date
-        ", [
+        ', [
             AppointmentStatus::COMPLETED->value,
             AppointmentStatus::CANCELLED->value,
             AppointmentStatus::NO_SHOW->value,

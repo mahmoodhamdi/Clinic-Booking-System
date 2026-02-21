@@ -13,13 +13,12 @@ import {
   XCircle,
   AlertCircle,
   Search,
-  Filter,
   MoreVertical,
   User,
   Phone,
 } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -48,6 +47,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { adminApi } from '@/lib/api/admin';
 import { getErrorMessage } from '@/lib/api/client';
+import { useDebounce } from '@/hooks/useDebounce';
 import { Appointment } from '@/types';
 
 export default function AdminAppointmentsPage() {
@@ -60,6 +60,8 @@ export default function AdminAppointmentsPage() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [newStatus, setNewStatus] = useState('');
   const [statusNotes, setStatusNotes] = useState('');
+
+  const debouncedSearch = useDebounce(searchQuery, 300);
 
   // Fetch appointments
   const { data: appointments, isLoading } = useQuery({
@@ -191,8 +193,8 @@ export default function AdminAppointmentsPage() {
   };
 
   const filteredAppointments = appointments?.data?.filter((appointment: Appointment) => {
-    if (!searchQuery) return true;
-    const search = searchQuery.toLowerCase();
+    if (!debouncedSearch) return true;
+    const search = debouncedSearch.toLowerCase();
     return (
       appointment.patient?.name?.toLowerCase().includes(search) ||
       appointment.patient?.phone?.includes(search)

@@ -16,9 +16,7 @@ use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
-    public function __construct(protected AppointmentService $appointmentService)
-    {
-    }
+    public function __construct(protected AppointmentService $appointmentService) {}
 
     public function index(ListAppointmentsRequest $request): JsonResponse
     {
@@ -206,7 +204,7 @@ class AppointmentController extends Controller
         ]);
 
         try {
-            $newDatetime = Carbon::parse($request->date . ' ' . $request->slot_time);
+            $newDatetime = Carbon::parse($request->date.' '.$request->slot_time);
             $appointment = $this->appointmentService->reschedule($appointment, $newDatetime);
 
             return response()->json([

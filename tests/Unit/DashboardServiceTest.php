@@ -3,7 +3,6 @@
 namespace Tests\Unit;
 
 use App\Enums\AppointmentStatus;
-use App\Enums\PaymentStatus;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use App\Models\Payment;
@@ -67,16 +66,19 @@ class DashboardServiceTest extends TestCase
             'appointment_date' => $today,
             'status' => AppointmentStatus::PENDING,
         ]);
-        Appointment::factory()->count(2)->create([
+        $completedAppointments = Appointment::factory()->count(2)->create([
             'appointment_date' => $today,
             'status' => AppointmentStatus::COMPLETED,
         ]);
 
-        // Create today's payments
-        Payment::factory()->count(2)->paid()->create([
-            'total' => 150.00,
-            'created_at' => now(),
-        ]);
+        // Create today's payments linked to existing appointments (to avoid creating extra appointments)
+        foreach ($completedAppointments as $apt) {
+            Payment::factory()->paid()->create([
+                'appointment_id' => $apt->id,
+                'total' => 150.00,
+                'created_at' => now(),
+            ]);
+        }
 
         $stats = $this->dashboardService->getTodayStatistics();
 

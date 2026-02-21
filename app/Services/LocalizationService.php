@@ -28,6 +28,7 @@ class LocalizationService
     public function isRtl(): bool
     {
         $rtlLocales = config('localization.rtl_locales', ['ar', 'he', 'fa', 'ur']);
+
         return in_array($this->getCurrentLocale(), $rtlLocales);
     }
 
@@ -68,7 +69,7 @@ class LocalizationService
      */
     public function formatDate($date, ?string $format = null): string
     {
-        if (!$date) {
+        if (! $date) {
             return '';
         }
 
@@ -86,7 +87,7 @@ class LocalizationService
      */
     public function formatTime($time, ?string $format = null): string
     {
-        if (!$time) {
+        if (! $time) {
             return '';
         }
 
@@ -104,7 +105,7 @@ class LocalizationService
      */
     public function formatDateTime($datetime, ?string $format = null): string
     {
-        if (!$datetime) {
+        if (! $datetime) {
             return '';
         }
 

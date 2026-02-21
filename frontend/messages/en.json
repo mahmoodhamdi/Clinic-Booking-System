@@ -30,7 +30,26 @@
     "notes": "Notes",
     "date": "Date",
     "active": "Active",
-    "currency": "EGP"
+    "currency": "EGP",
+    "viewAll": "View All",
+    "download": "Download",
+    "noMedications": "No medications",
+    "noNotes": "No notes",
+    "notFound": "Item not found",
+    "patient": "Patient",
+    "name": "Name",
+    "phone": "Phone",
+    "units": {
+      "bpm": "bpm",
+      "kg": "kg",
+      "cm": "cm"
+    },
+    "pagination": "Pagination",
+    "page": "Page",
+    "status": "Status",
+    "time": "Time",
+    "reason": "Reason",
+    "createdAt": "Created At"
   },
   "auth": {
     "login": "Login",
@@ -164,6 +183,13 @@
       "insuranceProvider": "Insurance Provider",
       "policyNumber": "Policy Number",
       "updateSuccess": "Profile updated successfully"
+    },
+    "prescriptions": {
+      "notFound": "Prescription not found",
+      "dispensedAt": "This prescription was dispensed on"
+    },
+    "medicalRecords": {
+      "notFound": "Medical record not found"
     }
   },
   "admin": {
@@ -178,7 +204,30 @@
       "todayRevenue": "Today's Revenue",
       "recentActivity": "Recent Activity",
       "weeklyStats": "Weekly Stats",
-      "monthlyStats": "Monthly Stats"
+      "monthlyStats": "Monthly Stats",
+      "pendingConfirmation": "awaiting confirmation",
+      "noTodayAppointments": "No appointments today",
+      "noRecentActivity": "No recent activity",
+      "appointmentTrend": "Appointment Trend",
+      "statusDistribution": "Status Distribution",
+      "revenueTrend": "Revenue Trend",
+      "appointments": "Appointments",
+      "revenue": "Revenue",
+      "completed": "Completed",
+      "newPatients": "New Patients",
+      "thisWeek": "This Week",
+      "paymentStats": "Payment Statistics",
+      "totalRevenueAll": "Total Revenue",
+      "monthRevenue": "This Month",
+      "todayRevenueLabel": "Today",
+      "pendingPayments": "Pending Payments",
+      "chartLoadError": "Failed to load chart data",
+      "noChartData": "No data available for this period",
+      "statusConfirmed": "Confirmed",
+      "statusPending": "Pending",
+      "statusCompleted": "Completed",
+      "statusCancelled": "Cancelled",
+      "statusNoShow": "No Show"
     },
     "appointments": {
       "title": "Manage Appointments",
@@ -193,7 +242,23 @@
       "changeStatus": "Change Status",
       "changeStatusDescription": "Are you sure you want to change the status of this appointment?",
       "confirm": "Confirm",
-      "markCompleted": "Mark as Completed"
+      "markCompleted": "Mark as Completed",
+      "appointmentDetail": "Appointment Details",
+      "appointmentInfo": "Appointment Information",
+      "timeline": "Timeline",
+      "created": "Created",
+      "adminNotes": "Admin Notes",
+      "cancellationReason": "Cancellation Reason",
+      "reason": "Reason for Visit",
+      "notFound": "Appointment not found",
+      "actions": "Actions",
+      "status": {
+        "confirmed": "Confirmed",
+        "pending": "Pending",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "no_show": "No Show"
+      }
     },
     "patients": {
       "title": "Manage Patients",
@@ -202,7 +267,8 @@
       "patientHistory": "Patient History",
       "addNotes": "Add Notes",
       "toggleStatus": "Toggle Status",
-      "searchPlaceholder": "Search by name or phone..."
+      "searchPlaceholder": "Search by name or phone...",
+      "viewProfile": "View Profile"
     },
     "medicalRecords": {
       "title": "Medical Records",
@@ -238,7 +304,12 @@
       "instructions": "Instructions",
       "addMedication": "Add Medication",
       "markDispensed": "Mark as Dispensed",
-      "downloadPdf": "Download PDF"
+      "downloadPdf": "Download PDF",
+      "dispensed": "Dispensed",
+      "notDispensed": "Not Dispensed",
+      "frequencyPlaceholder": "3 times daily",
+      "durationPlaceholder": "7 days",
+      "instructionsPlaceholder": "After meals"
     },
     "payments": {
       "title": "Payments",
@@ -316,9 +387,17 @@
       "revenueReport": "Revenue Report",
       "appointmentsReport": "Appointments Report",
       "patientsReport": "Patients Report",
-      "dateRange": "Date Range",
+      "dateRange": "Select a date range to view the report",
       "export": "Export",
-      "exportPdf": "Export PDF"
+      "exportPdf": "Export PDF",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "lastMonth": "Last Month",
+      "last3Months": "Last 3 Months",
+      "completionRate": "Completion Rate",
+      "cancellationRate": "Cancellation Rate",
+      "statusDistribution": "Status Distribution",
+      "inactivePatients": "Inactive Patients"
     }
   },
   "notifications": {
