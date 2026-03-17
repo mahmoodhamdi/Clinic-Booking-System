@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import {
   Users,
   Search,
@@ -31,10 +30,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { adminApi } from '@/lib/api/admin';
 import { useDebounce } from '@/hooks/useDebounce';
+import { getDateLocale } from '@/lib/utils';
 import type { User, Appointment, MedicalRecord, Prescription, PaginatedResponse } from '@/types';
 
 export default function AdminPatientsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -94,7 +95,7 @@ export default function AdminPatientsPage() {
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={patient.avatar || ''} />
+                    <AvatarImage src={patient.avatar || undefined} />
                     <AvatarFallback>{patient.name?.charAt(0) || 'P'}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
@@ -116,7 +117,7 @@ export default function AdminPatientsPage() {
                     <Calendar className="h-4 w-4" />
                     <span>
                       {patient.created_at
-                        ? format(new Date(patient.created_at), 'PP', { locale: ar })
+                        ? format(new Date(patient.created_at), 'PP', { locale: getDateLocale(locale) })
                         : '-'}
                     </span>
                   </div>
@@ -152,7 +153,7 @@ export default function AdminPatientsPage() {
               {/* Patient Info */}
               <div className="flex items-start gap-4 mb-6">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={patientDetails.data.avatar || ''} />
+                  <AvatarImage src={patientDetails.data.avatar || undefined} />
                   <AvatarFallback className="text-xl">
                     {patientDetails.data.name?.charAt(0) || 'P'}
                   </AvatarFallback>
@@ -182,7 +183,7 @@ export default function AdminPatientsPage() {
                     {patientDetails.data.date_of_birth && (
                       <Badge variant="outline">
                         {format(new Date(patientDetails.data.date_of_birth), 'PP', {
-                          locale: ar,
+                          locale: getDateLocale(locale),
                         })}
                       </Badge>
                     )}
@@ -217,7 +218,7 @@ export default function AdminPatientsPage() {
                         >
                           <div>
                             <p className="font-medium">
-                              {format(new Date(apt.date), 'PPP', { locale: ar })}
+                              {format(new Date(apt.date), 'PPP', { locale: getDateLocale(locale) })}
                             </p>
                             <p className="text-sm text-gray-500">{apt.slot_time}</p>
                           </div>
@@ -250,7 +251,7 @@ export default function AdminPatientsPage() {
                         >
                           <p className="font-medium">{record.diagnosis}</p>
                           <p className="text-sm text-gray-500 mt-1">
-                            {format(new Date(record.created_at), 'PPP', { locale: ar })}
+                            {format(new Date(record.created_at), 'PPP', { locale: getDateLocale(locale) })}
                           </p>
                         </div>
                       ))}

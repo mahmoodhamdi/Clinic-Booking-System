@@ -300,13 +300,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             {/* Right Side */}
             <div className="flex items-center gap-2">
               {/* Notifications */}
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <Badge className="absolute -top-1 -end-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </Badge>
-                )}
+              <Button variant="ghost" size="icon" className="relative" aria-label={t('navigation.notifications')} asChild>
+                <Link href="/admin/notifications">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <Badge className="absolute -top-1 -end-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </Badge>
+                  )}
+                </Link>
               </Button>
 
               {/* Language Switcher */}
@@ -317,7 +319,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user?.avatar || ''} />
+                      <AvatarImage src={user?.avatar || undefined} />
                       <AvatarFallback>
                         {user?.name?.charAt(0) || 'A'}
                       </AvatarFallback>

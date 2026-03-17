@@ -137,7 +137,7 @@ export function PatientLayout({ children }: PatientLayoutProps) {
             {/* Right Side */}
             <div className="flex items-center gap-2">
               {/* Notifications */}
-              <Button variant="ghost" size="icon" className="relative" asChild>
+              <Button variant="ghost" size="icon" className="relative" aria-label={t('navigation.notifications')} asChild>
                 <Link href="/notifications">
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
@@ -156,7 +156,7 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user?.avatar || ''} />
+                      <AvatarImage src={user?.avatar || undefined} />
                       <AvatarFallback>
                         {user?.name?.charAt(0) || 'U'}
                       </AvatarFallback>

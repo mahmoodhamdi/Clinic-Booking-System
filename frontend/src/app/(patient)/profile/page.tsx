@@ -217,7 +217,7 @@ export default function ProfilePage() {
               {/* Avatar */}
               <div className="flex items-center gap-4 mb-6">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={user?.avatar || ''} />
+                  <AvatarImage src={user?.avatar || undefined} />
                   <AvatarFallback className="text-2xl">
                     {user?.name?.charAt(0) || 'U'}
                   </AvatarFallback>
