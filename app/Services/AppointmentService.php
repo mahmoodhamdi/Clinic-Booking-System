@@ -365,9 +365,11 @@ class AppointmentService
             $query->forPatient($filters['patient_id']);
         }
 
-        // Order by
-        $orderBy = $filters['order_by'] ?? 'appointment_date';
-        $orderDir = $filters['order_dir'] ?? 'desc';
+        // Order by (allow-list enforced for defense-in-depth)
+        $allowedOrderBy = ['appointment_date', 'created_at', 'status'];
+        $allowedOrderDir = ['asc', 'desc'];
+        $orderBy = in_array($filters['order_by'] ?? '', $allowedOrderBy, true) ? $filters['order_by'] : 'appointment_date';
+        $orderDir = in_array($filters['order_dir'] ?? '', $allowedOrderDir, true) ? $filters['order_dir'] : 'desc';
         $query->orderBy($orderBy, $orderDir);
 
         if ($orderBy === 'appointment_date') {

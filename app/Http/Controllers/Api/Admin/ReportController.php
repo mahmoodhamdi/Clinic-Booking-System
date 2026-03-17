@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Helpers\ApiResponse;
+use App\Http\Requests\Admin\ReportFilterRequest;
 use App\Services\ReportService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ReportController extends Controller
@@ -15,44 +15,44 @@ class ReportController extends Controller
         private ReportService $reportService
     ) {}
 
-    public function appointments(Request $request): JsonResponse
+    public function appointments(ReportFilterRequest $request): JsonResponse
     {
         $data = $this->reportService->getAppointmentsReport(
-            $request->from_date,
-            $request->to_date,
-            $request->status
+            $request->validated('from_date'),
+            $request->validated('to_date'),
+            $request->validated('status')
         );
 
         return ApiResponse::success($data);
     }
 
-    public function revenue(Request $request): JsonResponse
+    public function revenue(ReportFilterRequest $request): JsonResponse
     {
         $data = $this->reportService->getRevenueReport(
-            $request->from_date,
-            $request->to_date,
-            $request->group_by ?? 'day'
+            $request->validated('from_date'),
+            $request->validated('to_date'),
+            $request->validated('group_by', 'day')
         );
 
         return ApiResponse::success($data);
     }
 
-    public function patients(Request $request): JsonResponse
+    public function patients(ReportFilterRequest $request): JsonResponse
     {
         $data = $this->reportService->getPatientsReport(
-            $request->from_date,
-            $request->to_date
+            $request->validated('from_date'),
+            $request->validated('to_date')
         );
 
         return ApiResponse::success($data);
     }
 
-    public function exportAppointments(Request $request): Response
+    public function exportAppointments(ReportFilterRequest $request): Response
     {
         $pdf = $this->reportService->exportAppointmentsReportToPdf(
-            $request->from_date,
-            $request->to_date,
-            $request->status
+            $request->validated('from_date'),
+            $request->validated('to_date'),
+            $request->validated('status')
         );
 
         $filename = 'appointments-report-'.now()->format('Y-m-d').'.pdf';
@@ -60,11 +60,11 @@ class ReportController extends Controller
         return $pdf->download($filename);
     }
 
-    public function exportRevenue(Request $request): Response
+    public function exportRevenue(ReportFilterRequest $request): Response
     {
         $pdf = $this->reportService->exportRevenueReportToPdf(
-            $request->from_date,
-            $request->to_date
+            $request->validated('from_date'),
+            $request->validated('to_date')
         );
 
         $filename = 'revenue-report-'.now()->format('Y-m-d').'.pdf';
@@ -72,11 +72,11 @@ class ReportController extends Controller
         return $pdf->download($filename);
     }
 
-    public function exportPatients(Request $request): Response
+    public function exportPatients(ReportFilterRequest $request): Response
     {
         $pdf = $this->reportService->exportPatientsReportToPdf(
-            $request->from_date,
-            $request->to_date
+            $request->validated('from_date'),
+            $request->validated('to_date')
         );
 
         $filename = 'patients-report-'.now()->format('Y-m-d').'.pdf';
