@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import {
@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/lib/stores/auth';
 import { patientApi } from '@/lib/api/patient';
+import { getIntlLocale } from '@/lib/utils';
 import type { Appointment, ApiResponse, PatientDashboard } from '@/types';
 
 function DashboardSkeleton() {
@@ -73,9 +74,10 @@ interface AppointmentItemProps {
   appointment: Appointment;
   confirmedLabel: string;
   pendingLabel: string;
+  intlLocale: string;
 }
 
-function AppointmentItem({ appointment, confirmedLabel, pendingLabel }: AppointmentItemProps) {
+function AppointmentItem({ appointment, confirmedLabel, pendingLabel, intlLocale }: AppointmentItemProps) {
   return (
     <div className="flex items-center justify-between p-4 rounded-lg border bg-gray-50 dark:bg-gray-800">
       <div className="flex items-center gap-4">
@@ -84,7 +86,7 @@ function AppointmentItem({ appointment, confirmedLabel, pendingLabel }: Appointm
         </div>
         <div>
           <p className="font-medium">
-            {new Date(appointment.date).toLocaleDateString('ar-EG', {
+            {new Date(appointment.date).toLocaleDateString(intlLocale, {
               weekday: 'long',
               month: 'long',
               day: 'numeric',
@@ -145,6 +147,7 @@ function EmptyAppointments({ message, buttonLabel }: EmptyAppointmentsProps) {
 
 export default function PatientDashboardPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const { user } = useAuthStore();
 
   // Fetch patient dashboard data
@@ -169,6 +172,7 @@ export default function PatientDashboardPage() {
   const upcomingAppointments = dashboard?.data?.upcoming_appointments ?? [];
   const confirmedLabel = getConfirmedLabel();
   const pendingLabel = getPendingLabel();
+  const intlLocale = getIntlLocale(locale);
 
   return (
     <div className="space-y-6">
@@ -179,7 +183,7 @@ export default function PatientDashboardPage() {
             {t('patient.dashboard.welcome')}، {user?.name}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {new Date().toLocaleDateString('ar-EG', {
+            {new Date().toLocaleDateString(intlLocale, {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
@@ -240,6 +244,7 @@ export default function PatientDashboardPage() {
                   appointment={appointment}
                   confirmedLabel={confirmedLabel}
                   pendingLabel={pendingLabel}
+                  intlLocale={intlLocale}
                 />
               ))}
             </div>

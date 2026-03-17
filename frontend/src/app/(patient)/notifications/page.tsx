@@ -1,9 +1,8 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { Bell, Check, CheckCheck, Trash2 } from 'lucide-react';
 
@@ -11,11 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api/client';
-import { cn } from '@/lib/utils';
+import { cn, getDateLocale } from '@/lib/utils';
 import type { Notification, ApiResponse } from '@/types';
 
 export default function NotificationsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const queryClient = useQueryClient();
 
   // Fetch notifications
@@ -130,7 +130,7 @@ export default function NotificationsPage() {
                       <p className="text-xs text-gray-400 mt-2">
                         {formatDistanceToNow(new Date(notification.created_at), {
                           addSuffix: true,
-                          locale: ar,
+                          locale: getDateLocale(locale),
                         })}
                       </p>
                     </div>

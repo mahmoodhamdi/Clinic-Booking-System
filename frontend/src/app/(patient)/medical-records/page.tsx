@@ -1,9 +1,8 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { FileText, Calendar, Stethoscope, Eye } from 'lucide-react';
 import Link from 'next/link';
 
@@ -11,10 +10,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api/client';
+import { getDateLocale } from '@/lib/utils';
 import type { MedicalRecord, ApiResponse } from '@/types';
 
 export default function MedicalRecordsPage() {
   const t = useTranslations();
+  const locale = useLocale();
 
   // Fetch medical records
   const { data: records, isLoading } = useQuery<ApiResponse<MedicalRecord[]>>({
@@ -51,7 +52,7 @@ export default function MedicalRecordsPage() {
                       <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
                         <Calendar className="h-4 w-4" />
                         <span>
-                          {format(new Date(record.created_at), 'PPP', { locale: ar })}
+                          {format(new Date(record.created_at), 'PPP', { locale: getDateLocale(locale) })}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 mb-2">

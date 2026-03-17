@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
   Calendar,
@@ -49,9 +48,11 @@ import { adminApi } from '@/lib/api/admin';
 import { getErrorMessage } from '@/lib/api/client';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Appointment } from '@/types';
+import { getDateLocale } from '@/lib/utils';
 
 export default function AdminAppointmentsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('');
@@ -262,7 +263,7 @@ export default function AdminAppointmentsPage() {
                         {new Date(appointment.date).getDate()}
                       </span>
                       <span className="text-xs text-primary">
-                        {format(new Date(appointment.date), 'MMM', { locale: ar })}
+                        {format(new Date(appointment.date), 'MMM', { locale: getDateLocale(locale) })}
                       </span>
                     </div>
                     <div>

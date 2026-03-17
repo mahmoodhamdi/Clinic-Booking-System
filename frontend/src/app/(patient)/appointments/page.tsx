@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
   Calendar,
@@ -31,6 +30,7 @@ import {
 } from '@/components/ui/dialog';
 import { appointmentsApi } from '@/lib/api/appointments';
 import { getErrorMessage } from '@/lib/api/client';
+import { getDateLocale } from '@/lib/utils';
 import { Appointment } from '@/types';
 
 interface AppointmentCardProps {
@@ -38,6 +38,7 @@ interface AppointmentCardProps {
   onCancelClick: (appointment: Appointment) => void;
   getStatusBadge: (status: string) => React.ReactNode;
   cancelLabel: string;
+  dateFnsLocale: ReturnType<typeof getDateLocale>;
 }
 
 function AppointmentCard({
@@ -45,6 +46,7 @@ function AppointmentCard({
   onCancelClick,
   getStatusBadge,
   cancelLabel,
+  dateFnsLocale,
 }: AppointmentCardProps) {
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -56,12 +58,12 @@ function AppointmentCard({
                 {new Date(appointment.date).getDate()}
               </span>
               <span className="text-xs text-primary">
-                {format(new Date(appointment.date), 'MMM', { locale: ar })}
+                {format(new Date(appointment.date), 'MMM', { locale: dateFnsLocale })}
               </span>
             </div>
             <div>
               <p className="font-medium">
-                {format(new Date(appointment.date), 'EEEE', { locale: ar })}
+                {format(new Date(appointment.date), 'EEEE', { locale: dateFnsLocale })}
               </p>
               <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                 <Clock className="h-4 w-4" />
@@ -122,6 +124,7 @@ function LoadingSkeleton() {
 
 export default function AppointmentsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState('upcoming');
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -239,6 +242,7 @@ export default function AppointmentsPage() {
   const cancelledAppointments = useMemo(() => filterAppointments('cancelled'), [filterAppointments]);
 
   const cancelLabel = t('patient.appointments.cancelAppointment');
+  const dateFnsLocale = getDateLocale(locale);
 
   return (
     <div className="space-y-6">
@@ -271,6 +275,7 @@ export default function AppointmentsPage() {
                   onCancelClick={handleCancelClick}
                   getStatusBadge={getStatusBadge}
                   cancelLabel={cancelLabel}
+                  dateFnsLocale={dateFnsLocale}
                 />
               ))}
             </div>
@@ -291,6 +296,7 @@ export default function AppointmentsPage() {
                   onCancelClick={handleCancelClick}
                   getStatusBadge={getStatusBadge}
                   cancelLabel={cancelLabel}
+                  dateFnsLocale={dateFnsLocale}
                 />
               ))}
             </div>
@@ -311,6 +317,7 @@ export default function AppointmentsPage() {
                   onCancelClick={handleCancelClick}
                   getStatusBadge={getStatusBadge}
                   cancelLabel={cancelLabel}
+                  dateFnsLocale={dateFnsLocale}
                 />
               ))}
             </div>

@@ -34,6 +34,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { adminApi } from '@/lib/api/admin';
+import { getIntlLocale } from '@/lib/utils';
 import type {
   Appointment,
   Activity,
@@ -620,7 +621,7 @@ export default function AdminDashboard() {
           {t('admin.dashboard.title')}
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          {new Date().toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', {
+          {new Date().toLocaleDateString(getIntlLocale(locale), {
             weekday: 'long',
             year: 'numeric',
             month: 'long',

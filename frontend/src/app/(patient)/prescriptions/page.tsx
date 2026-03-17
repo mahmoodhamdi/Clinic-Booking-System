@@ -1,9 +1,8 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { Pill, Calendar, Eye, CheckCircle2, Clock } from 'lucide-react';
 import Link from 'next/link';
 
@@ -12,10 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api/client';
+import { getDateLocale } from '@/lib/utils';
 import type { Prescription, ApiResponse } from '@/types';
 
 export default function PrescriptionsPage() {
   const t = useTranslations();
+  const locale = useLocale();
 
   // Fetch prescriptions
   const { data: prescriptions, isLoading } = useQuery<ApiResponse<Prescription[]>>({
@@ -53,7 +54,7 @@ export default function PrescriptionsPage() {
                         <Calendar className="h-4 w-4" />
                         <span>
                           {format(new Date(prescription.created_at), 'PPP', {
-                            locale: ar,
+                            locale: getDateLocale(locale),
                           })}
                         </span>
                       </div>

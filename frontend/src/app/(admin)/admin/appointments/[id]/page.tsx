@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
   Calendar,
@@ -31,6 +30,7 @@ import { getErrorMessage } from '@/lib/api/client';
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import type { AppointmentStatus } from '@/types';
+import { getDateLocale } from '@/lib/utils';
 
 type ActionType = 'confirm' | 'complete' | 'cancel' | 'no_show' | null;
 
@@ -42,6 +42,7 @@ interface StatusConfig {
 
 export default function AdminAppointmentDetailPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -284,7 +285,7 @@ export default function AdminAppointmentDetailPage() {
               {t('admin.appointments.appointmentDetail')} #{id}
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {format(new Date(appointment.date), 'PPPP', { locale: ar })}
+              {format(new Date(appointment.date), 'PPPP', { locale: getDateLocale(locale) })}
             </p>
           </div>
         </div>
@@ -313,7 +314,7 @@ export default function AdminAppointmentDetailPage() {
                     {t('common.date')}
                   </p>
                   <p className="font-medium">
-                    {format(new Date(appointment.date), 'PPP', { locale: ar })}
+                    {format(new Date(appointment.date), 'PPP', { locale: getDateLocale(locale) })}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -393,7 +394,7 @@ export default function AdminAppointmentDetailPage() {
                   </span>
                   <h3 className="text-sm font-semibold">{t('admin.appointments.created')}</h3>
                   <p className="text-xs text-muted-foreground">
-                    {format(new Date(appointment.created_at), 'PPp', { locale: ar })}
+                    {format(new Date(appointment.created_at), 'PPp', { locale: getDateLocale(locale) })}
                   </p>
                 </li>
                 {appointment.confirmed_at && (
@@ -403,7 +404,7 @@ export default function AdminAppointmentDetailPage() {
                     </span>
                     <h3 className="text-sm font-semibold">{t('patient.appointments.status.confirmed')}</h3>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(appointment.confirmed_at), 'PPp', { locale: ar })}
+                      {format(new Date(appointment.confirmed_at), 'PPp', { locale: getDateLocale(locale) })}
                     </p>
                   </li>
                 )}
@@ -414,7 +415,7 @@ export default function AdminAppointmentDetailPage() {
                     </span>
                     <h3 className="text-sm font-semibold">{t('patient.appointments.status.completed')}</h3>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(appointment.completed_at), 'PPp', { locale: ar })}
+                      {format(new Date(appointment.completed_at), 'PPp', { locale: getDateLocale(locale) })}
                     </p>
                   </li>
                 )}
@@ -425,7 +426,7 @@ export default function AdminAppointmentDetailPage() {
                     </span>
                     <h3 className="text-sm font-semibold">{t('patient.appointments.status.cancelled')}</h3>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(appointment.cancelled_at), 'PPp', { locale: ar })}
+                      {format(new Date(appointment.cancelled_at), 'PPp', { locale: getDateLocale(locale) })}
                     </p>
                   </li>
                 )}
