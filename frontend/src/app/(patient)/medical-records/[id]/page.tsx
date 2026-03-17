@@ -2,16 +2,17 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { patientApi } from '@/lib/api/patient';
+import { getDateLocale } from '@/lib/utils';
 import type { MedicalRecord, ApiResponse } from '@/types';
 import {
+  ArrowLeft,
   ArrowRight,
   Calendar,
   FileText,
@@ -29,6 +30,8 @@ export default function MedicalRecordDetailPage() {
   const params = useParams();
   const router = useRouter();
   const t = useTranslations();
+  const locale = useLocale();
+  const BackIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const recordId = params.id as string;
 
   const { data, isLoading, error } = useQuery<ApiResponse<MedicalRecord>>({
@@ -60,12 +63,12 @@ export default function MedicalRecordDetailPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowRight className="h-5 w-5" />
+          <BackIcon className="h-5 w-5" />
         </Button>
         <div>
           <h1 className="text-2xl font-bold">{t('navigation.medicalRecords')}</h1>
           <p className="text-muted-foreground">
-            {format(new Date(record.created_at), 'EEEE، d MMMM yyyy', { locale: ar })}
+            {format(new Date(record.created_at), 'EEEE، d MMMM yyyy', { locale: getDateLocale(locale) })}
           </p>
         </div>
       </div>
@@ -181,7 +184,7 @@ export default function MedicalRecordDetailPage() {
             </CardHeader>
             <CardContent>
               <p className="text-lg font-medium">
-                {format(new Date(record.follow_up_date), 'EEEE، d MMMM yyyy', { locale: ar })}
+                {format(new Date(record.follow_up_date), 'EEEE، d MMMM yyyy', { locale: getDateLocale(locale) })}
               </p>
               {record.follow_up_notes && (
                 <p className="text-muted-foreground mt-2">{record.follow_up_notes}</p>

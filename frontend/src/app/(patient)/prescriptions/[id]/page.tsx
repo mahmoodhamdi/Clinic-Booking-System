@@ -2,9 +2,8 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,8 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { patientApi } from '@/lib/api/patient';
+import { getDateLocale } from '@/lib/utils';
 import type { Prescription, PrescriptionItem, ApiResponse } from '@/types';
 import {
+  ArrowLeft,
   ArrowRight,
   Pill,
   FileText,
@@ -26,6 +27,8 @@ export default function PrescriptionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const t = useTranslations();
+  const locale = useLocale();
+  const BackIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const prescriptionId = params.id as string;
 
   const { data, isLoading, error } = useQuery<ApiResponse<Prescription>>({
@@ -66,12 +69,12 @@ export default function PrescriptionDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowRight className="h-5 w-5" />
+            <BackIcon className="h-5 w-5" />
           </Button>
           <div>
             <h1 className="text-2xl font-bold">{t('navigation.prescriptions')}</h1>
             <p className="text-muted-foreground">
-              {format(new Date(prescription.created_at), 'EEEE، d MMMM yyyy', { locale: ar })}
+              {format(new Date(prescription.created_at), 'EEEE، d MMMM yyyy', { locale: getDateLocale(locale) })}
             </p>
           </div>
         </div>
@@ -102,7 +105,7 @@ export default function PrescriptionDetailPage() {
               <span>
                 {t('patient.prescriptions.dispensedAt')}{' '}
                 {format(new Date(prescription.dispensed_at), 'd MMMM yyyy', {
-                  locale: ar,
+                  locale: getDateLocale(locale),
                 })}
               </span>
             </div>

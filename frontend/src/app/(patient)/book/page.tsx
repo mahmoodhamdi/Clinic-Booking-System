@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { CalendarIcon, Clock, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,12 +24,14 @@ import {
 } from '@/components/ui/dialog';
 import { appointmentsApi } from '@/lib/api/appointments';
 import { getErrorMessage } from '@/lib/api/client';
-import { cn } from '@/lib/utils';
+import { cn, getDateLocale } from '@/lib/utils';
 
 type BookingStep = 'date' | 'time' | 'confirm';
 
 export default function BookAppointmentPage() {
   const t = useTranslations();
+  const locale = useLocale();
+  const BackIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const router = useRouter();
   const [step, setStep] = useState<BookingStep>('date');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -177,7 +178,7 @@ export default function BookAppointmentPage() {
                   selected={selectedDate}
                   onSelect={handleDateSelect}
                   disabled={(date) => !isDateAvailable(date) || date < new Date()}
-                  locale={ar}
+                  locale={getDateLocale(locale)}
                   className="rounded-md border"
                 />
               </div>
@@ -199,7 +200,7 @@ export default function BookAppointmentPage() {
             <div className="mb-4">
               <p className="text-gray-600">
                 {selectedDate &&
-                  format(selectedDate, 'EEEE، d MMMM yyyy', { locale: ar })}
+                  format(selectedDate, 'EEEE، d MMMM yyyy', { locale: getDateLocale(locale) })}
               </p>
             </div>
 
@@ -231,7 +232,7 @@ export default function BookAppointmentPage() {
 
             <div className="flex justify-start mt-6">
               <Button variant="outline" onClick={handleBack}>
-                <ArrowRight className="h-4 w-4 me-2" />
+                <BackIcon className="h-4 w-4 me-2" />
                 {t('common.back')}
               </Button>
             </div>
@@ -257,7 +258,7 @@ export default function BookAppointmentPage() {
                   <p className="text-sm text-gray-500">{t('patient.booking.selectDate')}</p>
                   <p className="font-medium">
                     {selectedDate &&
-                      format(selectedDate, 'EEEE، d MMMM yyyy', { locale: ar })}
+                      format(selectedDate, 'EEEE، d MMMM yyyy', { locale: getDateLocale(locale) })}
                   </p>
                 </div>
               </div>
@@ -285,7 +286,7 @@ export default function BookAppointmentPage() {
             {/* Actions */}
             <div className="flex gap-3">
               <Button variant="outline" onClick={handleBack} className="flex-1">
-                <ArrowRight className="h-4 w-4 me-2" />
+                <BackIcon className="h-4 w-4 me-2" />
                 {t('common.back')}
               </Button>
               <Button
@@ -321,7 +322,7 @@ export default function BookAppointmentPage() {
             </DialogTitle>
             <DialogDescription className="text-center">
               {selectedDate &&
-                format(selectedDate, 'EEEE، d MMMM yyyy', { locale: ar })}{' '}
+                format(selectedDate, 'EEEE، d MMMM yyyy', { locale: getDateLocale(locale) })}{' '}
               - {selectedTime}
             </DialogDescription>
           </DialogHeader>
