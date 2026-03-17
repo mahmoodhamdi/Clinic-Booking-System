@@ -31,3 +31,6 @@ clinic-booking-prompt.md
 
 # Google OAuth credentials
 client_secret_*.json
+
+# Audit state (development only)
+.audit/
