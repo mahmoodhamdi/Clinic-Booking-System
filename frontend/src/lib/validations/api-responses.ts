@@ -235,9 +235,9 @@ export function paginatedResponseSchema<T extends z.ZodType>(itemSchema: T) {
 export function validateResponse<T>(schema: z.ZodType<T>, data: unknown): T {
   const result = schema.safeParse(data);
   if (!result.success) {
-    console.error('API Response validation failed:', result.error.issues);
-    // In production, we might want to report this to an error tracking service
-    // For now, we'll still return the data but log the error
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('API Response validation failed:', result.error.issues);
+    }
     return data as T;
   }
   return result.data;
@@ -247,7 +247,9 @@ export function validateResponse<T>(schema: z.ZodType<T>, data: unknown): T {
 export function validateResponseStrict<T>(schema: z.ZodType<T>, data: unknown): T {
   const result = schema.safeParse(data);
   if (!result.success) {
-    console.error('API Response validation failed:', result.error.issues);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('API Response validation failed:', result.error.issues);
+    }
     throw new Error('Invalid API response format');
   }
   return result.data;

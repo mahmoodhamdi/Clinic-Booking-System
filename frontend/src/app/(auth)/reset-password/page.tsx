@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { useMutation } from '@tanstack/react-query';
@@ -167,7 +167,7 @@ export default function ResetPasswordPage() {
     resetPassword.mutate(data);
   };
 
-  const password = form.watch('password');
+  const password = useWatch({ control: form.control, name: 'password' });
 
   if (isSuccess) {
     return (
