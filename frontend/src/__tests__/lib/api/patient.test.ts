@@ -205,7 +205,7 @@ describe('patientApi', () => {
       };
       mockApi.get.mockResolvedValueOnce(mockResponse);
 
-      const result = await patientApi.getPrescriptions({ page: 1 });
+      await patientApi.getPrescriptions({ page: 1 });
 
       expect(mockApi.get).toHaveBeenCalledWith('/prescriptions', { params: { page: 1 } });
     });
@@ -247,7 +247,7 @@ describe('patientApi', () => {
       };
       mockApi.get.mockResolvedValueOnce(mockResponse);
 
-      const result = await patientApi.getNotifications({ page: 2 });
+      await patientApi.getNotifications({ page: 2 });
 
       expect(mockApi.get).toHaveBeenCalledWith('/notifications', { params: { page: 2 } });
     });

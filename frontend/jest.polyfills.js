@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // jest.polyfills.js
 /**
  * Polyfills for MSW 2.x compatibility with Jest

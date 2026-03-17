@@ -2,7 +2,6 @@ import { adminApi } from '@/lib/api/admin';
 import api from '@/lib/api/client';
 import {
   createAppointment,
-  createUser,
   createPatient,
   createMedicalRecord,
   createPrescription,
@@ -113,7 +112,7 @@ describe('adminApi', () => {
         const mockResponse = { data: wrapInPaginatedResponse(appointments) };
         mockApi.get.mockResolvedValueOnce(mockResponse);
 
-        const result = await adminApi.getAppointments({
+        await adminApi.getAppointments({
           status: 'pending',
           date: '2025-01-15',
           page: 1,
@@ -185,7 +184,7 @@ describe('adminApi', () => {
         const mockResponse = { data: wrapInApiResponse(appointment) };
         mockApi.post.mockResolvedValueOnce(mockResponse);
 
-        const result = await adminApi.markNoShow(123);
+        await adminApi.markNoShow(123);
 
         expect(mockApi.post).toHaveBeenCalledWith('/admin/appointments/123/no-show');
       });
@@ -197,7 +196,7 @@ describe('adminApi', () => {
         const mockResponse = { data: wrapInApiResponse(appointment) };
         mockApi.put.mockResolvedValueOnce(mockResponse);
 
-        const result = await adminApi.updateAppointmentNotes(123, 'Patient notes', 'Admin notes');
+        await adminApi.updateAppointmentNotes(123, 'Patient notes', 'Admin notes');
 
         expect(mockApi.put).toHaveBeenCalledWith('/admin/appointments/123/notes', {
           notes: 'Patient notes',
@@ -216,7 +215,7 @@ describe('adminApi', () => {
         const mockResponse = { data: wrapInApiResponse(appointment) };
         mockApi.post.mockResolvedValueOnce(mockResponse);
 
-        const result = await adminApi.rescheduleAppointment(123, '2025-01-20', '11:00');
+        await adminApi.rescheduleAppointment(123, '2025-01-20', '11:00');
 
         expect(mockApi.post).toHaveBeenCalledWith('/admin/appointments/123/reschedule', {
           date: '2025-01-20',
@@ -259,7 +258,7 @@ describe('adminApi', () => {
         const mockResponse = { data: wrapInApiResponse({ ...patient, profile: createPatientProfile() }) };
         mockApi.get.mockResolvedValueOnce(mockResponse);
 
-        const result = await adminApi.getPatient(123);
+        await adminApi.getPatient(123);
 
         expect(mockApi.get).toHaveBeenCalledWith('/admin/patients/123');
       });
@@ -273,7 +272,7 @@ describe('adminApi', () => {
         const mockResponse = { data: wrapInPaginatedResponse(appointments) };
         mockApi.get.mockResolvedValueOnce(mockResponse);
 
-        const result = await adminApi.getPatientAppointments(123, 1);
+        await adminApi.getPatientAppointments(123, 1);
 
         expect(mockApi.get).toHaveBeenCalledWith('/admin/patients/123/appointments', {
           params: { page: 1 },

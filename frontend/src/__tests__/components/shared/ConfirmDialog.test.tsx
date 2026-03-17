@@ -128,7 +128,6 @@ describe('ConfirmDialog', () => {
   });
 
   it('does not call onConfirm when loading and confirm clicked', async () => {
-    const user = userEvent.setup();
     render(
       <ConfirmDialog
         open={true}

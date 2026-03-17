@@ -50,6 +50,7 @@ describe('API Response Validation', () => {
     });
 
     test('rejects missing required fields', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...userWithoutId } = validUser;
       const result = userSchema.safeParse(userWithoutId);
       expect(result.success).toBe(false);

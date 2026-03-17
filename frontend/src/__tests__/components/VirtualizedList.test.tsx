@@ -7,7 +7,8 @@ describe('VirtualizedList', () => {
     name: `Item ${i + 1}`,
   }));
 
-  const renderItem = (item: { id: number; name: string }, index: number) => (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const renderItem = (item: { id: number; name: string }, _index: number) => (
     <div data-testid={`item-${item.id}`}>{item.name}</div>
   );
 

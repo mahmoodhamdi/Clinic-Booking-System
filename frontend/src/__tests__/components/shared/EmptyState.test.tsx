@@ -141,7 +141,7 @@ describe('EmptyState', () => {
   });
 
   it('renders heading with proper text styling', () => {
-    const { container } = render(
+    render(
       <EmptyState
         icon={Package}
         title="No Items"

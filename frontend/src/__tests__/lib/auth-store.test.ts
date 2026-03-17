@@ -90,6 +90,7 @@ describe('Auth Store', () => {
     });
 
     it('should call auth API logout', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { authApi } = require('@/lib/api/auth');
 
       useAuthStore.setState({
@@ -103,6 +104,7 @@ describe('Auth Store', () => {
     });
 
     it('should handle logout errors gracefully', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { authApi } = require('@/lib/api/auth');
       authApi.logout.mockRejectedValueOnce(new Error('Logout failed'));
 
