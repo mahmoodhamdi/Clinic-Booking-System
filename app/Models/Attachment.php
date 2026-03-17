@@ -118,8 +118,8 @@ class Attachment extends Model
 
     public function deleteFile(): bool
     {
-        if (Storage::exists($this->file_path)) {
-            return Storage::delete($this->file_path);
+        if (Storage::disk('public')->exists($this->file_path)) {
+            return Storage::disk('public')->delete($this->file_path);
         }
 
         return false;

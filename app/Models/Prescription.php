@@ -125,18 +125,21 @@ class Prescription extends Model
 
     public static function generateNumber(): string
     {
-        $year = now()->year;
-        $lastPrescription = self::whereYear('created_at', $year)
-            ->orderByDesc('id')
-            ->first();
+        return \Illuminate\Support\Facades\DB::transaction(function () {
+            $year = now()->year;
+            $lastPrescription = self::whereYear('created_at', $year)
+                ->lockForUpdate()
+                ->orderByDesc('id')
+                ->first();
 
-        if ($lastPrescription) {
-            $lastNumber = (int) substr($lastPrescription->prescription_number, -4);
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
+            if ($lastPrescription) {
+                $lastNumber = (int) substr($lastPrescription->prescription_number, -4);
+                $newNumber = $lastNumber + 1;
+            } else {
+                $newNumber = 1;
+            }
 
-        return sprintf('RX-%d-%04d', $year, $newNumber);
+            return sprintf('RX-%d-%04d', $year, $newNumber);
+        });
     }
 }
