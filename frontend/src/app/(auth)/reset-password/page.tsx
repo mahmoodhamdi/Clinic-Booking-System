@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
@@ -118,6 +118,7 @@ function SuccessState({ t }: { t: (key: string) => string }) {
 export default function ResetPasswordPage() {
   const t = useTranslations('auth');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -133,25 +134,22 @@ export default function ResetPasswordPage() {
   });
 
   useEffect(() => {
-    const phone = sessionStorage.getItem('reset_phone');
-    const otp = sessionStorage.getItem('reset_otp');
+    // Get phone and token from URL search params
+    const phone = searchParams.get('phone');
+    const token = searchParams.get('token');
 
-    if (!phone || !otp) {
+    if (!phone || !token) {
       router.push('/forgot-password');
       return;
     }
 
     form.setValue('phone', phone);
-    form.setValue('otp', otp);
-  }, [router, form]);
+    form.setValue('otp', token);
+  }, [router, form, searchParams]);
 
   const resetPassword = useMutation({
     mutationFn: (data: ResetPasswordFormData) => authApi.resetPassword(data),
     onSuccess: () => {
-      // Clear session storage
-      sessionStorage.removeItem('reset_phone');
-      sessionStorage.removeItem('reset_otp');
-
       setIsSuccess(true);
       toast.success(t('passwordChanged'));
 

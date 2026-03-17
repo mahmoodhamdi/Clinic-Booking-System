@@ -40,9 +40,8 @@ export default function ForgotPasswordPage() {
     try {
       await authApi.forgotPassword(data);
       toast.success(t('otpSent'));
-      // Store phone in session storage for verify-otp page
-      sessionStorage.setItem('reset_phone', data.phone);
-      router.push('/verify-otp');
+      // Pass phone via URL search params (avoids sessionStorage exposure to XSS)
+      router.push(`/verify-otp?phone=${encodeURIComponent(data.phone)}`);
     } catch {
       toast.error(t('error'));
     } finally {

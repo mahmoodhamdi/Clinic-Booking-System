@@ -6,11 +6,14 @@ import { authApi } from '@/lib/api/auth';
 // Mock next/navigation
 const mockPush = jest.fn();
 const mockBack = jest.fn();
+const mockSearchParams = new URLSearchParams();
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
     back: mockBack,
   }),
+  useSearchParams: () => mockSearchParams,
 }));
 
 // Mock next-intl
@@ -37,16 +40,16 @@ jest.mock('sonner', () => ({
 describe('VerifyOtpPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Set up session storage with phone number
-    sessionStorage.setItem('reset_phone', '01012345678');
+    // Set up search params with phone number
+    mockSearchParams.set('phone', '01012345678');
   });
 
   afterEach(() => {
-    sessionStorage.clear();
+    mockSearchParams.delete('phone');
   });
 
-  it('redirects to forgot-password if no phone in session', async () => {
-    sessionStorage.clear();
+  it('redirects to forgot-password if no phone in URL params', async () => {
+    mockSearchParams.delete('phone');
     render(<VerifyOtpPage />);
 
     await waitFor(() => {

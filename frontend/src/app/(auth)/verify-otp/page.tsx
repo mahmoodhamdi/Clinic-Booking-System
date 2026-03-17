@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -16,22 +16,20 @@ import { authApi } from '@/lib/api/auth';
 export default function VerifyOtpPage() {
   const t = useTranslations('auth');
   const router = useRouter();
-  const [phone, setPhone] = useState<string>('');
+  const searchParams = useSearchParams();
+  const phone = searchParams.get('phone') ?? '';
   const [countdown, setCountdown] = useState(0);
   const [otpValues, setOtpValues] = useState<string[]>(['', '', '', '', '', '']);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    // Get phone from session storage
-    const storedPhone = sessionStorage.getItem('reset_phone');
-    if (!storedPhone) {
+    if (!phone) {
       router.push('/forgot-password');
       return;
     }
-    setPhone(storedPhone);
     // Focus first input
     inputRefs.current[0]?.focus();
-  }, [router]);
+  }, [router, phone]);
 
   useEffect(() => {
     // Countdown timer for resend
@@ -46,11 +44,9 @@ export default function VerifyOtpPage() {
     mutationFn: (data: { phone: string; otp: string }) => authApi.verifyOtp(data),
     onSuccess: (response) => {
       if (response.data.verified) {
-        // Store OTP for reset password page
         const otp = otpValues.join('');
-        sessionStorage.setItem('reset_otp', otp);
         toast.success(t('otpVerified'));
-        router.push('/reset-password');
+        router.push(`/reset-password?phone=${encodeURIComponent(phone)}&token=${encodeURIComponent(otp)}`);
       } else {
         toast.error(t('invalidOtp'));
         clearOtpInputs();
@@ -130,7 +126,9 @@ export default function VerifyOtpPage() {
     }
   }, [otpValues, phone, verifyOtp]);
 
-  const maskedPhone = phone ? `${phone.slice(0, 3)}****${phone.slice(-3)}` : '';
+  const maskedPhone = useMemo(() => {
+    return phone ? `${phone.slice(0, 3)}****${phone.slice(-3)}` : '';
+  }, [phone]);
 
   return (
     <AuthLayout
