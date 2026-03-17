@@ -81,8 +81,12 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
+              process.env.NODE_ENV === 'production'
+                ? "script-src 'self'"
+                : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              process.env.NODE_ENV === 'production'
+                ? "style-src 'self' fonts.googleapis.com"
+                : "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
               "font-src 'self' fonts.gstatic.com",
               "img-src 'self' data: blob: http://localhost:8000 http://localhost:9000 https:",
               "connect-src 'self' http://localhost:8000 http://localhost:9000 ws://localhost:3000",
