@@ -24,10 +24,15 @@ class PaymentPolicy
             return true;
         }
 
+        // For direct payments without an appointment
+        if ($payment->appointment_id === null) {
+            return $user->id === $payment->patient_id;
+        }
+
         // Load the appointment relationship if not loaded
         $payment->loadMissing('appointment');
 
-        return $user->id === $payment->appointment->user_id;
+        return $user->id === ($payment->appointment?->user_id);
     }
 
     /**

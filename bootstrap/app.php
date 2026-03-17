@@ -11,6 +11,16 @@ use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
+// Ensure locale is set for API exception responses (middleware may not have run)
+$setLocaleFromRequest = function (Request $request): void {
+    if ($request->is('api/*')) {
+        $lang = $request->query('lang') ?: $request->header('Accept-Language');
+        if ($lang && in_array(explode('-', explode(',', $lang)[0])[0], ['en', 'ar'])) {
+            app()->setLocale(explode('-', explode(',', $lang)[0])[0]);
+        }
+    }
+};
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -31,42 +41,53 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->api(append: [
+            \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\AddRequestId::class,
             \App\Http\Middleware\SecurityHeaders::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) use ($setLocaleFromRequest): void {
         // Handle authentication exceptions
-        $exceptions->render(function (AuthenticationException $e, Request $request) {
+        $exceptions->render(function (AuthenticationException $e, Request $request) use ($setLocaleFromRequest) {
             if ($request->expectsJson() || $request->is('api/*')) {
+                $setLocaleFromRequest($request);
+
                 return ApiResponse::unauthorized(__('يرجى تسجيل الدخول للمتابعة.'));
             }
         });
 
         // Handle authorization exceptions
-        $exceptions->render(function (AuthorizationException $e, Request $request) {
+        $exceptions->render(function (AuthorizationException $e, Request $request) use ($setLocaleFromRequest) {
             if ($request->expectsJson() || $request->is('api/*')) {
+                $setLocaleFromRequest($request);
+
                 return ApiResponse::forbidden($e->getMessage() ?: __('الوصول مرفوض.'));
             }
         });
 
         // Handle validation exceptions
-        $exceptions->render(function (ValidationException $e, Request $request) {
+        $exceptions->render(function (ValidationException $e, Request $request) use ($setLocaleFromRequest) {
             if ($request->expectsJson() || $request->is('api/*')) {
+                $setLocaleFromRequest($request);
+
                 return ApiResponse::validationError($e->errors());
             }
         });
 
         // Handle not found exceptions
-        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) use ($setLocaleFromRequest) {
             if ($request->expectsJson() || $request->is('api/*')) {
+                $setLocaleFromRequest($request);
+
                 return ApiResponse::notFound();
             }
         });
 
         // Handle rate limiting exceptions
-        $exceptions->render(function (TooManyRequestsHttpException $e, Request $request) {
+        $exceptions->render(function (TooManyRequestsHttpException $e, Request $request) use ($setLocaleFromRequest) {
             if ($request->expectsJson() || $request->is('api/*')) {
+                $setLocaleFromRequest($request);
+
                 return ApiResponse::tooManyRequests();
             }
         });
