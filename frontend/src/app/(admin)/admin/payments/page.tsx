@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
   CreditCard,
@@ -49,7 +48,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
+import { getErrorMessage } from '@/lib/api/client';
 import { useDebounce } from '@/hooks/useDebounce';
+import { getDateLocale } from '@/lib/utils';
 import type { Payment, User, PaginatedResponse } from '@/types';
 
 const paymentSchema = z.object({
@@ -63,6 +64,7 @@ type PaymentFormData = z.infer<typeof paymentSchema>;
 
 export default function AdminPaymentsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -110,8 +112,8 @@ export default function AdminPaymentsPage() {
       setCreateDialogOpen(false);
       form.reset();
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -286,7 +288,7 @@ export default function AdminPaymentsPage() {
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           <span>
-                            {format(new Date(payment.created_at), 'PPP', { locale: ar })}
+                            {format(new Date(payment.created_at), 'PPP', { locale: getDateLocale(locale) })}
                           </span>
                         </div>
                         <span>|</span>

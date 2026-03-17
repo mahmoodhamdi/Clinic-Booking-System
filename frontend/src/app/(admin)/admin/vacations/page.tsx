@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { CalendarOff, Plus, Trash2 } from 'lucide-react';
 
@@ -42,6 +41,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { adminApi } from '@/lib/api/admin';
+import { getErrorMessage } from '@/lib/api/client';
+import { getDateLocale } from '@/lib/utils';
 import type { Vacation, ApiResponse } from '@/types';
 
 const vacationSchema = z.object({
@@ -54,6 +55,7 @@ type VacationFormData = z.infer<typeof vacationSchema>;
 
 export default function VacationsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const [vacationDialogOpen, setVacationDialogOpen] = useState(false);
   const [deleteVacationId, setDeleteVacationId] = useState<number | null>(null);
@@ -82,8 +84,8 @@ export default function VacationsPage() {
       setVacationDialogOpen(false);
       vacationForm.reset();
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -95,8 +97,8 @@ export default function VacationsPage() {
       queryClient.invalidateQueries({ queryKey: ['vacations'] });
       setDeleteVacationId(null);
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -134,8 +136,8 @@ export default function VacationsPage() {
                 >
                   <div>
                     <p className="font-medium">
-                      {format(new Date(vacation.start_date), 'PPP', { locale: ar })} -{' '}
-                      {format(new Date(vacation.end_date), 'PPP', { locale: ar })}
+                      {format(new Date(vacation.start_date), 'PPP', { locale: getDateLocale(locale) })} -{' '}
+                      {format(new Date(vacation.end_date), 'PPP', { locale: getDateLocale(locale) })}
                     </p>
                     {vacation.reason && (
                       <p className="text-sm text-gray-500 mt-1">{vacation.reason}</p>
@@ -145,6 +147,7 @@ export default function VacationsPage() {
                     variant="ghost"
                     size="icon"
                     className="text-red-600"
+                    aria-label={t('common.delete')}
                     onClick={() => setDeleteVacationId(vacation.id)}
                   >
                     <Trash2 className="h-4 w-4" />

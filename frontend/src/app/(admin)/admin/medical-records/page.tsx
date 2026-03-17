@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
   FileText,
@@ -48,7 +47,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
+import { getErrorMessage } from '@/lib/api/client';
 import { useDebounce } from '@/hooks/useDebounce';
+import { getDateLocale } from '@/lib/utils';
 import type { MedicalRecord, User, ApiResponse, PaginatedResponse } from '@/types';
 
 const recordSchema = z.object({
@@ -62,6 +63,7 @@ type RecordFormData = z.infer<typeof recordSchema>;
 
 export default function AdminMedicalRecordsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -82,7 +84,7 @@ export default function AdminMedicalRecordsPage() {
 
   // Fetch medical records
   const { data: records, isLoading } = useQuery<ApiResponse<MedicalRecord[]>>({
-    queryKey: ['adminMedicalRecords', debouncedSearch],
+    queryKey: ['adminMedicalRecords'],
     queryFn: () => adminApi.getMedicalRecords(),
   });
 
@@ -107,8 +109,8 @@ export default function AdminMedicalRecordsPage() {
       setCreateDialogOpen(false);
       form.reset();
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -184,7 +186,7 @@ export default function AdminMedicalRecordsPage() {
                       <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                         <Calendar className="h-4 w-4" />
                         <span>
-                          {format(new Date(record.created_at), 'PPP', { locale: ar })}
+                          {format(new Date(record.created_at), 'PPP', { locale: getDateLocale(locale) })}
                         </span>
                       </div>
                     </div>
@@ -299,7 +301,7 @@ export default function AdminMedicalRecordsPage() {
                 <div>
                   <p className="text-sm text-gray-500">{t('common.date')}</p>
                   <p className="font-medium">
-                    {format(new Date(selectedRecord.created_at), 'PPP', { locale: ar })}
+                    {format(new Date(selectedRecord.created_at), 'PPP', { locale: getDateLocale(locale) })}
                   </p>
                 </div>
               </div>

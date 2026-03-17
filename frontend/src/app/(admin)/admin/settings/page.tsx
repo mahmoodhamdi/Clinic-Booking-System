@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
   Building2,
@@ -55,6 +54,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { adminApi } from '@/lib/api/admin';
+import { getErrorMessage } from '@/lib/api/client';
+import { getDateLocale } from '@/lib/utils';
 import type { Schedule, Vacation, ApiResponse } from '@/types';
 
 const settingsSchema = z.object({
@@ -77,6 +78,7 @@ const DAYS_OF_WEEK_VALUES = [0, 1, 2, 3, 4, 5, 6] as const;
 
 export default function AdminSettingsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const [vacationDialogOpen, setVacationDialogOpen] = useState(false);
   const [deleteVacationId, setDeleteVacationId] = useState<number | null>(null);
@@ -143,8 +145,8 @@ export default function AdminSettingsPage() {
       toast.success(t('common.success'));
       queryClient.invalidateQueries({ queryKey: ['clinicSettings'] });
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -161,8 +163,8 @@ export default function AdminSettingsPage() {
       toast.success(t('common.success'));
       queryClient.invalidateQueries({ queryKey: ['schedules'] });
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -175,8 +177,8 @@ export default function AdminSettingsPage() {
       setVacationDialogOpen(false);
       vacationForm.reset();
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -188,8 +190,8 @@ export default function AdminSettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['vacations'] });
       setDeleteVacationId(null);
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -451,8 +453,8 @@ export default function AdminSettingsPage() {
                     >
                       <div>
                         <p className="font-medium">
-                          {format(new Date(vacation.start_date), 'PPP', { locale: ar })} -{' '}
-                          {format(new Date(vacation.end_date), 'PPP', { locale: ar })}
+                          {format(new Date(vacation.start_date), 'PPP', { locale: getDateLocale(locale) })} -{' '}
+                          {format(new Date(vacation.end_date), 'PPP', { locale: getDateLocale(locale) })}
                         </p>
                         {vacation.reason && (
                           <p className="text-sm text-gray-500 mt-1">{vacation.reason}</p>

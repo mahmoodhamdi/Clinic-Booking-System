@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {
   Pill,
@@ -50,7 +49,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
+import { getErrorMessage } from '@/lib/api/client';
 import { useDebounce } from '@/hooks/useDebounce';
+import { getDateLocale } from '@/lib/utils';
 import type { Prescription, PrescriptionItem, User, ApiResponse, PaginatedResponse } from '@/types';
 
 const prescriptionSchema = z.object({
@@ -72,6 +73,7 @@ type PrescriptionFormData = z.infer<typeof prescriptionSchema>;
 
 export default function AdminPrescriptionsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -105,7 +107,7 @@ export default function AdminPrescriptionsPage() {
 
   // Fetch prescriptions
   const { data: prescriptions, isLoading } = useQuery<ApiResponse<Prescription[]>>({
-    queryKey: ['adminPrescriptions', debouncedSearch],
+    queryKey: ['adminPrescriptions'],
     queryFn: () => adminApi.getPrescriptions(),
   });
 
@@ -130,8 +132,8 @@ export default function AdminPrescriptionsPage() {
       setCreateDialogOpen(false);
       form.reset();
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -143,8 +145,8 @@ export default function AdminPrescriptionsPage() {
       queryClient.invalidateQueries({ queryKey: ['adminPrescriptions'] });
       setViewDialogOpen(false);
     },
-    onError: () => {
-      toast.error(t('common.error'));
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -161,7 +163,7 @@ export default function AdminPrescriptionsPage() {
     if (!debouncedSearch) return true;
     const search = debouncedSearch.toLowerCase();
     return (
-      (prescription as Prescription & { patient?: User }).patient?.name?.toLowerCase().includes(search) ||
+      (prescription.patient?.name || prescription.medical_record?.patient?.name)?.toLowerCase().includes(search) ||
       prescription.diagnosis?.toLowerCase().includes(search)
     );
   });
@@ -211,13 +213,13 @@ export default function AdminPrescriptionsPage() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <UserIcon className="h-4 w-4 text-gray-400" />
-                        <span className="font-medium">{prescription.patient?.name}</span>
+                        <span className="font-medium">{prescription.patient?.name || prescription.medical_record?.patient?.name}</span>
                       </div>
                       <p className="text-sm text-gray-500">{prescription.diagnosis}</p>
                       <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                         <Calendar className="h-4 w-4" />
                         <span>
-                          {format(new Date(prescription.created_at), 'PPP', { locale: ar })}
+                          {format(new Date(prescription.created_at), 'PPP', { locale: getDateLocale(locale) })}
                         </span>
                         <span className="mx-2">|</span>
                         <span>
@@ -461,12 +463,12 @@ export default function AdminPrescriptionsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">{t('admin.patients.title')}</p>
-                  <p className="font-medium">{selectedPrescription.patient?.name}</p>
+                  <p className="font-medium">{selectedPrescription.patient?.name || selectedPrescription.medical_record?.patient?.name}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">{t('common.date')}</p>
                   <p className="font-medium">
-                    {format(new Date(selectedPrescription.created_at), 'PPP', { locale: ar })}
+                    {format(new Date(selectedPrescription.created_at), 'PPP', { locale: getDateLocale(locale) })}
                   </p>
                 </div>
               </div>
