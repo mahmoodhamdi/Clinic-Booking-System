@@ -283,9 +283,9 @@ class AuthController extends Controller
             ], 429);
         }
 
-        // Check if token is expired (60 minutes)
+        // Check if token is expired (15 minutes)
         $createdAt = \Carbon\Carbon::parse($record->created_at);
-        if ($createdAt->addMinutes(60)->isPast()) {
+        if ($createdAt->addMinutes(15)->isPast()) {
             return response()->json([
                 'success' => false,
                 'message' => 'رمز التحقق منتهي الصلاحية.',
@@ -358,9 +358,9 @@ class AuthController extends Controller
             ], 429);
         }
 
-        // Check if token is expired (60 minutes)
+        // Check if token is expired (15 minutes)
         $createdAt = \Carbon\Carbon::parse($record->created_at);
-        if ($createdAt->addMinutes(60)->isPast()) {
+        if ($createdAt->addMinutes(15)->isPast()) {
             return response()->json([
                 'success' => false,
                 'message' => 'رمز التحقق منتهي الصلاحية.',

@@ -131,7 +131,7 @@ class SmsService
     {
         Log::info('SMS Message (logged)', [
             'to' => $this->maskPhone($phone),
-            'message' => $message,
+            'message' => app()->environment('local', 'testing') ? $message : '[REDACTED]',
         ]);
 
         return true;

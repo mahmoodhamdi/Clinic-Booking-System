@@ -115,8 +115,8 @@ class AuthController extends Controller
             ]
         );
 
-        // TODO: Send OTP via SMS (currently logging for development)
-        \Log::info("Password reset OTP for {$request->phone}: {$token}");
+        // Send OTP via SMS service (logs in development when no provider configured)
+        app(\App\Services\SmsService::class)->sendOtp($request->phone, $token);
 
         return redirect()->route('password.verify.form', ['phone' => $request->phone])
             ->with('success', 'تم إرسال رمز التحقق إلى هاتفك.');
@@ -148,7 +148,7 @@ class AuthController extends Controller
             return back()->with('error', 'رمز التحقق غير صحيح.');
         }
 
-        if (now()->diffInMinutes($record->created_at) > 60) {
+        if (now()->diffInMinutes($record->created_at) > 15) {
             return back()->with('error', 'رمز التحقق منتهي الصلاحية.');
         }
 
