@@ -71,6 +71,8 @@ export default function LoginPage() {
                   <div className="relative">
                     <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
+                      type="tel"
+                      inputMode="numeric"
                       placeholder="01xxxxxxxxx"
                       className="ps-10"
                       {...field}
