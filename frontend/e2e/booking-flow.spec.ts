@@ -337,9 +337,6 @@ test.describe('Booking Flow - UI/UX', () => {
   test('all auth pages have consistent styling', async ({ page }) => {
     // Check login
     await page.goto('/login');
-    const loginBg = page.locator('.bg-gradient-to-br, [class*="gradient"]');
-    const hasLoginBg = await loginBg.isVisible().catch(() => false);
-
     // Check register
     await page.goto('/register');
     await page.waitForLoadState('networkidle');
