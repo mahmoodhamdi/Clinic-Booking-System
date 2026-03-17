@@ -30,9 +30,13 @@ class SecurityHeaders
         // Permissions policy (disable unused browser features)
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
+        // Content Security Policy
+        $csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';";
+        $response->headers->set('Content-Security-Policy', $csp);
+
         // Strict Transport Security (for HTTPS)
         if ($request->secure() || config('app.env') === 'production') {
-            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
         }
 
         return $response;

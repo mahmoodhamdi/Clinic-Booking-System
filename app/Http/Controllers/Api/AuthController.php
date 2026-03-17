@@ -228,11 +228,10 @@ class AuthController extends Controller
             ], 500);
         }
 
-        // Log the OTP in development for testing purposes
+        // Log OTP dispatch event in development (no OTP value in logs for security)
         if (! $smsService->isRealProvider()) {
-            Log::info('OTP for password reset', [
-                'phone' => $request->phone,
-                'otp' => $token,
+            Log::info('Password reset OTP sent (dev mode)', [
+                'phone' => substr($request->phone, 0, 5).'*****',
             ]);
         }
 
@@ -460,7 +459,7 @@ class AuthController extends Controller
             $secure, // secure (HTTPS only in production)
             true, // httpOnly - not accessible via JavaScript
             false,
-            'lax' // SameSite - lax for better compatibility
+            'strict' // SameSite - strict for auth token security
         );
     }
 

@@ -30,7 +30,7 @@ class LoginRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                'min:6',
+                'min:8',
             ],
         ];
     }
@@ -46,7 +46,7 @@ class LoginRequest extends FormRequest
             'phone.required' => __('رقم الهاتف مطلوب.'),
             'phone.regex' => __('يرجى إدخال رقم هاتف مصري صحيح.'),
             'password.required' => __('كلمة المرور مطلوبة.'),
-            'password.min' => __('كلمة المرور يجب أن تكون 6 أحرف على الأقل.'),
+            'password.min' => __('كلمة المرور يجب أن تكون 8 أحرف على الأقل.'),
         ];
     }
 
