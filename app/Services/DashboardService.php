@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\AppointmentStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\UserRole;
 use App\Exceptions\BusinessLogicException;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
@@ -119,7 +120,7 @@ class DashboardService
             'revenue' => Payment::paid()
                 ->whereBetween('paid_at', [$startOfWeek, $endOfWeek])
                 ->sum('total'),
-            'new_patients' => User::where('role', 'patient')
+            'new_patients' => User::where('role', UserRole::PATIENT)
                 ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
                 ->count(),
         ];
@@ -163,7 +164,7 @@ class DashboardService
             'revenue' => Payment::paid()
                 ->whereBetween('paid_at', [$startOfMonth, $endOfMonth])
                 ->sum('total'),
-            'new_patients' => User::where('role', 'patient')
+            'new_patients' => User::where('role', UserRole::PATIENT)
                 ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
                 ->count(),
             'average_daily_appointments' => round(
@@ -397,7 +398,7 @@ class DashboardService
 
     private function getTotalPatients(): int
     {
-        return User::where('role', 'patient')->count();
+        return User::where('role', UserRole::PATIENT)->count();
     }
 
     private function getTotalAppointments(): int

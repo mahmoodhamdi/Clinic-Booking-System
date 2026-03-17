@@ -57,7 +57,7 @@ class DashboardController extends Controller
 
     public function recentActivity(Request $request): JsonResponse
     {
-        $limit = $request->limit ?? 10;
+        $limit = min((int) ($request->limit ?? 10), 50);
 
         $activity = $this->dashboardService->getRecentActivity($limit);
 
@@ -66,7 +66,7 @@ class DashboardController extends Controller
 
     public function upcomingAppointments(Request $request): JsonResponse
     {
-        $limit = $request->limit ?? 5;
+        $limit = min((int) ($request->limit ?? 5), 50);
 
         $appointments = $this->dashboardService->getUpcomingAppointments($limit);
 
