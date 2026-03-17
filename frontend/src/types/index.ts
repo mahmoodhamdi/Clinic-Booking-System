@@ -44,7 +44,8 @@ export interface AuthResponse {
   message: string;
   data: {
     user: User;
-    token: string;
+    // Token is set as an HttpOnly cookie by the server, not present in response body
+    token?: string;
   };
 }
 
@@ -141,6 +142,12 @@ export interface Prescription {
   created_at: string;
   items?: PrescriptionItem[];
   patient?: User;
+  medical_record?: {
+    id: number;
+    patient_id: number;
+    diagnosis: string;
+    patient?: User;
+  };
 }
 
 export interface PrescriptionItem {
@@ -428,7 +435,7 @@ export interface PaginatedResponse<T> {
   };
 }
 
-export interface ApiError {
+export interface ApiErrorResponse {
   success: false;
   message: string;
   errors?: Record<string, string[]>;
