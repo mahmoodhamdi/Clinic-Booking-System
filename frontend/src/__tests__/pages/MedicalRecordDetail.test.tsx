@@ -12,6 +12,7 @@ jest.mock('next/navigation', () => ({
 // Mock next-intl
 jest.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => 'ar',
 }));
 
 // Mock the patient API
