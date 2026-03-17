@@ -14,8 +14,11 @@ class AddRequestId
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Use existing request ID from header or generate a new one
-        $requestId = $request->header('X-Request-ID') ?? Str::uuid()->toString();
+        // Use existing request ID from header if valid, or generate a new one
+        $clientId = $request->header('X-Request-ID');
+        $requestId = ($clientId && preg_match('/^[\w\-]{1,64}$/', $clientId))
+            ? $clientId
+            : Str::uuid()->toString();
 
         // Add to request attributes for logging
         $request->attributes->set('request_id', $requestId);

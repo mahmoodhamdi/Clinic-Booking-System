@@ -21,10 +21,10 @@ class AuthenticateFromCookie
             return $next($request);
         }
 
-        // Check for auth_token cookie
+        // Check for auth_token cookie with format validation
         $token = $request->cookie('auth_token');
 
-        if ($token) {
+        if ($token && is_string($token) && preg_match('/^[a-zA-Z0-9|]+$/', $token) && strlen($token) <= 512) {
             // Add the token as a Bearer token header
             $request->headers->set('Authorization', 'Bearer '.$token);
         }
