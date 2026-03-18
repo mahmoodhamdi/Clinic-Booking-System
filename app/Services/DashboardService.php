@@ -343,7 +343,7 @@ class DashboardService
             ->map(fn ($apt) => [
                 'type' => 'appointment',
                 'id' => $apt->id,
-                'description' => "موعد جديد: {$apt->patient->name}",
+                'description' => 'موعد جديد: '.($apt->patient?->name ?? 'مريض محذوف'),
                 'status' => $apt->status->value,
                 'date' => $apt->created_at->format('Y-m-d H:i'),
                 'timestamp' => $apt->created_at->timestamp,
@@ -370,7 +370,7 @@ class DashboardService
             ->map(fn ($record) => [
                 'type' => 'medical_record',
                 'id' => $record->id,
-                'description' => "سجل طبي: {$record->patient->name}",
+                'description' => 'سجل طبي: '.($record->patient?->name ?? 'مريض محذوف'),
                 'status' => 'created',
                 'date' => $record->created_at->format('Y-m-d H:i'),
                 'timestamp' => $record->created_at->timestamp,
@@ -458,7 +458,7 @@ class DashboardService
 
         return [
             'id' => $next->id,
-            'patient_name' => $next->patient->name,
+            'patient_name' => $next->patient?->name,
             'date' => $next->appointment_date->format('Y-m-d'),
             'time' => $next->formatted_time,
             'status' => $next->status->value,

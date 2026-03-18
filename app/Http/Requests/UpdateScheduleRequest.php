@@ -25,7 +25,7 @@ class UpdateScheduleRequest extends FormRequest
             'start_time' => ['sometimes', 'required', 'date_format:H:i'],
             'end_time' => ['sometimes', 'required', 'date_format:H:i', 'after:start_time'],
             'is_active' => ['boolean'],
-            'break_start' => ['nullable', 'date_format:H:i'],
+            'break_start' => ['nullable', 'date_format:H:i', 'required_with:break_end'],
             'break_end' => ['nullable', 'date_format:H:i', 'required_with:break_start'],
         ];
     }
@@ -35,6 +35,7 @@ class UpdateScheduleRequest extends FormRequest
         return [
             'day_of_week.unique' => 'يوجد جدول لهذا اليوم بالفعل.',
             'end_time.after' => 'وقت النهاية يجب أن يكون بعد وقت البداية.',
+            'break_start.required_with' => 'وقت بداية الاستراحة مطلوب عند تحديد وقت النهاية.',
             'break_end.required_with' => 'وقت نهاية الاستراحة مطلوب عند تحديد وقت البداية.',
         ];
     }

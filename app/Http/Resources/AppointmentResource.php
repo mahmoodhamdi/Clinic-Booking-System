@@ -11,12 +11,12 @@ class AppointmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'patient' => [
+            'patient' => $this->patient ? [
                 'id' => $this->patient->id,
                 'name' => $this->patient->name,
                 'phone' => $this->patient->phone,
                 'avatar_url' => $this->patient->avatar_url,
-            ],
+            ] : null,
             'date' => $this->formatted_date,
             'time' => $this->formatted_time,
             'datetime' => $this->datetime->toIso8601String(),
@@ -27,7 +27,10 @@ class AppointmentResource extends JsonResource
             'status_label_en' => $this->status_label_en,
             'status_color' => $this->status->color(),
             'notes' => $this->notes,
-            'admin_notes' => $this->admin_notes,
+            'admin_notes' => $this->when(
+                optional(request()->user())->isStaff(),
+                $this->admin_notes
+            ),
             'can_cancel' => $this->can_cancel,
             'is_upcoming' => $this->is_upcoming,
             'is_today' => $this->is_today,

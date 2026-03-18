@@ -40,7 +40,7 @@ class PatientResource extends JsonResource
             'profile' => $this->whenLoaded('profile', function () {
                 return $this->profile ? new PatientProfileResource($this->profile) : null;
             }),
-            'has_profile' => $this->profile !== null,
+            'has_profile' => $this->relationLoaded('profile') ? $this->profile !== null : $this->profile()->exists(),
             'statistics' => $this->when($this->statistics !== null, fn () => [
                 'total_appointments' => $this->statistics['total_appointments'] ?? 0,
                 'completed_appointments' => $this->statistics['completed_appointments'] ?? 0,

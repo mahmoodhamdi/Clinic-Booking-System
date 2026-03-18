@@ -161,7 +161,12 @@ class PaymentService
         $from = $from ?? now()->startOfMonth()->toDateTimeString();
         $to = $to ?? now()->endOfMonth()->toDateTimeString();
 
-        $query = Payment::whereBetween('created_at', [$from, $to]);
+        $query = Payment::where(function ($q) use ($from, $to) {
+            $q->whereBetween('paid_at', [$from, $to])
+                ->orWhere(function ($q2) use ($from, $to) {
+                    $q2->whereNull('paid_at')->whereBetween('created_at', [$from, $to]);
+                });
+        });
 
         $totalPaid = (clone $query)->paid()->sum('total');
         $totalPending = (clone $query)->pending()->sum('total');

@@ -15,7 +15,7 @@ class UpdateVacationRequest extends FormRequest
     {
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'start_date' => ['sometimes', 'required', 'date'],
+            'start_date' => ['sometimes', 'required', 'date', 'after_or_equal:today'],
             'end_date' => ['sometimes', 'required', 'date', 'after_or_equal:start_date'],
             'reason' => ['nullable', 'string'],
         ];
@@ -26,6 +26,7 @@ class UpdateVacationRequest extends FormRequest
         return [
             'title.required' => 'عنوان الإجازة مطلوب.',
             'start_date.required' => 'تاريخ البداية مطلوب.',
+            'start_date.after_or_equal' => 'تاريخ البداية يجب أن يكون اليوم أو بعده.',
             'end_date.required' => 'تاريخ النهاية مطلوب.',
             'end_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون مساوياً أو بعد تاريخ البداية.',
         ];

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { CalendarIcon, Clock, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -33,6 +33,7 @@ export default function BookAppointmentPage() {
   const locale = useLocale();
   const BackIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<BookingStep>('date');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -56,6 +57,10 @@ export default function BookAppointmentPage() {
   const bookMutation = useMutation({
     mutationFn: appointmentsApi.book,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['availableDates'] });
+      queryClient.invalidateQueries({ queryKey: ['slots'] });
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['upcomingAppointments'] });
       setShowSuccessDialog(true);
     },
     onError: (error) => {

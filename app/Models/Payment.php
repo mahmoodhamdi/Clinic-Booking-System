@@ -125,8 +125,10 @@ class Payment extends Model
 
     public function scopeForPatient($query, int $patientId)
     {
-        return $query->whereHas('appointment', function ($q) use ($patientId) {
-            $q->where('user_id', $patientId);
+        return $query->where(function ($q) use ($patientId) {
+            $q->whereHas('appointment', function ($q2) use ($patientId) {
+                $q2->where('user_id', $patientId);
+            })->orWhere('patient_id', $patientId);
         });
     }
 
