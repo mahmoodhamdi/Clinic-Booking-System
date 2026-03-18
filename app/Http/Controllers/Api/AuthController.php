@@ -169,8 +169,9 @@ class AuthController extends Controller
             Storage::disk('public')->delete($user->avatar);
         }
 
-        // Generate a secure random filename to prevent path traversal
-        $extension = $request->file('avatar')->getClientOriginalExtension();
+        // Derive extension from server-validated MIME type (not client filename)
+        $mimeToExt = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
+        $extension = $mimeToExt[$request->file('avatar')->getMimeType()] ?? 'jpg';
         $filename = Str::uuid().'.'.$extension;
         $path = $request->file('avatar')->storeAs('avatars', $filename, 'public');
         $user->update(['avatar' => $path]);
@@ -206,6 +207,16 @@ class AuthController extends Controller
      */
     public function forgotPassword(ForgotPasswordRequest $request, SmsService $smsService): JsonResponse
     {
+        $user = User::where('phone', $request->phone)->first();
+
+        // Always return the same response to prevent user enumeration
+        if (! $user) {
+            return response()->json([
+                'success' => true,
+                'message' => 'إذا كان الرقم مسجلاً، سيتم إرسال رمز التحقق إليه.',
+            ]);
+        }
+
         $token = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         DB::table('password_reset_tokens')->updateOrInsert(
@@ -239,7 +250,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إرسال رمز التحقق إلى هاتفك.',
+            'message' => 'إذا كان الرقم مسجلاً، سيتم إرسال رمز التحقق إليه.',
         ]);
     }
 
@@ -259,7 +270,7 @@ class AuthController extends Controller
     public function verifyOtp(Request $request): JsonResponse
     {
         $request->validate([
-            'phone' => ['required', 'string', 'exists:users,phone'],
+            'phone' => ['required', 'string'],
             'otp' => ['required', 'string', 'size:6'],
         ]);
 

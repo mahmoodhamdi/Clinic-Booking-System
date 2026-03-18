@@ -23,7 +23,7 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'phone' => ['required', 'string', 'exists:users,phone'],
+            'phone' => ['required', 'string'],
             'otp' => ['required', 'string', 'size:6'],
             'password' => [
                 'required',
@@ -42,7 +42,6 @@ class ResetPasswordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.exists' => 'رقم الهاتف غير مسجل.',
             'otp.required' => 'رمز التحقق مطلوب.',
             'otp.size' => 'رمز التحقق يجب أن يكون 6 أرقام.',
             'password.confirmed' => 'كلمة المرور غير متطابقة.',

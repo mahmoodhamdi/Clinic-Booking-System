@@ -32,14 +32,22 @@ class PasswordResetTest extends TestCase
     }
 
     /** @test */
-    public function password_reset_fails_for_nonexistent_phone(): void
+    public function password_reset_returns_same_response_for_nonexistent_phone(): void
     {
         $response = $this->postJson('/api/auth/forgot-password', [
             'phone' => '01099999999',
         ]);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['phone']);
+        // Anti-enumeration: always return 200 with generic message
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+            ]);
+
+        // Verify no token was created for nonexistent phone
+        $this->assertDatabaseMissing('password_reset_tokens', [
+            'phone' => '01099999999',
+        ]);
     }
 
     /** @test */

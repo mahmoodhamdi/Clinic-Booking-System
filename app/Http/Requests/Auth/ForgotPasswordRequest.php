@@ -22,7 +22,7 @@ class ForgotPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'phone' => ['required', 'string', 'exists:users,phone'],
+            'phone' => ['required', 'string'],
         ];
     }
 
@@ -35,7 +35,6 @@ class ForgotPasswordRequest extends FormRequest
     {
         return [
             'phone.required' => 'رقم الهاتف مطلوب.',
-            'phone.exists' => 'رقم الهاتف غير مسجل.',
         ];
     }
 }
