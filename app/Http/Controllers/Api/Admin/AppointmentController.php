@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Enums\AppointmentStatus;
 use App\Enums\CancelledBy;
+use App\Exceptions\BusinessLogicException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ListAppointmentsRequest;
 use App\Http\Requests\Admin\UpdateAppointmentNotesRequest;
@@ -21,7 +23,7 @@ class AppointmentController extends Controller
     public function index(ListAppointmentsRequest $request): JsonResponse
     {
         $filters = $request->validated();
-        $perPage = $request->integer('per_page', 15);
+        $perPage = min($request->integer('per_page', 15), 100);
 
         $appointments = $this->appointmentService->getAllAppointments($filters, $perPage);
 
@@ -46,9 +48,9 @@ class AppointmentController extends Controller
             'data' => AppointmentResource::collection($appointments),
             'summary' => [
                 'total' => $appointments->count(),
-                'pending' => $appointments->where('status.value', 'pending')->count(),
-                'confirmed' => $appointments->where('status.value', 'confirmed')->count(),
-                'completed' => $appointments->where('status.value', 'completed')->count(),
+                'pending' => $appointments->where('status', AppointmentStatus::PENDING)->count(),
+                'confirmed' => $appointments->where('status', AppointmentStatus::CONFIRMED)->count(),
+                'completed' => $appointments->where('status', AppointmentStatus::COMPLETED)->count(),
             ],
         ]);
     }
@@ -115,10 +117,11 @@ class AppointmentController extends Controller
                 'message' => __('تم تأكيد الحجز بنجاح'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
-        } catch (\InvalidArgumentException $e) {
+        } catch (BusinessLogicException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
+                'error_code' => $e->getErrorCode(),
             ], 422);
         }
     }
@@ -135,10 +138,11 @@ class AppointmentController extends Controller
                 'message' => __('تم إتمام الحجز بنجاح'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
-        } catch (\InvalidArgumentException $e) {
+        } catch (BusinessLogicException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
+                'error_code' => $e->getErrorCode(),
             ], 422);
         }
     }
@@ -157,10 +161,11 @@ class AppointmentController extends Controller
                 'message' => __('تم إلغاء الحجز بنجاح'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
-        } catch (\InvalidArgumentException $e) {
+        } catch (BusinessLogicException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
+                'error_code' => $e->getErrorCode(),
             ], 422);
         }
     }
@@ -175,10 +180,11 @@ class AppointmentController extends Controller
                 'message' => __('تم تسجيل عدم الحضور'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
-        } catch (\InvalidArgumentException $e) {
+        } catch (BusinessLogicException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
+                'error_code' => $e->getErrorCode(),
             ], 422);
         }
     }

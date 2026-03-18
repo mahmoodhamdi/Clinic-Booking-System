@@ -172,7 +172,7 @@ describe('adminApi', () => {
         const result = await adminApi.cancelAppointment(123, 'Doctor unavailable');
 
         expect(mockApi.post).toHaveBeenCalledWith('/admin/appointments/123/cancel', {
-          cancellation_reason: 'Doctor unavailable',
+          reason: 'Doctor unavailable',
         });
         expect(result.data?.status).toBe('cancelled');
       });

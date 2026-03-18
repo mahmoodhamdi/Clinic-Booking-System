@@ -233,7 +233,7 @@ export const adminApi = {
 
   cancelAppointment: async (id: number, reason?: string): Promise<ApiResponse<Appointment>> => {
     const response = await api.post<ApiResponse<Appointment>>(`/admin/appointments/${id}/cancel`, {
-      cancellation_reason: reason,
+      reason: reason,
     });
     return response.data;
   },

@@ -126,11 +126,24 @@ class SlotGeneratorService
      */
     protected function getVacationDatesInRange(string $startDate, string $endDate): Collection
     {
-        return Vacation::query()
-            ->where('is_active', true)
-            ->whereBetween('date', [$startDate, $endDate])
-            ->pluck('date')
-            ->map(fn ($date) => Carbon::parse($date)->toDateString());
+        $vacations = Vacation::query()
+            ->where('start_date', '<=', $endDate)
+            ->where('end_date', '>=', $startDate)
+            ->get(['start_date', 'end_date']);
+
+        $dates = collect();
+
+        foreach ($vacations as $vacation) {
+            $current = Carbon::parse($vacation->start_date)->max(Carbon::parse($startDate));
+            $end = Carbon::parse($vacation->end_date)->min(Carbon::parse($endDate));
+
+            while ($current->lte($end)) {
+                $dates->push($current->toDateString());
+                $current->addDay();
+            }
+        }
+
+        return $dates->unique()->values();
     }
 
     /**
@@ -144,23 +157,6 @@ class SlotGeneratorService
                 ->keyBy('day_of_week')
                 ->toArray();
         });
-    }
-
-    /**
-     * Get all schedules indexed by day of week (per-day cached fallback for individual lookups).
-     */
-    protected function getAllSchedules(): array
-    {
-        $schedules = [];
-        for ($i = 0; $i <= 6; $i++) {
-            $schedules[$i] = Cache::remember(
-                $this->getScheduleCacheKey($i),
-                $this->cacheTtl,
-                fn () => Schedule::active()->forDay(DayOfWeek::from($i))->first()
-            );
-        }
-
-        return $schedules;
     }
 
     /**

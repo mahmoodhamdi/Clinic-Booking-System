@@ -255,7 +255,7 @@ describe('appointmentsApi', () => {
       const result = await appointmentsApi.cancel(123, 'Cannot make it');
 
       expect(mockApi.post).toHaveBeenCalledWith('/appointments/123/cancel', {
-        cancellation_reason: 'Cannot make it',
+        reason: 'Cannot make it',
       });
       expect(result.data?.status).toBe('cancelled');
     });
@@ -270,7 +270,7 @@ describe('appointmentsApi', () => {
       await appointmentsApi.cancel(123);
 
       expect(mockApi.post).toHaveBeenCalledWith('/appointments/123/cancel', {
-        cancellation_reason: undefined,
+        reason: undefined,
       });
     });
 
