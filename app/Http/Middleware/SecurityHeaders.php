@@ -19,7 +19,7 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
 
         // Prevent clickjacking
-        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        $response->headers->set('X-Frame-Options', 'DENY');
 
         // Enable XSS filter in older browsers
         $response->headers->set('X-XSS-Protection', '1; mode=block');

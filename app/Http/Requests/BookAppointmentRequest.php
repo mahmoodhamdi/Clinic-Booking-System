@@ -9,7 +9,9 @@ class BookAppointmentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+
+        return $user && $user->phone_verified_at !== null;
     }
 
     public function rules(): array
