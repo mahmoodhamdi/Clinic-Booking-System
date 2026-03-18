@@ -21,6 +21,7 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
+  Heart,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { useAuthStore } from '@/lib/stores/auth';
 import { patientApi } from '@/lib/api/patient';
 import { cn } from '@/lib/utils';
@@ -64,10 +66,10 @@ function NavLink({ item, collapsed = false, onClick, isActive }: NavLinkProps) {
       href={item.href}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
         isActive
-          ? 'bg-primary text-primary-foreground'
-          : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
+          ? 'bg-primary text-primary-foreground shadow-primary'
+          : 'text-muted-foreground hover:bg-primary/10 hover:text-primary',
         collapsed && 'justify-center px-2'
       )}
       title={collapsed ? item.name : undefined}
@@ -111,17 +113,17 @@ function SidebarContent({
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className={cn('flex items-center h-16 px-4', collapsed && 'justify-center px-2')}>
-        <Link href="/admin/dashboard" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-lg">C</span>
+        <Link href="/admin/dashboard" className="flex items-center gap-2.5 group">
+          <div className="h-9 w-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-primary flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
+            <Heart className="h-4.5 w-4.5 text-white" fill="white" />
           </div>
           {!collapsed && (
-            <span className="font-bold text-lg">{appName}</span>
+            <span className="font-bold text-lg text-foreground">{appName}</span>
           )}
         </Link>
       </div>
 
-      <Separator />
+      <Separator className="opacity-50" />
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-1">
@@ -135,7 +137,7 @@ function SidebarContent({
           />
         ))}
 
-        <Separator className="my-4" />
+        <Separator className="my-4 opacity-50" />
 
         {settingsNavigation.map((item) => (
           <NavLink
@@ -150,11 +152,11 @@ function SidebarContent({
 
       {/* Collapse Button (Desktop only) */}
       {!mobile && onCollapseToggle && (
-        <div className="p-3 border-t">
+        <div className="p-3 border-t border-border/50">
           <Button
             variant="ghost"
             size="sm"
-            className="w-full"
+            className="w-full hover:bg-primary/10 hover:text-primary"
             onClick={onCollapseToggle}
           >
             {collapsed ? (
@@ -171,13 +173,13 @@ function SidebarContent({
 
       {/* Logout Button (Mobile only) */}
       {mobile && onLogout && (
-        <div className="p-3 border-t">
+        <div className="p-3 border-t border-border/50">
           <button
             onClick={() => {
               onNavClick?.();
               onLogout();
             }}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 w-full transition-colors"
           >
             <LogOut className="h-4 w-4" />
             {logoutLabel}
@@ -236,11 +238,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 start-0 z-50 hidden lg:flex flex-col bg-white dark:bg-gray-800 border-e border-gray-200 dark:border-gray-700 transition-all duration-300',
+          'fixed inset-y-0 start-0 z-50 hidden lg:flex flex-col bg-card border-e border-border/50 transition-all duration-300 shadow-sm',
           sidebarCollapsed ? 'w-16' : 'w-64'
         )}
       >
@@ -280,36 +282,37 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         )}
       >
         {/* Header */}
-        <header className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex h-16 items-center justify-between px-4">
+        <header className="sticky top-0 z-40 glass border-b border-border/50">
+          <div className="flex h-16 items-center justify-between px-4 sm:px-6">
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden hover:bg-primary/10"
               onClick={() => setMobileMenuOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </Button>
 
-            {/* Search (placeholder) */}
-            <div className="flex-1 max-w-md mx-4">
-              {/* Search input can be added here */}
-            </div>
+            {/* Spacer */}
+            <div className="flex-1" />
 
             {/* Right Side */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {/* Notifications */}
-              <Button variant="ghost" size="icon" className="relative" aria-label={t('navigation.notifications')} asChild>
+              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10" aria-label={t('navigation.notifications')} asChild>
                 <Link href="/admin/notifications">
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
-                    <Badge className="absolute -top-1 -end-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    <Badge className="absolute -top-1 -end-1 h-5 min-w-5 flex items-center justify-center p-0 text-xs bg-destructive text-white border-2 border-background">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </Badge>
                   )}
                 </Link>
               </Button>
+
+              {/* Theme Toggle */}
+              <ThemeToggle />
 
               {/* Language Switcher */}
               <LanguageSwitcher />
@@ -317,16 +320,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
+                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-primary/10">
+                    <Avatar className="h-8 w-8 ring-2 ring-primary/20">
                       <AvatarImage src={user?.avatar || undefined} />
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                         {user?.name?.charAt(0) || 'A'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden sm:block text-start">
                       <p className="text-sm font-medium">{user?.name}</p>
-                      <p className="text-xs text-gray-500">{user?.role}</p>
+                      <p className="text-xs text-muted-foreground">{user?.role}</p>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
@@ -340,7 +343,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="text-red-600 cursor-pointer"
+                    className="text-destructive cursor-pointer"
                   >
                     <LogOut className="h-4 w-4 me-2" />
                     {t('auth.logout')}
@@ -352,7 +355,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-6">{children}</main>
+        <main className="p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ import {
   LogOut,
   Menu,
   X,
+  Heart,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
+import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { useAuthStore } from '@/lib/stores/auth';
 import { patientApi } from '@/lib/api/patient';
 import { cn } from '@/lib/utils';
@@ -63,10 +65,10 @@ function NavLinks({ navigation, pathname, mobile = false, onNavClick }: NavLinks
             href={item.href}
             onClick={onNavClick}
             className={cn(
-              'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+              'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
               isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                ? 'bg-primary text-primary-foreground shadow-primary'
+                : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
             )}
           >
             <item.icon className="h-4 w-4" />
@@ -114,17 +116,17 @@ export function PatientLayout({ children }: PatientLayoutProps) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <header className="sticky top-0 z-50 glass border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-lg">C</span>
+            <Link href="/dashboard" className="flex items-center gap-2.5 group">
+              <div className="h-9 w-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-primary transition-transform duration-200 group-hover:scale-105">
+                <Heart className="h-4.5 w-4.5 text-white" fill="white" />
               </div>
-              <span className="font-bold text-lg hidden sm:block">
+              <span className="font-bold text-lg hidden sm:block text-foreground">
                 {t('common.appName')}
               </span>
             </Link>
@@ -135,18 +137,21 @@ export function PatientLayout({ children }: PatientLayoutProps) {
             </div>
 
             {/* Right Side */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {/* Notifications */}
-              <Button variant="ghost" size="icon" className="relative" aria-label={t('navigation.notifications')} asChild>
+              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10" aria-label={t('navigation.notifications')} asChild>
                 <Link href="/notifications">
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
-                    <Badge className="absolute -top-1 -end-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    <Badge className="absolute -top-1 -end-1 h-5 min-w-5 flex items-center justify-center p-0 text-xs bg-destructive text-white border-2 border-background">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </Badge>
                   )}
                 </Link>
               </Button>
+
+              {/* Theme Toggle */}
+              <ThemeToggle />
 
               {/* Language Switcher */}
               <LanguageSwitcher />
@@ -154,10 +159,10 @@ export function PatientLayout({ children }: PatientLayoutProps) {
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
+                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-primary/10">
+                    <Avatar className="h-8 w-8 ring-2 ring-primary/20">
                       <AvatarImage src={user?.avatar || undefined} />
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                         {user?.name?.charAt(0) || 'U'}
                       </AvatarFallback>
                     </Avatar>
@@ -176,7 +181,7 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="text-red-600 cursor-pointer"
+                    className="text-destructive cursor-pointer"
                   >
                     <LogOut className="h-4 w-4 me-2" />
                     {t('auth.logout')}
@@ -187,18 +192,24 @@ export function PatientLayout({ children }: PatientLayoutProps) {
               {/* Mobile Menu Button */}
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Button variant="ghost" size="icon" className="lg:hidden hover:bg-primary/10">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-72">
                   <div className="flex flex-col h-full">
                     <div className="flex items-center justify-between mb-6">
-                      <span className="font-bold text-lg">{t('common.appName')}</span>
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-xl bg-gradient-primary flex items-center justify-center">
+                          <Heart className="h-4 w-4 text-white" fill="white" />
+                        </div>
+                        <span className="font-bold text-lg">{t('common.appName')}</span>
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={handleMobileNavClick}
+                        className="hover:bg-primary/10"
                       >
                         <X className="h-5 w-5" />
                       </Button>
@@ -210,11 +221,11 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                       onNavClick={handleMobileNavClick}
                     />
                     {/* Mobile Profile & Logout */}
-                    <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="mt-auto pt-4 border-t border-border">
                       <Link
                         href="/profile"
                         onClick={handleMobileNavClick}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary"
                       >
                         <User className="h-4 w-4" />
                         {t('navigation.profile')}
@@ -224,7 +235,7 @@ export function PatientLayout({ children }: PatientLayoutProps) {
                           handleMobileNavClick();
                           handleLogout();
                         }}
-                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 w-full"
                       >
                         <LogOut className="h-4 w-4" />
                         {t('auth.logout')}

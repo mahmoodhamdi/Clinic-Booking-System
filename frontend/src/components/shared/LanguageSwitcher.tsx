@@ -26,7 +26,7 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={isPending}>
+        <Button variant="ghost" size="icon" disabled={isPending} className="hover:bg-primary/10">
           <Languages className="h-5 w-5" />
           <span className="sr-only">Switch language</span>
         </Button>
