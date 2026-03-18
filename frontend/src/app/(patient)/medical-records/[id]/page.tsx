@@ -59,7 +59,7 @@ export default function MedicalRecordDetailPage() {
   const record = data.data;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -251,8 +251,8 @@ function VitalSign({
   unit: string;
 }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-      <div className="text-muted-foreground">{icon}</div>
+    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-colors">
+      <div className="text-primary/70">{icon}</div>
       <div>
         <p className="text-sm text-muted-foreground">{label}</p>
         <p className="font-medium">

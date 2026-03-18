@@ -28,7 +28,7 @@ export default function PrescriptionsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div>
         <h1 className="text-2xl font-bold">{t('navigation.prescriptions')}</h1>
       </div>
@@ -42,7 +42,7 @@ export default function PrescriptionsPage() {
       ) : prescriptions?.data && prescriptions.data.length > 0 ? (
         <div className="space-y-4">
           {prescriptions.data.map((prescription) => (
-            <Card key={prescription.id} className="hover:shadow-md transition-shadow">
+            <Card key={prescription.id} className="card-hover">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">

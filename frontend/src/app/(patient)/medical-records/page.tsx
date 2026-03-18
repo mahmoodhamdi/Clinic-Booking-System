@@ -27,7 +27,7 @@ export default function MedicalRecordsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div>
         <h1 className="text-2xl font-bold">{t('navigation.medicalRecords')}</h1>
       </div>
@@ -41,7 +41,7 @@ export default function MedicalRecordsPage() {
       ) : records?.data && records.data.length > 0 ? (
         <div className="space-y-4">
           {records.data.map((record) => (
-            <Card key={record.id} className="hover:shadow-md transition-shadow">
+            <Card key={record.id} className="card-hover">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">

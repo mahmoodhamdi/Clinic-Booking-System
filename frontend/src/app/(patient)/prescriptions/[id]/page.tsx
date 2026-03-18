@@ -64,7 +64,7 @@ export default function PrescriptionDetailPage() {
   const prescription = data.data;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -205,7 +205,7 @@ function MedicationItemCard({
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-3 bg-muted/50 rounded-lg">
+    <div className="p-3 bg-muted/50 rounded-lg hover:bg-muted/80 transition-colors">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="font-medium">{value}</p>
     </div>
