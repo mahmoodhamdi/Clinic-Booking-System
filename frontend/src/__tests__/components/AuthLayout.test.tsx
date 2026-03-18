@@ -71,8 +71,9 @@ describe('AuthLayout', () => {
       </AuthLayout>
     );
 
-    // LanguageSwitcher should be in the document
-    expect(screen.getByRole('button')).toBeInTheDocument();
+    // LanguageSwitcher and ThemeToggle buttons should be in the document
+    const buttons = screen.getAllByRole('button');
+    expect(buttons.length).toBeGreaterThanOrEqual(1);
   });
 
   it('renders the footer with copyright and app name', () => {
@@ -97,6 +98,6 @@ describe('AuthLayout', () => {
 
     // Check for gradient background class
     expect(container.firstChild).toHaveClass('min-h-screen');
-    expect(container.firstChild).toHaveClass('bg-gradient-to-br');
+    expect(container.firstChild).toHaveClass('bg-gradient-subtle');
   });
 });

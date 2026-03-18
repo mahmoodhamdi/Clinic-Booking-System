@@ -128,7 +128,7 @@ Aliases:
 - `secretary` → `SecretaryMiddleware`
 - `cache.api` → `CacheApiResponse`
 
-Note: `SetLocale` middleware exists but is not globally registered — locale is set per-request via `Accept-Language` header or `?lang=` query param.
+Note: `SetLocale` middleware is appended to API middleware stack — locale is set per-request via `Accept-Language` header or `?lang=` query param.
 
 ### Core Services (app/Services/)
 | Service | Responsibility |
@@ -140,7 +140,13 @@ Note: `SetLocale` middleware exists but is not globally registered — locale is
 | PrescriptionPdfService | PDF generation with DomPDF |
 | DashboardService | Statistics and charts |
 | ReportService | Appointment, revenue, patient reports |
+| CacheInvalidationService | Tag-based cache invalidation for API responses |
+| SmsService | SMS sending abstraction (OTP, notifications) |
+| PatientStatisticsService | Patient-specific statistics aggregation |
 | LocalizationService | Multi-language support (ar/en) |
+
+### Authorization Policies (app/Policies/)
+Policies enforce ownership-based access: `AppointmentPolicy`, `MedicalRecordPolicy`, `PatientProfilePolicy`, `PrescriptionPolicy`, `PaymentPolicy`. Patients can only access their own records; admins/secretaries can access all.
 
 ### Model Observers (app/Observers/)
 Registered in `AppServiceProvider::boot()`:
