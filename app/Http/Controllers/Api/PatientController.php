@@ -114,7 +114,7 @@ class PatientController extends Controller
     {
         $user = $request->user();
         $status = $request->query('status');
-        $perPage = $request->integer('per_page', 15);
+        $perPage = min($request->integer('per_page', 15), 100);
 
         $query = $user->appointments()
             ->with('patient')

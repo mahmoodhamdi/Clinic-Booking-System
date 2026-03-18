@@ -53,7 +53,7 @@ class PaymentController extends Controller
             })
             ->latest();
 
-        $perPage = $request->per_page ?? 15;
+        $perPage = min((int) ($request->per_page ?? 15), 100);
         $payments = $query->paginate($perPage);
 
         return ApiResponse::paginated($payments, PaymentResource::class);
@@ -113,6 +113,10 @@ class PaymentController extends Controller
 
     public function markAsPaid(Request $request, Payment $payment): JsonResponse
     {
+        $request->validate([
+            'transaction_id' => ['nullable', 'string', 'max:255'],
+        ]);
+
         if ($payment->isPaid()) {
             return ApiResponse::error('الدفعة مدفوعة بالفعل', 422);
         }
@@ -150,6 +154,11 @@ class PaymentController extends Controller
 
     public function statistics(Request $request): JsonResponse
     {
+        $request->validate([
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date', 'after_or_equal:from'],
+        ]);
+
         $from = $request->from ?? now()->startOfMonth()->toDateTimeString();
         $to = $request->to ?? now()->endOfMonth()->toDateTimeString();
 
@@ -160,8 +169,13 @@ class PaymentController extends Controller
 
     public function report(Request $request): JsonResponse
     {
+        $request->validate([
+            'period' => ['nullable', 'string', 'in:week,month,quarter,year'],
+            'year' => ['nullable', 'integer', 'min:2000', 'max:'.(now()->year + 1)],
+        ]);
+
         $period = $request->period ?? 'month';
-        $year = $request->year ?? now()->year;
+        $year = (int) ($request->year ?? now()->year);
 
         $report = $this->paymentService->getRevenueReport($period, $year);
 

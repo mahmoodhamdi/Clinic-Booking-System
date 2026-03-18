@@ -16,7 +16,7 @@ class MedicalRecordController extends Controller
         $records = MedicalRecord::with(['appointment', 'prescriptions'])
             ->forPatient($request->user()->id)
             ->latest()
-            ->paginate($request->per_page ?? 15);
+            ->paginate(min((int) ($request->per_page ?? 15), 100));
 
         return ApiResponse::paginated($records, MedicalRecordResource::class);
     }

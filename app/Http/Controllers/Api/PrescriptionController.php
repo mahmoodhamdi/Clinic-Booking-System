@@ -19,7 +19,7 @@ class PrescriptionController extends Controller
             ->when($request->status === 'valid', fn ($q) => $q->valid())
             ->when($request->status === 'expired', fn ($q) => $q->expired())
             ->latest()
-            ->paginate($request->per_page ?? 15);
+            ->paginate(min((int) ($request->per_page ?? 15), 100));
 
         return ApiResponse::paginated($prescriptions, PrescriptionResource::class);
     }

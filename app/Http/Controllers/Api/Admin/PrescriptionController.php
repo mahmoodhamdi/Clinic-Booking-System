@@ -29,7 +29,7 @@ class PrescriptionController extends Controller
             })
             ->latest();
 
-        $perPage = $request->per_page ?? 15;
+        $perPage = min((int) ($request->per_page ?? 15), 100);
         $prescriptions = $query->paginate($perPage);
 
         return ApiResponse::paginated($prescriptions, PrescriptionResource::class);

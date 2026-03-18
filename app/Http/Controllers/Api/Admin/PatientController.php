@@ -68,7 +68,7 @@ class PatientController extends Controller
             $query->orderBy($orderBy, $orderDir);
         }
 
-        $perPage = $request->integer('per_page', 15);
+        $perPage = min($request->integer('per_page', 15), 100);
         $patients = $query->paginate($perPage);
 
         // Get all statistics in one query
@@ -121,7 +121,7 @@ class PatientController extends Controller
         }
 
         $status = $request->query('status');
-        $perPage = $request->integer('per_page', 15);
+        $perPage = min($request->integer('per_page', 15), 100);
 
         $query = $patient->appointments()
             ->with('patient')

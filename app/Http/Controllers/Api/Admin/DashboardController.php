@@ -38,8 +38,8 @@ class DashboardController extends Controller
 
     public function monthly(Request $request): JsonResponse
     {
-        $month = $request->month ?? now()->month;
-        $year = $request->year ?? now()->year;
+        $month = (int) ($request->month ?? now()->month);
+        $year = (int) ($request->year ?? now()->year);
 
         $statistics = $this->dashboardService->getMonthlyStatistics($month, $year);
 
@@ -48,7 +48,7 @@ class DashboardController extends Controller
 
     public function chart(Request $request): JsonResponse
     {
-        $period = $request->period ?? 'week';
+        $period = (string) ($request->period ?? 'week');
 
         $chartData = $this->dashboardService->getChartData($period);
 

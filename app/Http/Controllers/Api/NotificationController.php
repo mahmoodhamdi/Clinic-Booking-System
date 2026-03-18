@@ -18,7 +18,7 @@ class NotificationController extends Controller
     {
         $notifications = $this->notificationService->getNotifications(
             $request->user(),
-            $request->per_page ?? 15
+            min((int) ($request->per_page ?? 15), 100)
         );
 
         return response()->json([
