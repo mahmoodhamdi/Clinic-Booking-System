@@ -205,9 +205,8 @@ class PatientController extends Controller
             ], 404);
         }
 
-        $patient->update([
-            'is_active' => ! $patient->is_active,
-        ]);
+        $patient->is_active = ! $patient->is_active;
+        $patient->save();
 
         $statusMessage = $patient->is_active
             ? __('تم تفعيل حساب المريض')

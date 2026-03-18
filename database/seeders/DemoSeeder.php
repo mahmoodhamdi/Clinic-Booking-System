@@ -29,19 +29,20 @@ class DemoSeeder extends Seeder
         $this->command->info('Creating demo data...');
 
         // Create Secretary
-        $secretary = User::create([
+        $secretary = new User([
             'name' => 'سارة أحمد',
             'email' => 'secretary@clinic.com',
             'phone' => '01100000000',
             'password' => Hash::make('secretary123'),
-            'role' => UserRole::SECRETARY,
             'gender' => Gender::FEMALE,
             'date_of_birth' => '1990-05-15',
             'address' => 'القاهرة، مصر الجديدة',
-            'is_active' => true,
             'phone_verified_at' => now(),
             'email_verified_at' => now(),
         ]);
+        $secretary->role = UserRole::SECRETARY;
+        $secretary->is_active = true;
+        $secretary->save();
         $this->command->info("✓ Secretary created: {$secretary->phone}");
 
         // Create Patients with full profiles
@@ -184,14 +185,15 @@ class DemoSeeder extends Seeder
             $profileData = $data['profile'];
             unset($data['profile']);
 
-            $patient = User::create([
+            $patient = new User([
                 ...$data,
                 'password' => Hash::make('patient123'),
-                'role' => UserRole::PATIENT,
-                'is_active' => true,
                 'phone_verified_at' => now(),
                 'email_verified_at' => now(),
             ]);
+            $patient->role = UserRole::PATIENT;
+            $patient->is_active = true;
+            $patient->save();
 
             PatientProfile::create([
                 'user_id' => $patient->id,

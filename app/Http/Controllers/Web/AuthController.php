@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class AuthController extends Controller
@@ -61,13 +62,15 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request): RedirectResponse
     {
-        $user = User::create([
+        $user = new User([
             'name' => $request->name,
             'phone' => $request->phone,
             'email' => $request->email,
             'password' => $request->password,
-            'role' => UserRole::PATIENT,
         ]);
+        $user->role = UserRole::PATIENT;
+        $user->is_active = true;
+        $user->save();
 
         Auth::login($user);
 
@@ -111,6 +114,8 @@ class AuthController extends Controller
             ['phone' => $request->phone],
             [
                 'token' => Hash::make($token),
+                'attempts' => 0,
+                'locked_until' => null,
                 'created_at' => now(),
             ]
         );
@@ -144,13 +149,38 @@ class AuthController extends Controller
             ->where('phone', $request->phone)
             ->first();
 
-        if (! $record || ! Hash::check($request->token, $record->token)) {
+        if (! $record) {
             return back()->with('error', 'رمز التحقق غير صحيح.');
+        }
+
+        // Check lockout
+        if ($record->locked_until && now()->lessThan($record->locked_until)) {
+            return back()->with('error', 'تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة لاحقاً.');
         }
 
         if (now()->diffInMinutes($record->created_at) > 15) {
             return back()->with('error', 'رمز التحقق منتهي الصلاحية.');
         }
+
+        if (! Hash::check($request->token, $record->token)) {
+            $attempts = ($record->attempts ?? 0) + 1;
+            $updateData = ['attempts' => $attempts];
+
+            if ($attempts >= 5) {
+                $updateData['locked_until'] = now()->addMinutes(30);
+            }
+
+            DB::table('password_reset_tokens')
+                ->where('phone', $request->phone)
+                ->update($updateData);
+
+            return back()->with('error', 'رمز التحقق غير صحيح.');
+        }
+
+        // Reset attempts on success
+        DB::table('password_reset_tokens')
+            ->where('phone', $request->phone)
+            ->update(['attempts' => 0, 'locked_until' => null]);
 
         return redirect()->route('password.reset.form', [
             'phone' => $request->phone,
@@ -177,7 +207,7 @@ class AuthController extends Controller
         $request->validate([
             'phone' => ['required', 'string'],
             'token' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()],
         ], [
             'password.min' => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.',
             'password.confirmed' => 'كلمة المرور غير متطابقة.',

@@ -15,17 +15,19 @@ class AdminSeeder extends Seeder
     {
         $password = env('ADMIN_DEFAULT_PASSWORD', 'admin123');
 
-        User::firstOrCreate(
-            ['phone' => '01000000000'],
-            [
+        $admin = User::where('phone', '01000000000')->first();
+        if (! $admin) {
+            $admin = new User([
                 'name' => 'Dr. Admin',
                 'email' => 'admin@clinic.com',
                 'password' => $password,
-                'role' => UserRole::ADMIN,
-                'is_active' => true,
+                'phone' => '01000000000',
                 'phone_verified_at' => now(),
-            ]
-        );
+            ]);
+            $admin->role = UserRole::ADMIN;
+            $admin->is_active = true;
+            $admin->save();
+        }
 
         $this->command->info('Admin user created/verified: phone=01000000000');
     }

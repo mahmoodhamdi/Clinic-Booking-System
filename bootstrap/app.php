@@ -95,12 +95,17 @@ return Application::configure(basePath: dirname(__DIR__))
         // Handle business logic exceptions
         $exceptions->render(function (\App\Exceptions\BusinessLogicException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
+                $response = [
                     'success' => false,
                     'message' => $e->getMessage(),
                     'error_code' => $e->getErrorCode(),
-                    'context' => $e->getContext(),
-                ], $e->getCode());
+                ];
+
+                if (! app()->environment('production')) {
+                    $response['context'] = $e->getContext();
+                }
+
+                return response()->json($response, $e->getCode());
             }
         });
 

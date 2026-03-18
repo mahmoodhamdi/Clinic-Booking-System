@@ -46,7 +46,14 @@ class ClinicSettingController extends Controller
     public function uploadLogo(Request $request): JsonResponse
     {
         $request->validate([
-            'logo' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'logo' => [
+                'required',
+                'image',
+                'mimes:jpeg,png,jpg',
+                'mimetypes:image/jpeg,image/png',
+                'max:2048',
+                'dimensions:min_width=50,min_height=50,max_width=2000,max_height=2000',
+            ],
         ]);
 
         $settings = ClinicSetting::getInstance();

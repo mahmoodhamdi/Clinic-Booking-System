@@ -90,15 +90,16 @@ class PrescriptionController extends Controller
 
                 foreach ($request->items as $itemData) {
                     if (isset($itemData['id'])) {
-                        // Update existing item
-                        PrescriptionItem::where('id', $itemData['id'])->update([
-                            'medication_name' => $itemData['medication_name'],
-                            'dosage' => $itemData['dosage'],
-                            'frequency' => $itemData['frequency'],
-                            'duration' => $itemData['duration'],
-                            'instructions' => $itemData['instructions'] ?? null,
-                            'quantity' => $itemData['quantity'] ?? null,
-                        ]);
+                        // Update existing item (scoped to owning prescription)
+                        PrescriptionItem::where('id', $itemData['id'])
+                            ->where('prescription_id', $prescription->id)->update([
+                                'medication_name' => $itemData['medication_name'],
+                                'dosage' => $itemData['dosage'],
+                                'frequency' => $itemData['frequency'],
+                                'duration' => $itemData['duration'],
+                                'instructions' => $itemData['instructions'] ?? null,
+                                'quantity' => $itemData['quantity'] ?? null,
+                            ]);
                     } else {
                         // Create new item
                         $prescription->items()->create([

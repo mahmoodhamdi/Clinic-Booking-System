@@ -22,12 +22,10 @@ class UserTest extends TestCase
             'email',
             'phone',
             'password',
-            'role',
             'date_of_birth',
             'gender',
             'address',
             'avatar',
-            'is_active',
             'phone_verified_at',
         ], $user->getFillable());
     }
