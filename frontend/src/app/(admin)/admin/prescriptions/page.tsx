@@ -203,7 +203,7 @@ export default function AdminPrescriptionsPage() {
       ) : filteredPrescriptions && filteredPrescriptions.length > 0 ? (
         <div className="space-y-4">
           {filteredPrescriptions.map((prescription) => (
-            <Card key={prescription.id} className="hover:shadow-md transition-shadow">
+            <Card key={prescription.id} className="hover:shadow-md transition-shadow card-hover">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">

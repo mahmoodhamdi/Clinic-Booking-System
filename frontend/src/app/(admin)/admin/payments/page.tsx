@@ -192,7 +192,7 @@ export default function AdminPaymentsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 animate-fade-in-up">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -272,7 +272,7 @@ export default function AdminPaymentsPage() {
       ) : filteredPayments && filteredPayments.length > 0 ? (
         <div className="space-y-4">
           {filteredPayments.map((payment) => (
-            <Card key={payment.id} className="hover:shadow-md transition-shadow">
+            <Card key={payment.id} className="hover:shadow-md transition-shadow card-hover">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">

@@ -49,7 +49,7 @@ function AppointmentCard({
   dateFnsLocale,
 }: AppointmentCardProps) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow card-hover">
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
@@ -245,7 +245,7 @@ export default function AppointmentsPage() {
   const dateFnsLocale = getDateLocale(locale);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div>
         <h1 className="text-2xl font-bold">{t('navigation.myAppointments')}</h1>
       </div>

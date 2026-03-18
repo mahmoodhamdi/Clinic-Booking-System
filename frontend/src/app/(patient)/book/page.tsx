@@ -114,29 +114,29 @@ export default function BookAppointmentPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto animate-fade-in-up">
       {/* Progress Steps */}
       <div className="flex items-center justify-center mb-8">
         <div className="flex items-center gap-2">
           <div
             className={cn(
-              'h-10 w-10 rounded-full flex items-center justify-center font-medium',
+              'h-10 w-10 rounded-full flex items-center justify-center font-medium transition-all duration-300',
               step === 'date'
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-white shadow-primary'
                 : 'bg-primary/20 text-primary'
             )}
           >
             1
           </div>
-          <span className="text-sm font-medium">{t('patient.booking.selectDate')}</span>
+          <span className="text-sm font-medium hidden sm:inline">{t('patient.booking.selectDate')}</span>
         </div>
-        <div className="h-0.5 w-8 bg-border mx-2" />
+        <div className={cn('h-0.5 w-8 mx-2 transition-colors duration-300', step !== 'date' ? 'bg-primary/40' : 'bg-border')} />
         <div className="flex items-center gap-2">
           <div
             className={cn(
-              'h-10 w-10 rounded-full flex items-center justify-center font-medium',
+              'h-10 w-10 rounded-full flex items-center justify-center font-medium transition-all duration-300',
               step === 'time'
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-white shadow-primary'
                 : step === 'confirm'
                 ? 'bg-primary/20 text-primary'
                 : 'bg-border text-muted-foreground/70'
@@ -144,21 +144,21 @@ export default function BookAppointmentPage() {
           >
             2
           </div>
-          <span className="text-sm font-medium">{t('patient.booking.selectTime')}</span>
+          <span className="text-sm font-medium hidden sm:inline">{t('patient.booking.selectTime')}</span>
         </div>
-        <div className="h-0.5 w-8 bg-border mx-2" />
+        <div className={cn('h-0.5 w-8 mx-2 transition-colors duration-300', step === 'confirm' ? 'bg-primary/40' : 'bg-border')} />
         <div className="flex items-center gap-2">
           <div
             className={cn(
-              'h-10 w-10 rounded-full flex items-center justify-center font-medium',
+              'h-10 w-10 rounded-full flex items-center justify-center font-medium transition-all duration-300',
               step === 'confirm'
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-white shadow-primary'
                 : 'bg-border text-muted-foreground/70'
             )}
           >
             3
           </div>
-          <span className="text-sm font-medium">{t('patient.booking.confirmBooking')}</span>
+          <span className="text-sm font-medium hidden sm:inline">{t('patient.booking.confirmBooking')}</span>
         </div>
       </div>
 
@@ -223,7 +223,7 @@ export default function BookAppointmentPage() {
                     variant={selectedTime === slot.time ? 'default' : 'outline'}
                     disabled={!slot.available}
                     onClick={() => handleTimeSelect(slot.time)}
-                    className="h-12"
+                    className="h-12 card-hover"
                   >
                     {slot.time}
                   </Button>
@@ -256,7 +256,7 @@ export default function BookAppointmentPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Summary */}
-            <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+            <div className="bg-muted/50 rounded-xl p-5 space-y-3 border border-border/50">
               <div className="flex items-center gap-3">
                 <CalendarIcon className="h-5 w-5 text-muted-foreground/70" />
                 <div>

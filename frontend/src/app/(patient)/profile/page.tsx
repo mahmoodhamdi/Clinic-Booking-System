@@ -189,9 +189,9 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl font-bold">{t('navigation.profile')}</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">{t('navigation.profile')}</h1>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">

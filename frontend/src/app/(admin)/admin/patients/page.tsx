@@ -91,7 +91,7 @@ export default function AdminPatientsPage() {
       ) : patients?.data && patients.data.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {patients.data.map((patient: User) => (
-            <Card key={patient.id} className="hover:shadow-md transition-shadow">
+            <Card key={patient.id} className="hover:shadow-md transition-shadow card-hover">
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   <Avatar className="h-12 w-12">

@@ -91,12 +91,12 @@ export default function NotificationsPage() {
           ))}
         </div>
       ) : notifications?.data && notifications.data.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-3 animate-fade-in">
           {notifications.data.map((notification) => (
             <Card
               key={notification.id}
               className={cn(
-                'transition-all',
+                'transition-all hover:shadow-md card-hover',
                 !notification.read_at && 'border-primary/50 bg-primary/5'
               )}
             >

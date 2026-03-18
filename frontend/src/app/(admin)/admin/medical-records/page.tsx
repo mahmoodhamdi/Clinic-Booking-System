@@ -167,7 +167,7 @@ export default function AdminMedicalRecordsPage() {
       ) : filteredRecords && filteredRecords.length > 0 ? (
         <div className="space-y-4">
           {filteredRecords.map((record) => (
-            <Card key={record.id} className="hover:shadow-md transition-shadow">
+            <Card key={record.id} className="hover:shadow-md transition-shadow card-hover">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
