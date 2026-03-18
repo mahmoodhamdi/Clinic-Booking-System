@@ -323,6 +323,92 @@
   .stagger-5 { animation-delay: 0.25s; }
   .stagger-6 { animation-delay: 0.30s; }
 
+  /* Gradient text */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, oklch(0.600 0.130 185), oklch(0.520 0.160 210));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dark .text-gradient-primary {
+    background: linear-gradient(135deg, oklch(0.720 0.130 183), oklch(0.660 0.150 210));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Stat card with colored left border */
+  .stat-card-blue {
+    border-inline-start: 4px solid oklch(0.600 0.180 255);
+  }
+  .stat-card-green {
+    border-inline-start: 4px solid oklch(0.620 0.185 145);
+  }
+  .stat-card-yellow {
+    border-inline-start: 4px solid oklch(0.750 0.183 65);
+  }
+  .stat-card-purple {
+    border-inline-start: 4px solid oklch(0.580 0.195 300);
+  }
+  .stat-card-teal {
+    border-inline-start: 4px solid oklch(0.600 0.130 185);
+  }
+
+  /* Welcome banner gradient */
+  .bg-gradient-welcome {
+    background: linear-gradient(135deg, oklch(0.600 0.130 185), oklch(0.560 0.150 200));
+  }
+  .dark .bg-gradient-welcome {
+    background: linear-gradient(135deg, oklch(0.350 0.080 185), oklch(0.300 0.070 210));
+  }
+
+  /* Shimmer skeleton enhancement */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      oklch(0.940 0.005 250) 0%,
+      oklch(0.970 0.003 250) 50%,
+      oklch(0.940 0.005 250) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+  .dark .shimmer {
+    background: linear-gradient(
+      90deg,
+      oklch(0.250 0.015 250) 0%,
+      oklch(0.300 0.015 250) 50%,
+      oklch(0.250 0.015 250) 100%
+    );
+    background-size: 200% 100%;
+  }
+
+  /* Icon container with soft glow */
+  .icon-glow {
+    position: relative;
+  }
+  .icon-glow::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: inherit;
+    opacity: 0.3;
+    filter: blur(8px);
+    z-index: -1;
+  }
+
+  /* Page section divider */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(0.600 0.130 185 / 20%),
+      transparent
+    );
+  }
+
   /* Respect reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-in,
@@ -339,4 +425,80 @@
       transform: none;
     }
   }
+}
+
+/* ═══════════════════════════════════════════════════
+   COMPONENT OVERRIDES — Enhanced shadcn/ui
+   ═══════════════════════════════════════════════════ */
+
+/* Cards — subtle shadow + hover enhancement */
+[data-slot="card"] {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  border-color: oklch(0.905 0.012 185 / 60%);
+}
+.dark [data-slot="card"] {
+  border-color: oklch(1 0 0 / 8%);
+}
+
+/* Primary buttons — gradient + shadow */
+button[data-variant="default"],
+a[data-variant="default"] {
+  background: linear-gradient(135deg, oklch(0.600 0.130 185), oklch(0.540 0.125 190));
+  box-shadow: 0 2px 8px -2px oklch(0.600 0.130 185 / 30%);
+  transition: all 0.2s ease;
+}
+button[data-variant="default"]:hover,
+a[data-variant="default"]:hover {
+  box-shadow: 0 4px 16px -2px oklch(0.600 0.130 185 / 40%);
+  transform: translateY(-1px);
+}
+button[data-variant="default"]:active,
+a[data-variant="default"]:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px -1px oklch(0.600 0.130 185 / 30%);
+}
+.dark button[data-variant="default"],
+.dark a[data-variant="default"] {
+  background: linear-gradient(135deg, oklch(0.620 0.130 183), oklch(0.560 0.125 188));
+}
+
+/* Input focus — teal glow ring */
+input:focus-visible,
+textarea:focus-visible,
+[role="combobox"]:focus-visible {
+  border-color: oklch(0.600 0.130 185) !important;
+  box-shadow: 0 0 0 3px oklch(0.600 0.130 185 / 12%),
+              0 1px 2px oklch(0 0 0 / 5%) !important;
+}
+.dark input:focus-visible,
+.dark textarea:focus-visible,
+.dark [role="combobox"]:focus-visible {
+  border-color: oklch(0.720 0.130 183) !important;
+  box-shadow: 0 0 0 3px oklch(0.720 0.130 183 / 15%),
+              0 1px 2px oklch(0 0 0 / 10%) !important;
+}
+
+/* Badges — slightly more rounded + nicer defaults */
+[data-slot="badge"] {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Dialog/Modal overlay — better blur */
+[data-slot="dialog-overlay"] {
+  backdrop-filter: blur(4px);
+}
+
+/* Tabs — underline style enhancement */
+[role="tablist"] {
+  border-bottom: 2px solid oklch(0.905 0.012 185 / 40%);
+}
+.dark [role="tablist"] {
+  border-bottom: 2px solid oklch(1 0 0 / 8%);
+}
+[role="tab"][data-state="active"] {
+  box-shadow: inset 0 -2px 0 0 oklch(0.600 0.130 185);
+}
+.dark [role="tab"][data-state="active"] {
+  box-shadow: inset 0 -2px 0 0 oklch(0.720 0.130 183);
 }
