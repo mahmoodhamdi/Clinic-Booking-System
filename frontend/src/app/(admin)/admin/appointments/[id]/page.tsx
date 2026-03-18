@@ -150,31 +150,31 @@ export default function AdminAppointmentDetailPage() {
       case 'confirmed':
         return {
           label: t('patient.appointments.status.confirmed'),
-          className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
+          className: 'bg-success/10 text-success dark:bg-success/20',
           icon: <CheckCircle2 className="h-4 w-4" />,
         };
       case 'pending':
         return {
           label: t('patient.appointments.status.pending'),
-          className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100',
+          className: 'bg-warning/10 text-warning dark:bg-warning/20',
           icon: <Clock className="h-4 w-4" />,
         };
       case 'completed':
         return {
           label: t('patient.appointments.status.completed'),
-          className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
+          className: 'bg-info/10 text-info dark:bg-info/20',
           icon: <CheckCircle2 className="h-4 w-4" />,
         };
       case 'cancelled':
         return {
           label: t('patient.appointments.status.cancelled'),
-          className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100',
+          className: 'bg-destructive/10 text-destructive dark:bg-destructive/20',
           icon: <XCircle className="h-4 w-4" />,
         };
       case 'no_show':
         return {
           label: t('patient.appointments.status.no_show'),
-          className: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100',
+          className: 'bg-muted text-foreground/80 dark:bg-muted',
           icon: <AlertCircle className="h-4 w-4" />,
         };
     }
@@ -368,8 +368,8 @@ export default function AdminAppointmentDetailPage() {
 
               {/* Cancellation Reason */}
               {appointment.cancellation_reason && (
-                <div className="space-y-1 rounded-lg bg-red-50 dark:bg-red-900/20 p-3">
-                  <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                <div className="space-y-1 rounded-lg bg-destructive/5 p-3">
+                  <p className="text-sm text-destructive font-medium">
                     {t('admin.appointments.cancellationReason')}
                   </p>
                   <p className="text-foreground">{appointment.cancellation_reason}</p>
@@ -387,10 +387,10 @@ export default function AdminAppointmentDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ol className="relative border-s border-gray-200 dark:border-gray-700 ms-3 space-y-4">
+              <ol className="relative border-s border-border ms-3 space-y-4">
                 <li className="ms-6">
-                  <span className="absolute flex items-center justify-center w-6 h-6 bg-green-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-800 dark:bg-green-900">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-300" />
+                  <span className="absolute flex items-center justify-center w-6 h-6 bg-success/10 rounded-full -start-3 ring-8 ring-background">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                   </span>
                   <h3 className="text-sm font-semibold">{t('admin.appointments.created')}</h3>
                   <p className="text-xs text-muted-foreground">
@@ -399,8 +399,8 @@ export default function AdminAppointmentDetailPage() {
                 </li>
                 {appointment.confirmed_at && (
                   <li className="ms-6">
-                    <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-800 dark:bg-blue-900">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 dark:text-blue-300" />
+                    <span className="absolute flex items-center justify-center w-6 h-6 bg-info/10 rounded-full -start-3 ring-8 ring-background">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-info" />
                     </span>
                     <h3 className="text-sm font-semibold">{t('patient.appointments.status.confirmed')}</h3>
                     <p className="text-xs text-muted-foreground">
@@ -410,8 +410,8 @@ export default function AdminAppointmentDetailPage() {
                 )}
                 {appointment.completed_at && (
                   <li className="ms-6">
-                    <span className="absolute flex items-center justify-center w-6 h-6 bg-purple-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-800 dark:bg-purple-900">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-purple-600 dark:text-purple-300" />
+                    <span className="absolute flex items-center justify-center w-6 h-6 bg-primary/10 rounded-full -start-3 ring-8 ring-background">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                     </span>
                     <h3 className="text-sm font-semibold">{t('patient.appointments.status.completed')}</h3>
                     <p className="text-xs text-muted-foreground">
@@ -421,8 +421,8 @@ export default function AdminAppointmentDetailPage() {
                 )}
                 {appointment.cancelled_at && (
                   <li className="ms-6">
-                    <span className="absolute flex items-center justify-center w-6 h-6 bg-red-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-800 dark:bg-red-900">
-                      <XCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-300" />
+                    <span className="absolute flex items-center justify-center w-6 h-6 bg-destructive/10 rounded-full -start-3 ring-8 ring-background">
+                      <XCircle className="h-3.5 w-3.5 text-destructive" />
                     </span>
                     <h3 className="text-sm font-semibold">{t('patient.appointments.status.cancelled')}</h3>
                     <p className="text-xs text-muted-foreground">
@@ -486,7 +486,7 @@ export default function AdminAppointmentDetailPage() {
                     onClick={() => setPendingAction('confirm')}
                     disabled={isAnyPending}
                   >
-                    <CheckCircle2 className="h-4 w-4 me-2 text-green-100" />
+                    <CheckCircle2 className="h-4 w-4 me-2 text-primary-foreground" />
                     {t('admin.appointments.confirm')}
                   </Button>
                 )}

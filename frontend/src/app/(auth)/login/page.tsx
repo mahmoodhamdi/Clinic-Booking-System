@@ -69,7 +69,7 @@ export default function LoginPage() {
                 <FormLabel>{t('phone')}</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="tel"
                       inputMode="numeric"
@@ -92,7 +92,7 @@ export default function LoginPage() {
                 <FormLabel>{t('password')}</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
@@ -101,7 +101,7 @@ export default function LoginPage() {
                     />
                     <button
                       type="button"
-                      className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -137,7 +137,7 @@ export default function LoginPage() {
             )}
           </Button>
 
-          <p className="text-center text-sm text-gray-600">
+          <p className="text-center text-sm text-muted-foreground">
             {t('dontHaveAccount')}{' '}
             <Link href="/register" className="text-primary hover:underline">
               {t('register')}

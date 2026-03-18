@@ -8,7 +8,7 @@ export const LazyCalendar = dynamic(
   () => import('@/components/ui/calendar').then((mod) => mod.Calendar),
   {
     loading: () => (
-      <div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg" />
+      <div className="h-64 bg-muted animate-pulse rounded-lg" />
     ),
     ssr: false,
   }
@@ -19,7 +19,7 @@ export const LazyVirtualizedList = dynamic(
   () => import('@/components/shared/VirtualizedList').then((mod) => mod.VirtualizedList),
   {
     loading: () => (
-      <div className="h-96 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg" />
+      <div className="h-96 bg-muted animate-pulse rounded-lg" />
     ),
   }
 );
@@ -37,7 +37,7 @@ export const LazyTabs = dynamic(
   () => import('@/components/ui/tabs').then((mod) => mod.Tabs),
   {
     loading: () => (
-      <div className="h-12 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-lg" />
+      <div className="h-12 bg-muted animate-pulse rounded-lg" />
     ),
   }
 );

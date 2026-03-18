@@ -64,7 +64,7 @@ export default function RegisterPage() {
                 <FormLabel>{t('name')}</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <User className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <User className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder={t('name')}
                       className="ps-10"
@@ -85,7 +85,7 @@ export default function RegisterPage() {
                 <FormLabel>{t('phone')}</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="01xxxxxxxxx"
                       className="ps-10"
@@ -104,11 +104,11 @@ export default function RegisterPage() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  {t('email')} <span className="text-gray-400">(optional)</span>
+                  {t('email')} <span className="text-muted-foreground">(optional)</span>
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="email"
                       placeholder="email@example.com"
@@ -130,7 +130,7 @@ export default function RegisterPage() {
                 <FormLabel>{t('password')}</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
@@ -139,7 +139,7 @@ export default function RegisterPage() {
                     />
                     <button
                       type="button"
-                      className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -163,7 +163,7 @@ export default function RegisterPage() {
                 <FormLabel>{t('confirmPassword')}</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type={showConfirmPassword ? 'text' : 'password'}
                       placeholder="••••••••"
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                     />
                     <button
                       type="button"
-                      className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? (
@@ -199,7 +199,7 @@ export default function RegisterPage() {
             )}
           </Button>
 
-          <p className="text-center text-sm text-gray-600">
+          <p className="text-center text-sm text-muted-foreground">
             {t('alreadyHaveAccount')}{' '}
             <Link href="/login" className="text-primary hover:underline">
               {t('login')}

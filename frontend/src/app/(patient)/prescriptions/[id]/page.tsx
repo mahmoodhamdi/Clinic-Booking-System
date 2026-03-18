@@ -52,7 +52,7 @@ export default function PrescriptionDetailPage() {
   if (error || !data?.data) {
     return (
       <div className="text-center py-12">
-        <Pill className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        <Pill className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
         <p className="text-muted-foreground">{t('patient.prescriptions.notFound')}</p>
         <Button onClick={() => router.back()} variant="outline" className="mt-4">
           {t('common.back')}
@@ -98,9 +98,9 @@ export default function PrescriptionDetailPage() {
 
       {/* Dispensed Info */}
       {prescription.is_dispensed && prescription.dispensed_at && (
-        <Card className="bg-green-50 border-green-200">
+        <Card className="bg-success/5 border-success/20">
           <CardContent className="py-4">
-            <div className="flex items-center gap-2 text-green-700">
+            <div className="flex items-center gap-2 text-success">
               <CheckCircle className="h-5 w-5" />
               <span>
                 {t('patient.prescriptions.dispensedAt')}{' '}
@@ -192,11 +192,11 @@ function MedicationItemCard({
         <InfoItem label={t('admin.prescriptions.duration')} value={item.duration} />
       </div>
       {item.instructions && (
-        <div className="mt-3 p-3 bg-yellow-50 rounded-lg">
-          <p className="text-sm font-medium text-yellow-800">
+        <div className="mt-3 p-3 bg-warning/5 rounded-lg">
+          <p className="text-sm font-medium text-warning">
             {t('admin.prescriptions.instructions')}:
           </p>
-          <p className="text-sm text-yellow-700 mt-1">{item.instructions}</p>
+          <p className="text-sm text-warning mt-1">{item.instructions}</p>
         </div>
       )}
     </div>
@@ -205,7 +205,7 @@ function MedicationItemCard({
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-3 bg-gray-50 rounded-lg">
+    <div className="p-3 bg-muted/50 rounded-lg">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="font-medium">{value}</p>
     </div>

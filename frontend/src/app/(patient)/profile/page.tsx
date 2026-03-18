@@ -224,7 +224,7 @@ export default function ProfilePage() {
                 </Avatar>
                 <div>
                   <p className="font-medium text-lg">{user?.name}</p>
-                  <p className="text-sm text-gray-500">{user?.phone}</p>
+                  <p className="text-sm text-muted-foreground">{user?.phone}</p>
                 </div>
               </div>
 
@@ -241,7 +241,7 @@ export default function ProfilePage() {
                         <FormLabel>{t('auth.name')}</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <User className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <User className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                             <Input className="ps-10" {...field} />
                           </div>
                         </FormControl>
@@ -258,7 +258,7 @@ export default function ProfilePage() {
                         <FormLabel>{t('auth.email')}</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                             <Input type="email" className="ps-10" {...field} />
                           </div>
                         </FormControl>
@@ -276,7 +276,7 @@ export default function ProfilePage() {
                           <FormLabel>{t('patient.profile.dateOfBirth')}</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Calendar className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Calendar className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                               <Input type="date" className="ps-10" {...field} />
                             </div>
                           </FormControl>
@@ -323,7 +323,7 @@ export default function ProfilePage() {
                         <FormLabel>{t('patient.profile.address')}</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <MapPin className="absolute start-3 top-3 h-4 w-4 text-gray-400" />
+                            <MapPin className="absolute start-3 top-3 h-4 w-4 text-muted-foreground/70" />
                             <Textarea className="ps-10" rows={2} {...field} />
                           </div>
                         </FormControl>
@@ -406,7 +406,7 @@ export default function ProfilePage() {
                         <FormItem>
                           <FormLabel>
                             <div className="flex items-center gap-2">
-                              <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                              <AlertTriangle className="h-4 w-4 text-warning" />
                               {t('patient.profile.allergies')}
                             </div>
                           </FormLabel>
@@ -429,7 +429,7 @@ export default function ProfilePage() {
                         <FormItem>
                           <FormLabel>
                             <div className="flex items-center gap-2">
-                              <Heart className="h-4 w-4 text-red-500" />
+                              <Heart className="h-4 w-4 text-destructive" />
                               {t('patient.profile.chronicDiseases')}
                             </div>
                           </FormLabel>
@@ -456,7 +456,7 @@ export default function ProfilePage() {
                               <FormLabel>{t('patient.profile.emergencyContactName')}</FormLabel>
                               <FormControl>
                                 <div className="relative">
-                                  <User className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                  <User className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                                   <Input className="ps-10" {...field} />
                                 </div>
                               </FormControl>
@@ -473,7 +473,7 @@ export default function ProfilePage() {
                               <FormLabel>{t('patient.profile.emergencyContactPhone')}</FormLabel>
                               <FormControl>
                                 <div className="relative">
-                                  <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                  <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                                   <Input className="ps-10" type="tel" {...field} />
                                 </div>
                               </FormControl>
@@ -524,7 +524,7 @@ export default function ProfilePage() {
                         <FormLabel>{t('auth.currentPassword')}</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                             <Input type="password" className="ps-10" {...field} />
                           </div>
                         </FormControl>
@@ -541,7 +541,7 @@ export default function ProfilePage() {
                         <FormLabel>{t('auth.newPassword')}</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                             <Input type="password" className="ps-10" {...field} />
                           </div>
                         </FormControl>
@@ -558,7 +558,7 @@ export default function ProfilePage() {
                         <FormLabel>{t('auth.confirmPassword')}</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                             <Input type="password" className="ps-10" {...field} />
                           </div>
                         </FormControl>

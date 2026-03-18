@@ -67,7 +67,7 @@ export default function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold">{t('notifications.title')}</h1>
           {unreadCount > 0 && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               {unreadCount} {t('notifications.unread')}
             </p>
           )}
@@ -107,7 +107,7 @@ export default function NotificationsPage() {
                       className={cn(
                         'h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0',
                         notification.read_at
-                          ? 'bg-gray-100'
+                          ? 'bg-muted'
                           : 'bg-primary/10'
                       )}
                     >
@@ -115,7 +115,7 @@ export default function NotificationsPage() {
                         className={cn(
                           'h-5 w-5',
                           notification.read_at
-                            ? 'text-gray-500'
+                            ? 'text-muted-foreground'
                             : 'text-primary'
                         )}
                       />
@@ -124,10 +124,10 @@ export default function NotificationsPage() {
                       <p className="font-medium">
                         {(notification as Notification & { data?: { title?: string; message?: string } }).data?.title || notification.title}
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {(notification as Notification & { data?: { title?: string; message?: string } }).data?.message || notification.body}
                       </p>
-                      <p className="text-xs text-gray-400 mt-2">
+                      <p className="text-xs text-muted-foreground/70 mt-2">
                         {formatDistanceToNow(new Date(notification.created_at), {
                           addSuffix: true,
                           locale: getDateLocale(locale),
@@ -150,7 +150,7 @@ export default function NotificationsPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => deleteMutation.mutate(notification.id)}
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       title={t('common.delete')}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -163,8 +163,8 @@ export default function NotificationsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">{t('notifications.noNotifications')}</p>
+          <Bell className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+          <p className="text-muted-foreground">{t('notifications.noNotifications')}</p>
         </div>
       )}
     </div>

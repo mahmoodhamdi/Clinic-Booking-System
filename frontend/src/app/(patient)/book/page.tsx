@@ -130,7 +130,7 @@ export default function BookAppointmentPage() {
           </div>
           <span className="text-sm font-medium">{t('patient.booking.selectDate')}</span>
         </div>
-        <div className="h-0.5 w-8 bg-gray-200 mx-2" />
+        <div className="h-0.5 w-8 bg-border mx-2" />
         <div className="flex items-center gap-2">
           <div
             className={cn(
@@ -139,21 +139,21 @@ export default function BookAppointmentPage() {
                 ? 'bg-primary text-white'
                 : step === 'confirm'
                 ? 'bg-primary/20 text-primary'
-                : 'bg-gray-200 text-gray-400'
+                : 'bg-border text-muted-foreground/70'
             )}
           >
             2
           </div>
           <span className="text-sm font-medium">{t('patient.booking.selectTime')}</span>
         </div>
-        <div className="h-0.5 w-8 bg-gray-200 mx-2" />
+        <div className="h-0.5 w-8 bg-border mx-2" />
         <div className="flex items-center gap-2">
           <div
             className={cn(
               'h-10 w-10 rounded-full flex items-center justify-center font-medium',
               step === 'confirm'
                 ? 'bg-primary text-white'
-                : 'bg-gray-200 text-gray-400'
+                : 'bg-border text-muted-foreground/70'
             )}
           >
             3
@@ -203,7 +203,7 @@ export default function BookAppointmentPage() {
           </CardHeader>
           <CardContent>
             <div className="mb-4">
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 {selectedDate &&
                   format(selectedDate, 'EEEE، d MMMM yyyy', { locale: getDateLocale(locale) })}
               </p>
@@ -230,7 +230,7 @@ export default function BookAppointmentPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-muted-foreground">
                 {t('patient.booking.noSlots')}
               </div>
             )}
@@ -256,11 +256,11 @@ export default function BookAppointmentPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Summary */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
+            <div className="bg-muted/50 rounded-lg p-4 space-y-3">
               <div className="flex items-center gap-3">
-                <CalendarIcon className="h-5 w-5 text-gray-400" />
+                <CalendarIcon className="h-5 w-5 text-muted-foreground/70" />
                 <div>
-                  <p className="text-sm text-gray-500">{t('patient.booking.selectDate')}</p>
+                  <p className="text-sm text-muted-foreground">{t('patient.booking.selectDate')}</p>
                   <p className="font-medium">
                     {selectedDate &&
                       format(selectedDate, 'EEEE، d MMMM yyyy', { locale: getDateLocale(locale) })}
@@ -268,9 +268,9 @@ export default function BookAppointmentPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-gray-400" />
+                <Clock className="h-5 w-5 text-muted-foreground/70" />
                 <div>
-                  <p className="text-sm text-gray-500">{t('patient.booking.selectTime')}</p>
+                  <p className="text-sm text-muted-foreground">{t('patient.booking.selectTime')}</p>
                   <p className="font-medium">{selectedTime}</p>
                 </div>
               </div>
@@ -318,8 +318,8 @@ export default function BookAppointmentPage() {
         <DialogContent>
           <DialogHeader>
             <div className="flex justify-center mb-4">
-              <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
-                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center">
+                <CheckCircle2 className="h-8 w-8 text-success" />
               </div>
             </div>
             <DialogTitle className="text-center">

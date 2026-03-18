@@ -98,10 +98,10 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, color, subtext, trend, linkHref, linkText }: StatCardProps) {
   const colors = {
-    blue: 'bg-blue-100 text-blue-600',
-    green: 'bg-green-100 text-green-600',
-    yellow: 'bg-yellow-100 text-yellow-600',
-    purple: 'bg-purple-100 text-purple-600',
+    blue: 'bg-info/10 text-info',
+    green: 'bg-success/10 text-success',
+    yellow: 'bg-warning/10 text-warning',
+    purple: 'bg-chart-4/10 text-chart-4',
   };
 
   return (
@@ -109,7 +109,7 @@ function StatCard({ title, value, icon, color, subtext, trend, linkHref, linkTex
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">{title}</p>
+            <p className="text-sm text-muted-foreground">{title}</p>
             <p className="text-3xl font-bold mt-1">{value}</p>
           </div>
           <div className={`h-12 w-12 rounded-full flex items-center justify-center ${colors[color]}`}>
@@ -117,13 +117,13 @@ function StatCard({ title, value, icon, color, subtext, trend, linkHref, linkTex
           </div>
         </div>
         {trend && (
-          <div className={`flex items-center gap-1 mt-2 text-sm ${trend.positive ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`flex items-center gap-1 mt-2 text-sm ${trend.positive ? 'text-success' : 'text-destructive'}`}>
             <TrendingUp className="h-4 w-4" />
             <span>{trend.value}</span>
           </div>
         )}
         {subtext && (
-          <div className="mt-2 text-sm text-gray-500">{subtext}</div>
+          <div className="mt-2 text-sm text-muted-foreground">{subtext}</div>
         )}
         {linkHref && linkText && (
           <Button variant="link" className="p-0 h-auto mt-2" asChild>
@@ -146,12 +146,12 @@ interface MiniStatProps {
 
 function MiniStat({ label, value, icon, colorClass }: MiniStatProps) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
       <div className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${colorClass}`}>
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-xs text-gray-500 truncate">{label}</p>
+        <p className="text-xs text-muted-foreground truncate">{label}</p>
         <p className="text-lg font-bold truncate">{value}</p>
       </div>
     </div>
@@ -167,11 +167,11 @@ interface AppointmentRowProps {
 
 function AppointmentRow({ appointment, t }: AppointmentRowProps) {
   const statusColors: Record<string, string> = {
-    confirmed: 'bg-green-100 text-green-800',
-    pending: 'bg-yellow-100 text-yellow-800',
-    completed: 'bg-blue-100 text-blue-800',
-    cancelled: 'bg-red-100 text-red-800',
-    no_show: 'bg-gray-100 text-gray-800',
+    confirmed: 'bg-success/10 text-success',
+    pending: 'bg-warning/10 text-warning',
+    completed: 'bg-info/10 text-info',
+    cancelled: 'bg-destructive/10 text-destructive',
+    no_show: 'bg-muted text-muted-foreground',
   };
 
   const StatusIcon = appointment.status === 'pending' ? Clock : CheckCircle2;
@@ -179,7 +179,7 @@ function AppointmentRow({ appointment, t }: AppointmentRowProps) {
   const appointmentTime = (appointment as Appointment & { time?: string }).time || appointment.slot_time;
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border bg-gray-50 dark:bg-gray-800">
+    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
       <div className="flex items-center gap-4">
         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
           <span className="font-medium text-primary">
@@ -188,11 +188,11 @@ function AppointmentRow({ appointment, t }: AppointmentRowProps) {
         </div>
         <div>
           <p className="font-medium">{patientName}</p>
-          <p className="text-sm text-gray-500">{appointmentTime}</p>
+          <p className="text-sm text-muted-foreground">{appointmentTime}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Badge className={statusColors[appointment.status] || 'bg-gray-100'}>
+        <Badge className={statusColors[appointment.status] || 'bg-muted'}>
           <StatusIcon className="h-3 w-3 me-1" />
           {t(`admin.appointments.status.${appointment.status}` as Parameters<typeof t>[0]) || appointment.status}
         </Badge>
@@ -212,21 +212,21 @@ interface ActivityRowProps {
 
 function ActivityRow({ activity }: ActivityRowProps) {
   const typeIcons: Record<string, React.ReactNode> = {
-    appointment: <Calendar className="h-4 w-4 text-blue-600" />,
-    payment: <DollarSign className="h-4 w-4 text-green-600" />,
-    medical_record: <FileText className="h-4 w-4 text-purple-600" />,
+    appointment: <Calendar className="h-4 w-4 text-info" />,
+    payment: <DollarSign className="h-4 w-4 text-success" />,
+    medical_record: <FileText className="h-4 w-4 text-chart-4" />,
   };
 
   const activityDate = (activity as Activity & { date?: string }).date || activity.created_at;
 
   return (
     <div className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
-      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-        {typeIcons[activity.type] || <AlertCircle className="h-4 w-4 text-gray-600" />}
+      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+        {typeIcons[activity.type] || <AlertCircle className="h-4 w-4 text-muted-foreground" />}
       </div>
       <div>
         <p className="text-sm font-medium">{activity.description}</p>
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-muted-foreground/70 mt-1">
           {activityDate || ''}
         </p>
       </div>
@@ -238,7 +238,7 @@ function ActivityRow({ activity }: ActivityRowProps) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="text-center py-8 text-gray-500">
+    <div className="text-center py-8 text-muted-foreground">
       {message}
     </div>
   );
@@ -248,7 +248,7 @@ function EmptyState({ message }: { message: string }) {
 
 function ChartError({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-8 text-gray-400 gap-2">
+    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground/70 gap-2">
       <BarChart3 className="h-10 w-10 opacity-40" />
       <p className="text-sm">{message}</p>
     </div>
@@ -258,7 +258,7 @@ function ChartError({ message }: { message: string }) {
 // ─── Status colours for pie chart ─────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, string> = {
-  confirmed: '#22c55e',
+  confirmed: '#0D9488',
   pending: '#eab308',
   completed: '#3b82f6',
   cancelled: '#ef4444',
@@ -339,9 +339,9 @@ function AppointmentTrendChart({ data, isRtl, appointmentsLabel }: AppointmentTr
         <Line
           type="monotone"
           dataKey="count"
-          stroke="#6366f1"
+          stroke="#0D9488"
           strokeWidth={2.5}
-          dot={{ fill: '#6366f1', r: 4 }}
+          dot={{ fill: '#0D9488', r: 4 }}
           activeDot={{ r: 6 }}
         />
       </LineChart>
@@ -396,13 +396,13 @@ function StatusPieChart({ distribution, statusLabels, noDataLabel }: StatusPieCh
       {/* Legend */}
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2">
         {pieData.map((entry) => (
-          <div key={entry.status} className="flex items-center gap-1.5 text-xs text-gray-600">
+          <div key={entry.status} className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span
               className="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
               style={{ backgroundColor: STATUS_COLORS[entry.status] ?? '#9ca3af' }}
             />
             <span>{entry.name}</span>
-            <span className="text-gray-400">({entry.value})</span>
+            <span className="text-muted-foreground/70">({entry.value})</span>
           </div>
         ))}
       </div>
@@ -446,7 +446,7 @@ function RevenueTrendChart({ data, isRtl, currency, revenueLabel }: RevenueTrend
           contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: 12 }}
           formatter={(value) => [`${value} ${currency}`, revenueLabel]}
         />
-        <Bar dataKey="amount" fill="#22c55e" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="amount" fill="#0D9488" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -467,25 +467,25 @@ function WeeklyStatsWidget({ stats, t, currency }: WeeklyStatsWidgetProps) {
         label={t('admin.dashboard.appointments')}
         value={stats.appointments}
         icon={<Calendar className="h-4 w-4" />}
-        colorClass="bg-blue-100 text-blue-600"
+        colorClass="bg-info/10 text-info"
       />
       <MiniStat
         label={t('admin.dashboard.completed')}
         value={stats.completed}
         icon={<CheckCircle2 className="h-4 w-4" />}
-        colorClass="bg-green-100 text-green-600"
+        colorClass="bg-success/10 text-success"
       />
       <MiniStat
         label={t('admin.dashboard.revenue')}
         value={`${stats.revenue} ${currency}`}
         icon={<DollarSign className="h-4 w-4" />}
-        colorClass="bg-purple-100 text-purple-600"
+        colorClass="bg-chart-4/10 text-chart-4"
       />
       <MiniStat
         label={t('admin.dashboard.newPatients')}
         value={stats.new_patients}
         icon={<Users className="h-4 w-4" />}
-        colorClass="bg-yellow-100 text-yellow-600"
+        colorClass="bg-warning/10 text-warning"
       />
     </div>
   );
@@ -508,26 +508,26 @@ function PaymentStatsWidget({ stats, t, currency }: PaymentStatsWidgetProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between py-2 border-b">
-        <span className="text-sm text-gray-500">{t('admin.dashboard.totalRevenueAll')}</span>
-        <span className="font-semibold text-green-600">
+        <span className="text-sm text-muted-foreground">{t('admin.dashboard.totalRevenueAll')}</span>
+        <span className="font-semibold text-success">
           {stats.total_revenue} {currency}
         </span>
       </div>
       <div className="flex items-center justify-between py-2 border-b">
-        <span className="text-sm text-gray-500">{t('admin.dashboard.monthRevenue')}</span>
+        <span className="text-sm text-muted-foreground">{t('admin.dashboard.monthRevenue')}</span>
         <span className="font-semibold">
           {stats.this_month_revenue} {currency}
         </span>
       </div>
       <div className="flex items-center justify-between py-2 border-b">
-        <span className="text-sm text-gray-500">{t('admin.dashboard.todayRevenueLabel')}</span>
+        <span className="text-sm text-muted-foreground">{t('admin.dashboard.todayRevenueLabel')}</span>
         <span className="font-semibold">
           {stats.today_revenue} {currency}
         </span>
       </div>
       <div className="flex items-center justify-between py-2">
-        <span className="text-sm text-gray-500">{t('admin.dashboard.pendingPayments')}</span>
-        <span className="font-semibold text-yellow-600">
+        <span className="text-sm text-muted-foreground">{t('admin.dashboard.pendingPayments')}</span>
+        <span className="font-semibold text-warning">
           {stats.total_pending} {currency}
         </span>
       </div>
@@ -617,10 +617,10 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Page Title */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-foreground">
           {t('admin.dashboard.title')}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-muted-foreground mt-1">
           {new Date().toLocaleDateString(getIntlLocale(locale), {
             weekday: 'long',
             year: 'numeric',
@@ -732,7 +732,7 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="text-base">
               {t('admin.dashboard.weeklyStats')}
-              <span className="ms-2 text-xs font-normal text-gray-400">
+              <span className="ms-2 text-xs font-normal text-muted-foreground/70">
                 ({t('admin.dashboard.thisWeek')})
               </span>
             </CardTitle>

@@ -47,7 +47,7 @@ export default function MedicalRecordDetailPage() {
   if (error || !data?.data) {
     return (
       <div className="text-center py-12">
-        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        <FileText className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
         <p className="text-muted-foreground">{t('patient.medicalRecords.notFound')}</p>
         <Button onClick={() => router.back()} variant="outline" className="mt-4">
           {t('common.back')}
@@ -251,7 +251,7 @@ function VitalSign({
   unit: string;
 }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
       <div className="text-muted-foreground">{icon}</div>
       <div>
         <p className="text-sm text-muted-foreground">{label}</p>

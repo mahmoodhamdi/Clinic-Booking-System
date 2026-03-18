@@ -132,7 +132,7 @@ export default function VacationsPage() {
               {vacations.data.map((vacation) => (
                 <div
                   key={vacation.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
                 >
                   <div>
                     <p className="font-medium">
@@ -140,13 +140,13 @@ export default function VacationsPage() {
                       {format(new Date(vacation.end_date), 'PPP', { locale: getDateLocale(locale) })}
                     </p>
                     {vacation.reason && (
-                      <p className="text-sm text-gray-500 mt-1">{vacation.reason}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{vacation.reason}</p>
                     )}
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-red-600"
+                    className="text-destructive"
                     aria-label={t('common.delete')}
                     onClick={() => setDeleteVacationId(vacation.id)}
                   >
@@ -157,8 +157,8 @@ export default function VacationsPage() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <CalendarOff className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">{t('admin.settings.noVacations')}</p>
+              <CalendarOff className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+              <p className="text-muted-foreground">{t('admin.settings.noVacations')}</p>
             </div>
           )}
         </CardContent>
@@ -247,7 +247,7 @@ export default function VacationsPage() {
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteVacationId && deleteVacationMutation.mutate(deleteVacationId)}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               {deleteVacationMutation.isPending ? t('common.loading') : t('common.delete')}
             </AlertDialogAction>

@@ -70,7 +70,7 @@ export default function AdminPatientsPage() {
       <Card>
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
             <Input
               placeholder={t('admin.patients.searchPlaceholder')}
               className="ps-10"
@@ -100,12 +100,12 @@ export default function AdminPatientsPage() {
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium truncate">{patient.name}</h3>
-                    <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                       <Phone className="h-3 w-3" />
                       <span>{patient.phone}</span>
                     </div>
                     {patient.email && (
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Mail className="h-3 w-3" />
                         <span className="truncate">{patient.email}</span>
                       </div>
@@ -113,7 +113,7 @@ export default function AdminPatientsPage() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-4 w-4" />
                     <span>
                       {patient.created_at
@@ -132,8 +132,8 @@ export default function AdminPatientsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">{t('common.noData')}</p>
+          <Users className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+          <p className="text-muted-foreground">{t('common.noData')}</p>
         </div>
       )}
 
@@ -160,7 +160,7 @@ export default function AdminPatientsPage() {
                 </Avatar>
                 <div>
                   <h3 className="text-lg font-medium">{patientDetails.data.name}</h3>
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-1">
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-1">
                     <div className="flex items-center gap-1">
                       <Phone className="h-4 w-4" />
                       <span>{patientDetails.data.phone}</span>
@@ -214,21 +214,21 @@ export default function AdminPatientsPage() {
                       {patientDetails.data.appointments?.map((apt: Appointment) => (
                         <div
                           key={apt.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                          className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                         >
                           <div>
                             <p className="font-medium">
                               {format(new Date(apt.date), 'PPP', { locale: getDateLocale(locale) })}
                             </p>
-                            <p className="text-sm text-gray-500">{apt.slot_time}</p>
+                            <p className="text-sm text-muted-foreground">{apt.slot_time}</p>
                           </div>
                           <Badge
                             className={
                               apt.status === 'completed'
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-success/10 text-success'
                                 : apt.status === 'cancelled'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-destructive/10 text-destructive'
+                                : 'bg-warning/10 text-warning'
                             }
                           >
                             {t(`admin.appointments.status.${apt.status}` as Parameters<typeof t>[0]) || apt.status}
@@ -237,7 +237,7 @@ export default function AdminPatientsPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center text-gray-500 py-4">{t('common.noData')}</p>
+                    <p className="text-center text-muted-foreground py-4">{t('common.noData')}</p>
                   )}
                 </TabsContent>
 
@@ -247,17 +247,17 @@ export default function AdminPatientsPage() {
                       {patientDetails.data.medical_records?.map((record: MedicalRecord) => (
                         <div
                           key={record.id}
-                          className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                          className="p-3 bg-muted/50 rounded-lg"
                         >
                           <p className="font-medium">{record.diagnosis}</p>
-                          <p className="text-sm text-gray-500 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {format(new Date(record.created_at), 'PPP', { locale: getDateLocale(locale) })}
                           </p>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center text-gray-500 py-4">{t('common.noData')}</p>
+                    <p className="text-center text-muted-foreground py-4">{t('common.noData')}</p>
                   )}
                 </TabsContent>
 
@@ -267,15 +267,15 @@ export default function AdminPatientsPage() {
                       {patientDetails.data.prescriptions?.map((prescription: Prescription) => (
                         <div
                           key={prescription.id}
-                          className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                          className="p-3 bg-muted/50 rounded-lg"
                         >
                           <div className="flex items-center justify-between">
                             <p className="font-medium">{prescription.diagnosis}</p>
                             <Badge
                               className={
                                 prescription.is_dispensed
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-yellow-100 text-yellow-800'
+                                  ? 'bg-success/10 text-success'
+                                  : 'bg-warning/10 text-warning'
                               }
                             >
                               {prescription.is_dispensed
@@ -283,14 +283,14 @@ export default function AdminPatientsPage() {
                                 : t('admin.prescriptions.notDispensed')}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-500 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {prescription.items?.length || 0} {t('admin.prescriptions.medications')}
                           </p>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center text-gray-500 py-4">{t('common.noData')}</p>
+                    <p className="text-center text-muted-foreground py-4">{t('common.noData')}</p>
                   )}
                 </TabsContent>
               </Tabs>

@@ -45,22 +45,22 @@ export default function MedicalRecordsPage() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-green-600" />
+                    <div className="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-success" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                         <Calendar className="h-4 w-4" />
                         <span>
                           {format(new Date(record.created_at), 'PPP', { locale: getDateLocale(locale) })}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 mb-2">
-                        <Stethoscope className="h-4 w-4 text-gray-400" />
+                        <Stethoscope className="h-4 w-4 text-muted-foreground/70" />
                         <p className="font-medium">{record.diagnosis}</p>
                       </div>
                       {record.notes && (
-                        <p className="text-sm text-gray-500 line-clamp-2">
+                        <p className="text-sm text-muted-foreground line-clamp-2">
                           {record.notes}
                         </p>
                       )}
@@ -79,8 +79,8 @@ export default function MedicalRecordsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">{t('common.noData')}</p>
+          <FileText className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+          <p className="text-muted-foreground">{t('common.noData')}</p>
         </div>
       )}
     </div>

@@ -53,14 +53,14 @@ function StatusBadge({ status, confirmedLabel, pendingLabel }: StatusBadgeProps)
   switch (status) {
     case 'confirmed':
       return (
-        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+        <Badge className="bg-success/10 text-success">
           <CheckCircle2 className="h-3 w-3 me-1" />
           {confirmedLabel}
         </Badge>
       );
     case 'pending':
       return (
-        <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100">
+        <Badge className="bg-warning/10 text-warning">
           <Clock className="h-3 w-3 me-1" />
           {pendingLabel}
         </Badge>
@@ -79,7 +79,7 @@ interface AppointmentItemProps {
 
 function AppointmentItem({ appointment, confirmedLabel, pendingLabel, intlLocale }: AppointmentItemProps) {
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border bg-gray-50 dark:bg-gray-800">
+    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
       <div className="flex items-center gap-4">
         <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
           <Calendar className="h-6 w-6 text-primary" />
@@ -92,7 +92,7 @@ function AppointmentItem({ appointment, confirmedLabel, pendingLabel, intlLocale
               day: 'numeric',
             })}
           </p>
-          <p className="text-sm text-gray-500">{appointment.slot_time}</p>
+          <p className="text-sm text-muted-foreground">{appointment.slot_time}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -116,7 +116,7 @@ interface QuickActionCardProps {
 function QuickActionCard({ href, icon, iconBgColor, label }: QuickActionCardProps) {
   return (
     <Link href={href}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+      <Card className="card-hover cursor-pointer">
         <CardContent className="p-4 flex flex-col items-center text-center">
           <div className={`h-12 w-12 rounded-full ${iconBgColor} flex items-center justify-center mb-2`}>
             {icon}
@@ -136,8 +136,8 @@ interface EmptyAppointmentsProps {
 function EmptyAppointments({ message, buttonLabel }: EmptyAppointmentsProps) {
   return (
     <div className="text-center py-8">
-      <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-      <p className="text-gray-500">{message}</p>
+      <AlertCircle className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+      <p className="text-muted-foreground">{message}</p>
       <Button asChild className="mt-4">
         <Link href="/book">{buttonLabel}</Link>
       </Button>
@@ -179,10 +179,10 @@ export default function PatientDashboardPage() {
       {/* Welcome Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-foreground">
             {t('patient.dashboard.welcome')}، {user?.name}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             {new Date().toLocaleDateString(intlLocale, {
               weekday: 'long',
               year: 'numeric',
@@ -209,20 +209,20 @@ export default function PatientDashboardPage() {
         />
         <QuickActionCard
           href="/appointments"
-          icon={<Calendar className="h-6 w-6 text-blue-600" />}
-          iconBgColor="bg-blue-100"
+          icon={<Calendar className="h-6 w-6 text-info" />}
+          iconBgColor="bg-info/10"
           label={t('navigation.myAppointments')}
         />
         <QuickActionCard
           href="/medical-records"
-          icon={<FileText className="h-6 w-6 text-green-600" />}
-          iconBgColor="bg-green-100"
+          icon={<FileText className="h-6 w-6 text-success" />}
+          iconBgColor="bg-success/10"
           label={t('navigation.medicalRecords')}
         />
         <QuickActionCard
           href="/profile"
-          icon={<User className="h-6 w-6 text-purple-600" />}
-          iconBgColor="bg-purple-100"
+          icon={<User className="h-6 w-6 text-chart-4" />}
+          iconBgColor="bg-chart-4/10"
           label={t('navigation.profile')}
         />
       </div>

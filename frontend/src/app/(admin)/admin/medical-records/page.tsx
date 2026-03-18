@@ -146,7 +146,7 @@ export default function AdminMedicalRecordsPage() {
       <Card>
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
             <Input
               placeholder={t('common.search')}
               className="ps-10"
@@ -171,19 +171,19 @@ export default function AdminMedicalRecordsPage() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-green-600" />
+                    <div className="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-success" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <UserIcon className="h-4 w-4 text-gray-400" />
+                        <UserIcon className="h-4 w-4 text-muted-foreground/70" />
                         <span className="font-medium">{record.patient?.name}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Stethoscope className="h-4 w-4" />
                         <span>{record.diagnosis}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                         <Calendar className="h-4 w-4" />
                         <span>
                           {format(new Date(record.created_at), 'PPP', { locale: getDateLocale(locale) })}
@@ -202,8 +202,8 @@ export default function AdminMedicalRecordsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">{t('common.noData')}</p>
+          <FileText className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+          <p className="text-muted-foreground">{t('common.noData')}</p>
         </div>
       )}
 
@@ -295,31 +295,31 @@ export default function AdminMedicalRecordsPage() {
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">{t('admin.patients.title')}</p>
+                  <p className="text-sm text-muted-foreground">{t('admin.patients.title')}</p>
                   <p className="font-medium">{selectedRecord.patient?.name}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">{t('common.date')}</p>
+                  <p className="text-sm text-muted-foreground">{t('common.date')}</p>
                   <p className="font-medium">
                     {format(new Date(selectedRecord.created_at), 'PPP', { locale: getDateLocale(locale) })}
                   </p>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-gray-500">{t('admin.medicalRecords.diagnosis')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.medicalRecords.diagnosis')}</p>
                 <p className="font-medium">{selectedRecord.diagnosis}</p>
               </div>
               {selectedRecord.notes && (
                 <div>
-                  <p className="text-sm text-gray-500">{t('common.notes')}</p>
-                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                  <p className="text-sm text-muted-foreground">{t('common.notes')}</p>
+                  <p className="text-foreground/80 whitespace-pre-wrap">
                     {selectedRecord.notes}
                   </p>
                 </div>
               )}
               {selectedRecord.attachments && selectedRecord.attachments.length > 0 && (
                 <div>
-                  <p className="text-sm text-gray-500 mb-2">
+                  <p className="text-sm text-muted-foreground mb-2">
                     {t('admin.medicalRecords.attachments')}
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -329,7 +329,7 @@ export default function AdminMedicalRecordsPage() {
                         href={attachment.file_path}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-700"
+                        className="flex items-center gap-1 px-3 py-1 bg-muted rounded-lg text-sm hover:bg-border"
                       >
                         <Upload className="h-3 w-3" />
                         {attachment.file_name}

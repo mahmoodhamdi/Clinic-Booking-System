@@ -40,11 +40,11 @@ import { adminApi } from '@/lib/api/admin';
 import { toast } from 'sonner';
 
 const STATUS_COLORS: Record<string, string> = {
-  completed: '#22c55e',
-  confirmed: '#3b82f6',
-  pending: '#eab308',
-  cancelled: '#ef4444',
-  no_show: '#6b7280',
+  completed: '#0D9488',
+  confirmed: '#0891B2',
+  pending: '#D97706',
+  cancelled: '#DC2626',
+  no_show: '#6B7280',
 };
 
 function getQuickDateRange(period: string): { from: string; to: string } {
@@ -163,7 +163,7 @@ function StatCard({
   title,
   value,
   icon,
-  color = 'text-gray-900',
+  color = 'text-foreground',
 }: {
   title: string;
   value: string | number;
@@ -173,7 +173,7 @@ function StatCard({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           {icon}
           {title}
         </CardTitle>
@@ -277,9 +277,9 @@ export default function ReportsPage() {
 
   const paymentMethodData = revenueByMethod
     ? [
-        { name: t('admin.payments.cash'), value: revenueByMethod.cash || 0, color: '#22c55e' },
-        { name: t('admin.payments.card'), value: revenueByMethod.card || 0, color: '#3b82f6' },
-        { name: t('admin.payments.wallet'), value: revenueByMethod.wallet || 0, color: '#a855f7' },
+        { name: t('admin.payments.cash'), value: revenueByMethod.cash || 0, color: '#0D9488' },
+        { name: t('admin.payments.card'), value: revenueByMethod.card || 0, color: '#0891B2' },
+        { name: t('admin.payments.wallet'), value: revenueByMethod.wallet || 0, color: '#7C3AED' },
       ].filter((d) => d.value > 0)
     : [];
 
@@ -343,7 +343,7 @@ export default function ReportsPage() {
                       title={t('admin.dashboard.totalRevenue')}
                       value={`${revenueSummary.total_revenue?.toLocaleString() || 0} ${t('common.currency')}`}
                       icon={<DollarSign className="h-4 w-4" />}
-                      color="text-green-600"
+                      color="text-success"
                     />
                     <StatCard
                       title={t('admin.payments.transactionsCount')}
@@ -354,7 +354,7 @@ export default function ReportsPage() {
                       title={t('admin.payments.discount')}
                       value={`${revenueSummary.total_discount?.toLocaleString() || 0} ${t('common.currency')}`}
                       icon={<TrendingUp className="h-4 w-4" />}
-                      color="text-orange-600"
+                      color="text-warning"
                     />
                     <StatCard
                       title={t('admin.payments.amount')}
@@ -379,7 +379,7 @@ export default function ReportsPage() {
                               <Tooltip
                                 formatter={(value) => [`${Number(value).toLocaleString()} ${t('common.currency')}`, t('admin.dashboard.totalRevenue')]}
                               />
-                              <Bar dataKey="total" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                              <Bar dataKey="total" fill="#0D9488" radius={[4, 4, 0, 0]} />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -421,8 +421,8 @@ export default function ReportsPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">{t('admin.reports.dateRange')}</p>
+                  <FileText className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+                  <p className="text-muted-foreground">{t('admin.reports.dateRange')}</p>
                 </div>
               )}
             </CardContent>
@@ -469,19 +469,19 @@ export default function ReportsPage() {
                       title={t('patient.appointments.status.completed')}
                       value={appointmentsSummary.completed || 0}
                       icon={<CheckCircle2 className="h-4 w-4" />}
-                      color="text-green-600"
+                      color="text-success"
                     />
                     <StatCard
                       title={t('patient.appointments.status.cancelled')}
                       value={appointmentsSummary.cancelled || 0}
                       icon={<XCircle className="h-4 w-4" />}
-                      color="text-red-600"
+                      color="text-destructive"
                     />
                     <StatCard
                       title={t('patient.appointments.status.no_show')}
                       value={appointmentsSummary.no_show || 0}
                       icon={<AlertTriangle className="h-4 w-4" />}
-                      color="text-orange-600"
+                      color="text-warning"
                     />
                   </div>
 
@@ -490,14 +490,14 @@ export default function ReportsPage() {
                     <Card>
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">{t('admin.reports.completionRate')}</span>
-                          <span className="text-2xl font-bold text-green-600">
+                          <span className="text-sm text-muted-foreground">{t('admin.reports.completionRate')}</span>
+                          <span className="text-2xl font-bold text-success">
                             {appointmentsReport?.data?.completion_rate || 0}%
                           </span>
                         </div>
-                        <div className="mt-2 h-2 bg-gray-200 rounded-full">
+                        <div className="mt-2 h-2 bg-border rounded-full">
                           <div
-                            className="h-full bg-green-500 rounded-full transition-all"
+                            className="h-full bg-success rounded-full transition-all"
                             style={{ width: `${Math.min(appointmentsReport?.data?.completion_rate || 0, 100)}%` }}
                           />
                         </div>
@@ -506,14 +506,14 @@ export default function ReportsPage() {
                     <Card>
                       <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">{t('admin.reports.cancellationRate')}</span>
-                          <span className="text-2xl font-bold text-red-600">
+                          <span className="text-sm text-muted-foreground">{t('admin.reports.cancellationRate')}</span>
+                          <span className="text-2xl font-bold text-destructive">
                             {appointmentsReport?.data?.cancellation_rate || 0}%
                           </span>
                         </div>
-                        <div className="mt-2 h-2 bg-gray-200 rounded-full">
+                        <div className="mt-2 h-2 bg-border rounded-full">
                           <div
-                            className="h-full bg-red-500 rounded-full transition-all"
+                            className="h-full bg-destructive rounded-full transition-all"
                             style={{ width: `${Math.min(appointmentsReport?.data?.cancellation_rate || 0, 100)}%` }}
                           />
                         </div>
@@ -555,8 +555,8 @@ export default function ReportsPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">{t('admin.reports.dateRange')}</p>
+                  <FileText className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+                  <p className="text-muted-foreground">{t('admin.reports.dateRange')}</p>
                 </div>
               )}
             </CardContent>
@@ -602,13 +602,13 @@ export default function ReportsPage() {
                       title={t('common.active')}
                       value={patientsSummary.active_patients || 0}
                       icon={<CheckCircle2 className="h-4 w-4" />}
-                      color="text-green-600"
+                      color="text-success"
                     />
                     <StatCard
                       title={t('admin.reports.inactivePatients')}
                       value={patientsSummary.inactive_patients || 0}
                       icon={<Clock className="h-4 w-4" />}
-                      color="text-gray-500"
+                      color="text-muted-foreground"
                     />
                   </div>
 
@@ -623,21 +623,21 @@ export default function ReportsPage() {
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="border-b">
-                                <th className="text-start p-3 font-medium text-gray-600">{t('auth.name')}</th>
-                                <th className="text-start p-3 font-medium text-gray-600">{t('auth.phone')}</th>
-                                <th className="text-start p-3 font-medium text-gray-600">{t('admin.dashboard.totalAppointments')}</th>
-                                <th className="text-start p-3 font-medium text-gray-600">{t('patient.appointments.status.completed')}</th>
-                                <th className="text-start p-3 font-medium text-gray-600">{t('common.date')}</th>
+                                <th className="text-start p-3 font-medium text-muted-foreground">{t('auth.name')}</th>
+                                <th className="text-start p-3 font-medium text-muted-foreground">{t('auth.phone')}</th>
+                                <th className="text-start p-3 font-medium text-muted-foreground">{t('admin.dashboard.totalAppointments')}</th>
+                                <th className="text-start p-3 font-medium text-muted-foreground">{t('patient.appointments.status.completed')}</th>
+                                <th className="text-start p-3 font-medium text-muted-foreground">{t('common.date')}</th>
                               </tr>
                             </thead>
                             <tbody>
                               {patientsReport.data.patients.slice(0, 20).map((patient) => (
-                                <tr key={patient.id} className="border-b hover:bg-gray-50">
+                                <tr key={patient.id} className="border-b hover:bg-muted/50">
                                   <td className="p-3 font-medium">{patient.name}</td>
-                                  <td className="p-3 text-gray-600" dir="ltr">{patient.phone}</td>
+                                  <td className="p-3 text-muted-foreground" dir="ltr">{patient.phone}</td>
                                   <td className="p-3">{patient.total_appointments}</td>
-                                  <td className="p-3 text-green-600">{patient.completed_appointments}</td>
-                                  <td className="p-3 text-gray-500">{patient.registered_at}</td>
+                                  <td className="p-3 text-success">{patient.completed_appointments}</td>
+                                  <td className="p-3 text-muted-foreground">{patient.registered_at}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -649,8 +649,8 @@ export default function ReportsPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">{t('admin.reports.dateRange')}</p>
+                  <FileText className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+                  <p className="text-muted-foreground">{t('admin.reports.dateRange')}</p>
                 </div>
               )}
             </CardContent>

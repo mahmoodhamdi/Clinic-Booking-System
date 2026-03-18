@@ -53,7 +53,7 @@ export function VirtualizedList<T>({
   if (items.length === 0) {
     return (
       <div
-        className={`flex items-center justify-center text-gray-500 ${className}`}
+        className={`flex items-center justify-center text-muted-foreground ${className}`}
         style={{ height: containerHeight }}
       >
         {emptyMessage}

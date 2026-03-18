@@ -130,35 +130,35 @@ export default function AdminAppointmentsPage() {
     switch (status) {
       case 'confirmed':
         return (
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+          <Badge className="bg-success/10 text-success dark:bg-success/20">
             <CheckCircle2 className="h-3 w-3 me-1" />
             {t('patient.appointments.status.confirmed')}
           </Badge>
         );
       case 'pending':
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100">
+          <Badge className="bg-warning/10 text-warning dark:bg-warning/20">
             <Clock className="h-3 w-3 me-1" />
             {t('patient.appointments.status.pending')}
           </Badge>
         );
       case 'completed':
         return (
-          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
+          <Badge className="bg-info/10 text-info dark:bg-info/20">
             <CheckCircle2 className="h-3 w-3 me-1" />
             {t('patient.appointments.status.completed')}
           </Badge>
         );
       case 'cancelled':
         return (
-          <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">
+          <Badge className="bg-destructive/10 text-destructive dark:bg-destructive/20">
             <XCircle className="h-3 w-3 me-1" />
             {t('patient.appointments.status.cancelled')}
           </Badge>
         );
       case 'no_show':
         return (
-          <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100">
+          <Badge className="bg-muted text-foreground/80 dark:bg-muted">
             <AlertCircle className="h-3 w-3 me-1" />
             {t('patient.appointments.status.no_show')}
           </Badge>
@@ -213,7 +213,7 @@ export default function AdminAppointmentsPage() {
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
               <Input
                 placeholder={t('common.search')}
                 className="ps-10"
@@ -268,10 +268,10 @@ export default function AdminAppointmentsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <User className="h-4 w-4 text-gray-400" />
+                        <User className="h-4 w-4 text-muted-foreground/70" />
                         <span className="font-medium">{appointment.patient?.name}</span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Phone className="h-3 w-3" />
                           <span>{appointment.patient?.phone}</span>
@@ -282,7 +282,7 @@ export default function AdminAppointmentsPage() {
                         </div>
                       </div>
                       {appointment.reason && (
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-1">
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                           {appointment.reason}
                         </p>
                       )}
@@ -301,7 +301,7 @@ export default function AdminAppointmentsPage() {
                           <DropdownMenuItem
                             onClick={() => handleStatusChange(appointment, 'confirmed')}
                           >
-                            <CheckCircle2 className="h-4 w-4 me-2 text-green-600" />
+                            <CheckCircle2 className="h-4 w-4 me-2 text-success" />
                             {t('admin.appointments.confirm')}
                           </DropdownMenuItem>
                         )}
@@ -311,18 +311,18 @@ export default function AdminAppointmentsPage() {
                             <DropdownMenuItem
                               onClick={() => handleStatusChange(appointment, 'completed')}
                             >
-                              <CheckCircle2 className="h-4 w-4 me-2 text-blue-600" />
+                              <CheckCircle2 className="h-4 w-4 me-2 text-info" />
                               {t('admin.appointments.markCompleted')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleStatusChange(appointment, 'no_show')}
                             >
-                              <AlertCircle className="h-4 w-4 me-2 text-gray-600" />
+                              <AlertCircle className="h-4 w-4 me-2 text-muted-foreground" />
                               {t('admin.appointments.markNoShow')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleStatusChange(appointment, 'cancelled')}
-                              className="text-red-600"
+                              className="text-destructive"
                             >
                               <XCircle className="h-4 w-4 me-2" />
                               {t('common.cancel')}
@@ -339,8 +339,8 @@ export default function AdminAppointmentsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">{t('common.noData')}</p>
+          <Calendar className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+          <p className="text-muted-foreground">{t('common.noData')}</p>
         </div>
       )}
 

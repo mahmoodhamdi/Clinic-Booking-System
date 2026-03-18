@@ -125,21 +125,21 @@ export default function AdminPaymentsPage() {
     switch (status) {
       case 'completed':
         return (
-          <Badge className="bg-green-100 text-green-800">
+          <Badge className="bg-success/10 text-success">
             <CheckCircle2 className="h-3 w-3 me-1" />
             {t('admin.payments.completed')}
           </Badge>
         );
       case 'pending':
         return (
-          <Badge className="bg-yellow-100 text-yellow-800">
+          <Badge className="bg-warning/10 text-warning">
             <Clock className="h-3 w-3 me-1" />
             {t('admin.payments.pending')}
           </Badge>
         );
       case 'failed':
         return (
-          <Badge className="bg-red-100 text-red-800">
+          <Badge className="bg-destructive/10 text-destructive">
             {t('admin.payments.failed')}
           </Badge>
         );
@@ -197,11 +197,11 @@ export default function AdminPaymentsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">{t('admin.payments.totalPayments')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.payments.totalPayments')}</p>
                 <p className="text-2xl font-bold">{totalAmount.toFixed(2)} {currency}</p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 rounded-lg bg-info/10 flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-info" />
               </div>
             </div>
           </CardContent>
@@ -210,11 +210,11 @@ export default function AdminPaymentsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">{t('admin.payments.completedPayments')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.payments.completedPayments')}</p>
                 <p className="text-2xl font-bold">{completedAmount.toFixed(2)} {currency}</p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-success" />
               </div>
             </div>
           </CardContent>
@@ -223,11 +223,11 @@ export default function AdminPaymentsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">{t('admin.payments.transactionsCount')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.payments.transactionsCount')}</p>
                 <p className="text-2xl font-bold">{filteredPayments?.length || 0}</p>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <CreditCard className="h-5 w-5 text-purple-600" />
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <CreditCard className="h-5 w-5 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -239,7 +239,7 @@ export default function AdminPaymentsPage() {
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
               <Input
                 placeholder={t('common.search')}
                 className="ps-10"
@@ -276,15 +276,15 @@ export default function AdminPaymentsPage() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
-                      <CreditCard className="h-6 w-6 text-green-600" />
+                    <div className="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-success" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <UserIcon className="h-4 w-4 text-gray-400" />
+                        <UserIcon className="h-4 w-4 text-muted-foreground/70" />
                         <span className="font-medium">{payment.patient?.name}</span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           <span>
@@ -297,7 +297,7 @@ export default function AdminPaymentsPage() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <span className="text-lg font-bold text-green-600">
+                    <span className="text-lg font-bold text-success">
                       {payment.amount?.toFixed(2)} {currency}
                     </span>
                     {getStatusBadge(payment.status)}
@@ -309,8 +309,8 @@ export default function AdminPaymentsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">{t('common.noData')}</p>
+          <CreditCard className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+          <p className="text-muted-foreground">{t('common.noData')}</p>
         </div>
       )}
 
@@ -355,7 +355,7 @@ export default function AdminPaymentsPage() {
                     <FormLabel>{t('admin.payments.amount')}</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <DollarSign className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <DollarSign className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                         <Input
                           type="number"
                           step="0.01"

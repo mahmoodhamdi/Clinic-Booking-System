@@ -65,12 +65,12 @@ function AppointmentCard({
               <p className="font-medium">
                 {format(new Date(appointment.date), 'EEEE', { locale: dateFnsLocale })}
               </p>
-              <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                 <Clock className="h-4 w-4" />
                 <span>{(appointment as Appointment & { time?: string }).time || appointment.slot_time}</span>
               </div>
               {appointment.reason && (
-                <p className="text-sm text-gray-500 mt-1 line-clamp-1">
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                   {appointment.reason}
                 </p>
               )}
@@ -84,7 +84,7 @@ function AppointmentCard({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={() => onCancelClick(appointment)}
                 >
                   <X className="h-4 w-4 me-1" />
@@ -106,8 +106,8 @@ interface EmptyStateProps {
 function EmptyState({ message }: EmptyStateProps) {
   return (
     <div className="text-center py-12">
-      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-      <p className="text-gray-500">{message}</p>
+      <Calendar className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+      <p className="text-muted-foreground">{message}</p>
     </div>
   );
 }
@@ -157,35 +157,35 @@ export default function AppointmentsPage() {
     switch (status) {
       case 'confirmed':
         return (
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+          <Badge className="bg-success/10 text-success dark:bg-success/20">
             <CheckCircle2 className="h-3 w-3 me-1" />
             {t('patient.appointments.status.confirmed')}
           </Badge>
         );
       case 'pending':
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100">
+          <Badge className="bg-warning/10 text-warning dark:bg-warning/20">
             <Clock className="h-3 w-3 me-1" />
             {t('patient.appointments.status.pending')}
           </Badge>
         );
       case 'completed':
         return (
-          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
+          <Badge className="bg-info/10 text-info dark:bg-info/20">
             <CheckCircle2 className="h-3 w-3 me-1" />
             {t('patient.appointments.status.completed')}
           </Badge>
         );
       case 'cancelled':
         return (
-          <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">
+          <Badge className="bg-destructive/10 text-destructive dark:bg-destructive/20">
             <XCircle className="h-3 w-3 me-1" />
             {t('patient.appointments.status.cancelled')}
           </Badge>
         );
       case 'no_show':
         return (
-          <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100">
+          <Badge className="bg-muted text-foreground/80 dark:bg-muted">
             <AlertCircle className="h-3 w-3 me-1" />
             {t('patient.appointments.status.no_show')}
           </Badge>

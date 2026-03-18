@@ -43,9 +43,9 @@ function PasswordRequirements({ password, t }: { password: string; t: (key: stri
   const strengthPercentage = (metCount / requirements.length) * 100;
 
   const strengthColor = useMemo(() => {
-    if (strengthPercentage < 40) return 'bg-red-500';
-    if (strengthPercentage < 80) return 'bg-yellow-500';
-    return 'bg-green-500';
+    if (strengthPercentage < 40) return 'bg-destructive';
+    if (strengthPercentage < 80) return 'bg-warning';
+    return 'bg-success';
   }, [strengthPercentage]);
 
   const strengthLabel = useMemo(() => {
@@ -60,11 +60,11 @@ function PasswordRequirements({ password, t }: { password: string; t: (key: stri
       <div className="space-y-1">
         <div className="flex justify-between text-xs">
           <span className="text-muted-foreground">{t('passwordStrength')}</span>
-          <span className={`font-medium ${strengthPercentage >= 80 ? 'text-green-600' : strengthPercentage >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
+          <span className={`font-medium ${strengthPercentage >= 80 ? 'text-success' : strengthPercentage >= 40 ? 'text-warning' : 'text-destructive'}`}>
             {password.length > 0 ? strengthLabel : ''}
           </span>
         </div>
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-300 ${strengthColor}`}
             style={{ width: `${strengthPercentage}%` }}
@@ -78,7 +78,7 @@ function PasswordRequirements({ password, t }: { password: string; t: (key: stri
           <li
             key={index}
             className={`text-xs flex items-center gap-2 transition-colors ${
-              req.met ? 'text-green-600' : 'text-muted-foreground'
+              req.met ? 'text-success' : 'text-muted-foreground'
             }`}
           >
             {req.met ? (
@@ -99,8 +99,8 @@ function SuccessState({ t }: { t: (key: string) => string }) {
     <Card className="w-full max-w-md">
       <CardContent className="pt-6">
         <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+          <div className="mx-auto w-16 h-16 bg-success/10 rounded-full flex items-center justify-center">
+            <CheckCircle className="h-8 w-8 text-success" />
           </div>
           <h2 className="text-xl font-semibold">{t('passwordChanged')}</h2>
           <p className="text-muted-foreground">
@@ -171,7 +171,7 @@ export default function ResetPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <SuccessState t={t} />
       </div>
     );
@@ -189,7 +189,7 @@ export default function ResetPasswordPage() {
                 <FormLabel>{t('newPassword')}</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
@@ -198,7 +198,7 @@ export default function ResetPasswordPage() {
                     />
                     <button
                       type="button"
-                      className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -225,7 +225,7 @@ export default function ResetPasswordPage() {
                 <FormLabel>{t('confirmPassword')}</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type={showConfirmPassword ? 'text' : 'password'}
                       placeholder="••••••••"
@@ -234,7 +234,7 @@ export default function ResetPasswordPage() {
                     />
                     <button
                       type="button"
-                      className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? (

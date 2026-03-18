@@ -182,7 +182,7 @@ export default function AdminPrescriptionsPage() {
       <Card>
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
             <Input
               placeholder={t('common.search')}
               className="ps-10"
@@ -207,16 +207,16 @@ export default function AdminPrescriptionsPage() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                      <Pill className="h-6 w-6 text-purple-600" />
+                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Pill className="h-6 w-6 text-primary" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <UserIcon className="h-4 w-4 text-gray-400" />
+                        <UserIcon className="h-4 w-4 text-muted-foreground/70" />
                         <span className="font-medium">{prescription.patient?.name || prescription.medical_record?.patient?.name}</span>
                       </div>
-                      <p className="text-sm text-gray-500">{prescription.diagnosis}</p>
-                      <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-muted-foreground">{prescription.diagnosis}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                         <Calendar className="h-4 w-4" />
                         <span>
                           {format(new Date(prescription.created_at), 'PPP', { locale: getDateLocale(locale) })}
@@ -230,12 +230,12 @@ export default function AdminPrescriptionsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {prescription.is_dispensed ? (
-                      <Badge className="bg-green-100 text-green-800">
+                      <Badge className="bg-success/10 text-success">
                         <CheckCircle2 className="h-3 w-3 me-1" />
                         {t('admin.prescriptions.dispensed')}
                       </Badge>
                     ) : (
-                      <Badge className="bg-yellow-100 text-yellow-800">
+                      <Badge className="bg-warning/10 text-warning">
                         <Clock className="h-3 w-3 me-1" />
                         {t('admin.prescriptions.notDispensed')}
                       </Badge>
@@ -256,8 +256,8 @@ export default function AdminPrescriptionsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <Pill className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">{t('common.noData')}</p>
+          <Pill className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+          <p className="text-muted-foreground">{t('common.noData')}</p>
         </div>
       )}
 
@@ -342,7 +342,7 @@ export default function AdminPrescriptionsPage() {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="text-red-600"
+                            className="text-destructive"
                             onClick={() => remove(index)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -462,28 +462,28 @@ export default function AdminPrescriptionsPage() {
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">{t('admin.patients.title')}</p>
+                  <p className="text-sm text-muted-foreground">{t('admin.patients.title')}</p>
                   <p className="font-medium">{selectedPrescription.patient?.name || selectedPrescription.medical_record?.patient?.name}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">{t('common.date')}</p>
+                  <p className="text-sm text-muted-foreground">{t('common.date')}</p>
                   <p className="font-medium">
                     {format(new Date(selectedPrescription.created_at), 'PPP', { locale: getDateLocale(locale) })}
                   </p>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-gray-500">{t('admin.prescriptions.diagnosis')}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.prescriptions.diagnosis')}</p>
                 <p className="font-medium">{selectedPrescription.diagnosis}</p>
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 mb-2">{t('admin.prescriptions.medications')}</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('admin.prescriptions.medications')}</p>
                 <div className="space-y-2">
                   {selectedPrescription.items?.map((item: PrescriptionItem, index: number) => (
-                    <div key={index} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div key={index} className="p-3 bg-muted/50 rounded-lg">
                       <p className="font-medium">{item.medication_name}</p>
-                      <div className="text-sm text-gray-500 mt-1 space-x-2 rtl:space-x-reverse">
+                      <div className="text-sm text-muted-foreground mt-1 space-x-2 rtl:space-x-reverse">
                         <span>{item.dosage}</span>
                         <span>|</span>
                         <span>{item.frequency}</span>
@@ -491,7 +491,7 @@ export default function AdminPrescriptionsPage() {
                         <span>{item.duration}</span>
                       </div>
                       {item.instructions && (
-                        <p className="text-sm text-gray-500 mt-1">{item.instructions}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{item.instructions}</p>
                       )}
                     </div>
                   ))}
@@ -500,8 +500,8 @@ export default function AdminPrescriptionsPage() {
 
               {selectedPrescription.notes && (
                 <div>
-                  <p className="text-sm text-gray-500">{t('common.notes')}</p>
-                  <p className="text-gray-700 dark:text-gray-300">{selectedPrescription.notes}</p>
+                  <p className="text-sm text-muted-foreground">{t('common.notes')}</p>
+                  <p className="text-foreground/80">{selectedPrescription.notes}</p>
                 </div>
               )}
 

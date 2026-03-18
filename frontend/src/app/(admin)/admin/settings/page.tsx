@@ -275,7 +275,7 @@ export default function AdminSettingsPage() {
                           <FormLabel>{t('admin.settings.clinicName')}</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Building2 className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Building2 className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                               <Input className="ps-10" {...field} />
                             </div>
                           </FormControl>
@@ -292,7 +292,7 @@ export default function AdminSettingsPage() {
                           <FormLabel>{t('admin.settings.phone')}</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                               <Input className="ps-10" {...field} />
                             </div>
                           </FormControl>
@@ -309,7 +309,7 @@ export default function AdminSettingsPage() {
                           <FormLabel>{t('admin.settings.email')}</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                               <Input type="email" className="ps-10" {...field} />
                             </div>
                           </FormControl>
@@ -326,7 +326,7 @@ export default function AdminSettingsPage() {
                           <FormLabel>{t('admin.settings.address')}</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <MapPin className="absolute start-3 top-3 h-4 w-4 text-gray-400" />
+                              <MapPin className="absolute start-3 top-3 h-4 w-4 text-muted-foreground/70" />
                               <Textarea className="ps-10" rows={2} {...field} />
                             </div>
                           </FormControl>
@@ -371,7 +371,7 @@ export default function AdminSettingsPage() {
                     return (
                       <div
                         key={day.value}
-                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                        className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
                       >
                         <div className="flex items-center gap-4">
                           <Switch
@@ -449,7 +449,7 @@ export default function AdminSettingsPage() {
                   {vacations.data.map((vacation) => (
                     <div
                       key={vacation.id}
-                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                      className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
                     >
                       <div>
                         <p className="font-medium">
@@ -457,13 +457,13 @@ export default function AdminSettingsPage() {
                           {format(new Date(vacation.end_date), 'PPP', { locale: getDateLocale(locale) })}
                         </p>
                         {vacation.reason && (
-                          <p className="text-sm text-gray-500 mt-1">{vacation.reason}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{vacation.reason}</p>
                         )}
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-600"
+                        className="text-destructive"
                         onClick={() => setDeleteVacationId(vacation.id)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -473,8 +473,8 @@ export default function AdminSettingsPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <CalendarOff className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">{t('admin.settings.noVacations')}</p>
+                  <CalendarOff className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
+                  <p className="text-muted-foreground">{t('admin.settings.noVacations')}</p>
                 </div>
               )}
             </CardContent>
@@ -565,7 +565,7 @@ export default function AdminSettingsPage() {
             <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteVacationId && deleteVacationMutation.mutate(deleteVacationId)}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               {deleteVacationMutation.isPending ? t('common.loading') : t('common.delete')}
             </AlertDialogAction>

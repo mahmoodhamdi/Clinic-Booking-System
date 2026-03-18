@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
                 <FormLabel>{t('phone')}</FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Phone className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="01xxxxxxxxx"
                       className="ps-10"
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
 
           <Link
             href="/login"
-            className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-primary"
+            className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             {t('login')}
