@@ -115,12 +115,16 @@ class MedicalRecord extends Model
 
     public function getPrescriptionsCountAttribute(): int
     {
-        return $this->prescriptions()->count();
+        return $this->relationLoaded('prescriptions')
+            ? $this->prescriptions->count()
+            : $this->prescriptions()->count();
     }
 
     public function getAttachmentsCountAttribute(): int
     {
-        return $this->attachments()->count();
+        return $this->relationLoaded('attachments')
+            ? $this->attachments->count()
+            : $this->attachments()->count();
     }
 
     // ==================== Scopes ====================

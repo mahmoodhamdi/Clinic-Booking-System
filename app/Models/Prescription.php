@@ -70,7 +70,9 @@ class Prescription extends Model
 
     public function getItemsCountAttribute(): int
     {
-        return $this->items()->count();
+        return $this->relationLoaded('items')
+            ? $this->items->count()
+            : $this->items()->count();
     }
 
     public function getPatientAttribute(): ?User

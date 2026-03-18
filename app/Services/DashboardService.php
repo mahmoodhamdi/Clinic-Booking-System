@@ -168,7 +168,7 @@ class DashboardService
                 ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
                 ->count(),
             'average_daily_appointments' => round(
-                Appointment::whereBetween('appointment_date', [$startOfMonth, $endOfMonth])->count() / $startOfMonth->daysInMonth,
+                Appointment::whereBetween('appointment_date', [$startOfMonth, $endOfMonth])->count() / max($startOfMonth->daysInMonth, 1),
                 1
             ),
         ];
