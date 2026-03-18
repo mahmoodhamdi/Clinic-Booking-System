@@ -28,7 +28,7 @@ export default async function RootLayout({
   const direction = localeDirection[locale];
 
   return (
-    <html lang={locale} dir={direction}>
+    <html lang={locale} dir={direction} suppressHydrationWarning>
       <body className={`${cairo.variable} font-sans antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <Providers>{children}</Providers>
