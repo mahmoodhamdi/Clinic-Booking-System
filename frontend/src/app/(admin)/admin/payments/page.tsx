@@ -182,9 +182,9 @@ export default function AdminPaymentsPage() {
   const currency = t('common.currency');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('admin.payments.title')}</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">{t('admin.payments.title')}</h1>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 me-2" />
           {t('admin.payments.recordPayment')}

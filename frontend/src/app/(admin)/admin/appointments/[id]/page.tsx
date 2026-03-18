@@ -265,7 +265,7 @@ export default function AdminAppointmentDetailPage() {
   const isActionable = appointment.status === 'pending' || appointment.status === 'confirmed';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Breadcrumbs */}
       <Breadcrumbs items={breadcrumbs} />
 

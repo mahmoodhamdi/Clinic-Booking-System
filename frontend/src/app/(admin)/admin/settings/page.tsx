@@ -227,9 +227,9 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl font-bold">{t('admin.settings.title')}</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">{t('admin.settings.title')}</h1>
       </div>
 
       <Tabs defaultValue="clinic" className="space-y-6">
@@ -371,7 +371,7 @@ export default function AdminSettingsPage() {
                     return (
                       <div
                         key={day.value}
-                        className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                        className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted/80 transition-colors"
                       >
                         <div className="flex items-center gap-4">
                           <Switch
@@ -449,7 +449,7 @@ export default function AdminSettingsPage() {
                   {vacations.data.map((vacation) => (
                     <div
                       key={vacation.id}
-                      className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                      className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted/80 transition-colors"
                     >
                       <div>
                         <p className="font-medium">

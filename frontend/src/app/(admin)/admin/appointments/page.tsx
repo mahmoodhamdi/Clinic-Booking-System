@@ -203,9 +203,9 @@ export default function AdminAppointmentsPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('admin.appointments.title')}</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">{t('admin.appointments.title')}</h1>
       </div>
 
       {/* Filters */}
@@ -254,7 +254,7 @@ export default function AdminAppointmentsPage() {
       ) : filteredAppointments && filteredAppointments.length > 0 ? (
         <div className="space-y-4">
           {filteredAppointments.map((appointment: Appointment) => (
-            <Card key={appointment.id} className="hover:shadow-md transition-shadow">
+            <Card key={appointment.id} className="card-hover">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">

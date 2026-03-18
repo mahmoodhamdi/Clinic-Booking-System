@@ -287,9 +287,9 @@ export default function ReportsPage() {
   const patientsSummary = patientsReport?.data?.summary;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div>
-        <h1 className="text-2xl font-bold">{t('admin.reports.title')}</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">{t('admin.reports.title')}</h1>
       </div>
 
       <Tabs defaultValue="revenue" className="space-y-6">

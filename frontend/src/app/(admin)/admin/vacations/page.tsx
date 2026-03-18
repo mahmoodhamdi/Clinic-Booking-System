@@ -107,9 +107,9 @@ export default function VacationsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{t('admin.vacations.title')}</h1>
+        <h1 className="text-2xl font-bold text-gradient-primary">{t('admin.vacations.title')}</h1>
         <Button onClick={() => setVacationDialogOpen(true)}>
           <Plus className="h-4 w-4 me-2" />
           {t('admin.vacations.addVacation')}
@@ -132,7 +132,7 @@ export default function VacationsPage() {
               {vacations.data.map((vacation) => (
                 <div
                   key={vacation.id}
-                  className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted/80 transition-colors"
                 >
                   <div>
                     <p className="font-medium">
