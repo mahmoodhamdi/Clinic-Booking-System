@@ -104,8 +104,15 @@ function StatCard({ title, value, icon, color, subtext, trend, linkHref, linkTex
     purple: 'bg-chart-4/10 text-chart-4',
   };
 
+  const statBorderClasses = {
+    blue: 'stat-card-blue',
+    green: 'stat-card-green',
+    yellow: 'stat-card-yellow',
+    purple: 'stat-card-purple',
+  };
+
   return (
-    <Card>
+    <Card className={statBorderClasses[color]}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -179,7 +186,7 @@ function AppointmentRow({ appointment, t }: AppointmentRowProps) {
   const appointmentTime = (appointment as Appointment & { time?: string }).time || appointment.slot_time;
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
+    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50 hover:bg-muted transition-colors duration-150">
       <div className="flex items-center gap-4">
         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
           <span className="font-medium text-primary">
@@ -220,7 +227,7 @@ function ActivityRow({ activity }: ActivityRowProps) {
   const activityDate = (activity as Activity & { date?: string }).date || activity.created_at;
 
   return (
-    <div className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
+    <div className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0 hover:bg-muted/30 rounded-lg px-2 -mx-2 transition-colors">
       <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
         {typeIcons[activity.type] || <AlertCircle className="h-4 w-4 text-muted-foreground" />}
       </div>
@@ -617,7 +624,7 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Page Title */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-2xl font-bold text-gradient-primary">
           {t('admin.dashboard.title')}
         </h1>
         <p className="text-muted-foreground mt-1">
@@ -664,7 +671,7 @@ export default function AdminDashboard() {
       {/* Charts Row: Trend (2/3) + Pie (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Appointment Trend Line Chart */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 animate-fade-in-up">
           <CardHeader>
             <CardTitle className="text-base">{t('admin.dashboard.appointmentTrend')}</CardTitle>
           </CardHeader>
@@ -684,7 +691,7 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Status Distribution Pie Chart */}
-        <Card>
+        <Card className="animate-fade-in-up">
           <CardHeader>
             <CardTitle className="text-base">{t('admin.dashboard.statusDistribution')}</CardTitle>
           </CardHeader>
@@ -705,7 +712,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Revenue Trend Bar Chart – full width */}
-      <Card>
+      <Card className="animate-fade-in-up">
         <CardHeader>
           <CardTitle className="text-base">{t('admin.dashboard.revenueTrend')}</CardTitle>
         </CardHeader>
@@ -728,7 +735,7 @@ export default function AdminDashboard() {
       {/* Additional Widgets Row: Weekly Stats + Payment Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Weekly Stats */}
-        <Card>
+        <Card className="card-hover">
           <CardHeader>
             <CardTitle className="text-base">
               {t('admin.dashboard.weeklyStats')}
@@ -753,7 +760,7 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Payment Statistics */}
-        <Card>
+        <Card className="card-hover">
           <CardHeader>
             <CardTitle className="text-base">{t('admin.dashboard.paymentStats')}</CardTitle>
           </CardHeader>

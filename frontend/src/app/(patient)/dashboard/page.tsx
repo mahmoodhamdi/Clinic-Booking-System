@@ -79,7 +79,7 @@ interface AppointmentItemProps {
 
 function AppointmentItem({ appointment, confirmedLabel, pendingLabel, intlLocale }: AppointmentItemProps) {
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
+    <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50 hover:bg-muted transition-colors">
       <div className="flex items-center gap-4">
         <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
           <Calendar className="h-6 w-6 text-primary" />
@@ -118,7 +118,7 @@ function QuickActionCard({ href, icon, iconBgColor, label }: QuickActionCardProp
     <Link href={href}>
       <Card className="card-hover cursor-pointer">
         <CardContent className="p-4 flex flex-col items-center text-center">
-          <div className={`h-12 w-12 rounded-full ${iconBgColor} flex items-center justify-center mb-2`}>
+          <div className={`h-12 w-12 rounded-xl ${iconBgColor} flex items-center justify-center mb-2`}>
             {icon}
           </div>
           <span className="text-sm font-medium">{label}</span>
@@ -135,7 +135,7 @@ interface EmptyAppointmentsProps {
 
 function EmptyAppointments({ message, buttonLabel }: EmptyAppointmentsProps) {
   return (
-    <div className="text-center py-8">
+    <div className="text-center py-8 animate-fade-in">
       <AlertCircle className="h-12 w-12 text-muted-foreground/70 mx-auto mb-4" />
       <p className="text-muted-foreground">{message}</p>
       <Button asChild className="mt-4">
@@ -177,58 +177,69 @@ export default function PatientDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {t('patient.dashboard.welcome')}، {user?.name}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {new Date().toLocaleDateString(intlLocale, {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
+      <div className="bg-gradient-welcome rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="absolute top-0 end-0 w-48 h-48 rounded-full bg-white/10 translate-x-16 -translate-y-16 pointer-events-none" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative">
+          <div>
+            <h1 className="text-2xl font-bold text-white">
+              {t('patient.dashboard.welcome')}، {user?.name}
+            </h1>
+            <p className="text-white/80 mt-1">
+              {new Date().toLocaleDateString(intlLocale, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+          </div>
+          <Button asChild className="bg-white text-primary hover:bg-white/90 shadow-lg">
+            <Link href="/book">
+              <CalendarPlus className="h-4 w-4 me-2" />
+              {t('patient.dashboard.bookNow')}
+            </Link>
+          </Button>
         </div>
-        <Button asChild>
-          <Link href="/book">
-            <CalendarPlus className="h-4 w-4 me-2" />
-            {t('patient.dashboard.bookNow')}
-          </Link>
-        </Button>
       </div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <QuickActionCard
-          href="/book"
-          icon={<CalendarPlus className="h-6 w-6 text-primary" />}
-          iconBgColor="bg-primary/10"
-          label={t('navigation.bookAppointment')}
-        />
-        <QuickActionCard
-          href="/appointments"
-          icon={<Calendar className="h-6 w-6 text-info" />}
-          iconBgColor="bg-info/10"
-          label={t('navigation.myAppointments')}
-        />
-        <QuickActionCard
-          href="/medical-records"
-          icon={<FileText className="h-6 w-6 text-success" />}
-          iconBgColor="bg-success/10"
-          label={t('navigation.medicalRecords')}
-        />
-        <QuickActionCard
-          href="/profile"
-          icon={<User className="h-6 w-6 text-chart-4" />}
-          iconBgColor="bg-chart-4/10"
-          label={t('navigation.profile')}
-        />
+        <div className="animate-fade-in-up stagger-1">
+          <QuickActionCard
+            href="/book"
+            icon={<CalendarPlus className="h-6 w-6 text-primary" />}
+            iconBgColor="bg-primary/10"
+            label={t('navigation.bookAppointment')}
+          />
+        </div>
+        <div className="animate-fade-in-up stagger-2">
+          <QuickActionCard
+            href="/appointments"
+            icon={<Calendar className="h-6 w-6 text-info" />}
+            iconBgColor="bg-info/10"
+            label={t('navigation.myAppointments')}
+          />
+        </div>
+        <div className="animate-fade-in-up stagger-3">
+          <QuickActionCard
+            href="/medical-records"
+            icon={<FileText className="h-6 w-6 text-success" />}
+            iconBgColor="bg-success/10"
+            label={t('navigation.medicalRecords')}
+          />
+        </div>
+        <div className="animate-fade-in-up stagger-4">
+          <QuickActionCard
+            href="/profile"
+            icon={<User className="h-6 w-6 text-chart-4" />}
+            iconBgColor="bg-chart-4/10"
+            label={t('navigation.profile')}
+          />
+        </div>
       </div>
 
       {/* Upcoming Appointments */}
-      <Card>
+      <Card className="animate-fade-in-up stagger-4">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>{t('patient.dashboard.upcomingAppointments')}</CardTitle>
           <Button variant="ghost" size="sm" asChild>
