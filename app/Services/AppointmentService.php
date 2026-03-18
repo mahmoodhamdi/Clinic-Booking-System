@@ -127,6 +127,8 @@ class AppointmentService
             $this->validateBooking($patient, $datetime);
 
             return ['can_book' => true, 'reason' => null];
+        } catch (SlotNotAvailableException $e) {
+            return ['can_book' => false, 'reason' => $e->getMessage(), 'error_code' => $e->getErrorCode()];
         } catch (BusinessLogicException $e) {
             return ['can_book' => false, 'reason' => $e->getMessage(), 'error_code' => $e->getErrorCode()];
         }
@@ -412,28 +414,34 @@ class AppointmentService
         ], $bindings));
 
         // Get today's stats in a single query
-        $todayStats = DB::selectOne("
+        $today = now()->toDateString();
+        $todayStats = DB::selectOne('
             SELECT
                 COUNT(*) as total,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as confirmed,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed
             FROM appointments
-            WHERE deleted_at IS NULL AND appointment_date = DATE('now')
-        ", [
+            WHERE deleted_at IS NULL AND appointment_date = ?
+        ', [
             AppointmentStatus::PENDING->value,
             AppointmentStatus::CONFIRMED->value,
             AppointmentStatus::COMPLETED->value,
+            $today,
         ]);
 
         // Get weekly and monthly counts
-        $periodStats = DB::selectOne("
+        $weekStart = now()->startOfWeek()->toDateString();
+        $weekEnd = now()->endOfWeek()->toDateString();
+        $monthStart = now()->startOfMonth()->toDateString();
+        $monthEnd = now()->endOfMonth()->toDateString();
+        $periodStats = DB::selectOne('
             SELECT
-                SUM(CASE WHEN appointment_date BETWEEN DATE('now', 'weekday 0', '-6 days') AND DATE('now', 'weekday 0') THEN 1 ELSE 0 END) as this_week,
-                SUM(CASE WHEN strftime('%Y-%m', appointment_date) = strftime('%Y-%m', 'now') THEN 1 ELSE 0 END) as this_month
+                SUM(CASE WHEN appointment_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as this_week,
+                SUM(CASE WHEN appointment_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as this_month
             FROM appointments
             WHERE deleted_at IS NULL
-        ");
+        ', [$weekStart, $weekEnd, $monthStart, $monthEnd]);
 
         return [
             'total' => (int) $stats->total,

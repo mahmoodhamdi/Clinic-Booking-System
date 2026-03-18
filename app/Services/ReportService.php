@@ -357,57 +357,70 @@ class ReportService
             return $breakdown;
         }
 
-        if ($groupBy === 'week') {
-            // For weekly, use strftime to get week number
-            $dbResults = Payment::query()
-                ->selectRaw("strftime('%Y-%W', paid_at) as period_key, SUM(total) as total, COUNT(*) as count")
+        if ($groupBy === 'week' || $groupBy === 'month') {
+            // Use DATE() grouping (works on both SQLite and MySQL) then aggregate in PHP
+            $dailyResults = Payment::query()
+                ->selectRaw('DATE(paid_at) as day, SUM(total) as total, COUNT(*) as count')
                 ->where('status', PaymentStatus::PAID)
                 ->whereBetween('paid_at', [$fromDate, $toDate])
-                ->groupBy(DB::raw("strftime('%Y-%W', paid_at)"))
+                ->groupBy(DB::raw('DATE(paid_at)'))
                 ->get()
-                ->keyBy('period_key');
+                ->keyBy('day');
 
-            $breakdown = [];
-            $current = $from->copy()->startOfWeek();
-            while ($current->lte($to)) {
-                $weekEnd = $current->copy()->endOfWeek();
-                $weekKey = $current->format('Y-W');
-                $dbRow = $dbResults->get($weekKey);
+            if ($groupBy === 'week') {
+                $breakdown = [];
+                $current = $from->copy()->startOfWeek();
+                while ($current->lte($to)) {
+                    $weekEnd = $current->copy()->endOfWeek();
+                    $weekTotal = 0.0;
+                    $weekCount = 0;
 
-                $breakdown[] = [
-                    'period' => $current->toDateString(),
-                    'label' => $current->format('d M').' - '.$weekEnd->format('d M'),
-                    'total' => (float) ($dbRow->total ?? 0),
-                    'count' => (int) ($dbRow->count ?? 0),
-                ];
+                    $day = $current->copy();
+                    while ($day->lte($weekEnd)) {
+                        $row = $dailyResults->get($day->toDateString());
+                        if ($row) {
+                            $weekTotal += (float) $row->total;
+                            $weekCount += (int) $row->count;
+                        }
+                        $day->addDay();
+                    }
 
-                $current->addWeek();
+                    $breakdown[] = [
+                        'period' => $current->toDateString(),
+                        'label' => $current->format('d M').' - '.$weekEnd->format('d M'),
+                        'total' => $weekTotal,
+                        'count' => $weekCount,
+                    ];
+
+                    $current->addWeek();
+                }
+
+                return $breakdown;
             }
 
-            return $breakdown;
-        }
-
-        if ($groupBy === 'month') {
-            // For monthly, use strftime to get year-month
-            $dbResults = Payment::query()
-                ->selectRaw("strftime('%Y-%m', paid_at) as period_key, SUM(total) as total, COUNT(*) as count")
-                ->where('status', PaymentStatus::PAID)
-                ->whereBetween('paid_at', [$fromDate, $toDate])
-                ->groupBy(DB::raw("strftime('%Y-%m', paid_at)"))
-                ->get()
-                ->keyBy('period_key');
-
+            // month
             $breakdown = [];
             $current = $from->copy()->startOfMonth();
             while ($current->lte($to)) {
-                $monthKey = $current->format('Y-m');
-                $dbRow = $dbResults->get($monthKey);
+                $monthEnd = $current->copy()->endOfMonth();
+                $monthTotal = 0.0;
+                $monthCount = 0;
+
+                $day = $current->copy();
+                while ($day->lte($monthEnd)) {
+                    $row = $dailyResults->get($day->toDateString());
+                    if ($row) {
+                        $monthTotal += (float) $row->total;
+                        $monthCount += (int) $row->count;
+                    }
+                    $day->addDay();
+                }
 
                 $breakdown[] = [
-                    'period' => $monthKey,
+                    'period' => $current->format('Y-m'),
                     'label' => $current->translatedFormat('F Y'),
-                    'total' => (float) ($dbRow->total ?? 0),
-                    'count' => (int) ($dbRow->count ?? 0),
+                    'total' => $monthTotal,
+                    'count' => $monthCount,
                 ];
 
                 $current->addMonth();

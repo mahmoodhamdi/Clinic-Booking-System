@@ -14,20 +14,22 @@ class PatientStatisticsService
      */
     public function getForPatient(User $patient): array
     {
+        $today = now()->toDateString();
         $stats = $patient->appointments()
-            ->selectRaw("
+            ->selectRaw('
                 COUNT(*) as total,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show,
-                SUM(CASE WHEN status IN (?, ?) AND appointment_date >= DATE('now') THEN 1 ELSE 0 END) as upcoming,
+                SUM(CASE WHEN status IN (?, ?) AND appointment_date >= ? THEN 1 ELSE 0 END) as upcoming,
                 MAX(CASE WHEN status = ? THEN appointment_date ELSE NULL END) as last_visit
-            ", [
+            ', [
                 AppointmentStatus::COMPLETED->value,
                 AppointmentStatus::CANCELLED->value,
                 AppointmentStatus::NO_SHOW->value,
                 AppointmentStatus::PENDING->value,
                 AppointmentStatus::CONFIRMED->value,
+                $today,
                 AppointmentStatus::COMPLETED->value,
             ])
             ->first();
@@ -52,22 +54,24 @@ class PatientStatisticsService
         }
 
         $patientIds = $patients->pluck('id')->toArray();
+        $today = now()->toDateString();
 
         $stats = DB::table('appointments')
-            ->selectRaw("
+            ->selectRaw('
                 user_id,
                 COUNT(*) as total,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as cancelled,
                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as no_show,
-                SUM(CASE WHEN status IN (?, ?) AND appointment_date >= DATE('now') THEN 1 ELSE 0 END) as upcoming,
+                SUM(CASE WHEN status IN (?, ?) AND appointment_date >= ? THEN 1 ELSE 0 END) as upcoming,
                 MAX(CASE WHEN status = ? THEN appointment_date ELSE NULL END) as last_visit
-            ", [
+            ', [
                 AppointmentStatus::COMPLETED->value,
                 AppointmentStatus::CANCELLED->value,
                 AppointmentStatus::NO_SHOW->value,
                 AppointmentStatus::PENDING->value,
                 AppointmentStatus::CONFIRMED->value,
+                $today,
                 AppointmentStatus::COMPLETED->value,
             ])
             ->whereIn('user_id', $patientIds)
