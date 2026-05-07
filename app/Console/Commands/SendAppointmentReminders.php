@@ -27,38 +27,22 @@ class SendAppointmentReminders extends Command
         $windowStart = now()->addHours($hours - 1);
         $windowEnd = now()->addHours($hours + 1);
 
-        // Fetch all confirmed-and-unreminded appointments whose date is on
-        // either of the two calendar dates the ±1h window can intersect.
-        // Then narrow to the exact window in PHP — appointment_time has
-        // a TIME column + Carbon cast that doesn't survive cross-driver
-        // string concatenation, so PHP-side filtering is the safe path.
-        $dates = array_unique([
-            $windowStart->toDateString(),
-            $windowEnd->toDateString(),
-        ]);
-
+        // Fetch confirmed-and-unreminded appointments whose date falls in the
+        // window. whereDate (not where=/whereIn) is required because the
+        // 'date' cast on appointment_date binds the parameter as a datetime
+        // string when using equality predicates, which never matches the
+        // pure date stored in the DB column.
         $candidates = Appointment::query()
             ->where('status', AppointmentStatus::CONFIRMED)
             ->whereNull('reminder_sent_at')
-            ->whereIn('appointment_date', $dates)
+            ->whereDate('appointment_date', '>=', $windowStart->toDateString())
+            ->whereDate('appointment_date', '<=', $windowEnd->toDateString())
             ->with('user')
             ->get();
 
-        \Log::warning('[reminders][debug]', [
-            'now' => now()->toDateTimeString(),
-            'window_start' => $windowStart->toDateTimeString(),
-            'window_end' => $windowEnd->toDateTimeString(),
-            'dates_filter' => $dates,
-            'candidates_count' => $candidates->count(),
-            'all_appointments' => Appointment::all()->map(fn ($a) => [
-                'id' => $a->id,
-                'date' => (string) $a->appointment_date,
-                'time' => (string) $a->appointment_time,
-                'status' => $a->status?->value,
-                'reminder_sent_at' => $a->reminder_sent_at?->toDateTimeString(),
-            ])->toArray(),
-        ]);
-
+        // Narrow to the exact ±1h window in PHP. appointment_time is a TIME
+        // column with a 'datetime:H:i' Carbon cast; format('H:i:s') gives a
+        // clean time fragment we can safely concatenate with the date.
         $appointments = $candidates->filter(function (Appointment $a) use ($windowStart, $windowEnd) {
             $timeStr = $a->appointment_time instanceof \Carbon\Carbon
                 ? $a->appointment_time->format('H:i:s')
@@ -68,19 +52,8 @@ class SendAppointmentReminders extends Command
                 $a->appointment_date->format('Y-m-d').' '.$timeStr
             );
 
-            $inWindow = $datetime->greaterThanOrEqualTo($windowStart)
+            return $datetime->greaterThanOrEqualTo($windowStart)
                 && $datetime->lessThanOrEqualTo($windowEnd);
-
-            $this->line(sprintf(
-                '[reminders][debug] candidate id=%d date=%s time=%s parsed=%s inWindow=%s',
-                $a->id,
-                $a->appointment_date->format('Y-m-d'),
-                $timeStr,
-                $datetime->toDateTimeString(),
-                $inWindow ? 'yes' : 'no'
-            ));
-
-            return $inWindow;
         });
 
         if ($appointments->isEmpty()) {
@@ -91,7 +64,7 @@ class SendAppointmentReminders extends Command
 
         $sent = 0;
         foreach ($appointments as $appointment) {
-            $patient = $appointment->patient;
+            $patient = $appointment->user;
             if (! $patient) {
                 continue;
             }
