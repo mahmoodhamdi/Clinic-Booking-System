@@ -36,16 +36,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Vacations - date indexes for slot availability checks
-        if (! $this->indexExists('vacations', 'vacations_date_index')) {
+        // Vacations - date indexes for slot availability checks.
+        // The vacations table stores `start_date`/`end_date` (no `date` column),
+        // and there's no `is_active` flag (vacations are deletes/upserts, not toggles).
+        // Earlier versions of this migration referenced columns that don't exist;
+        // only the start_date+end_date pair benefits from an explicit index since
+        // the create-table migration already covers individual columns.
+        if (! $this->indexExists('vacations', 'vacations_dates_range_index')) {
             Schema::table('vacations', function (Blueprint $table) {
-                $table->index('date', 'vacations_date_index');
-            });
-        }
-
-        if (! $this->indexExists('vacations', 'vacations_date_active_index')) {
-            Schema::table('vacations', function (Blueprint $table) {
-                $table->index(['date', 'is_active'], 'vacations_date_active_index');
+                $table->index(['start_date', 'end_date'], 'vacations_dates_range_index');
             });
         }
 
@@ -69,15 +68,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if ($this->indexExists('vacations', 'vacations_date_index')) {
+        if ($this->indexExists('vacations', 'vacations_dates_range_index')) {
             Schema::table('vacations', function (Blueprint $table) {
-                $table->dropIndex('vacations_date_index');
-            });
-        }
-
-        if ($this->indexExists('vacations', 'vacations_date_active_index')) {
-            Schema::table('vacations', function (Blueprint $table) {
-                $table->dropIndex('vacations_date_active_index');
+                $table->dropIndex('vacations_dates_range_index');
             });
         }
 
