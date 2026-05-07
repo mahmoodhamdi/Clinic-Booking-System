@@ -41,8 +41,13 @@ class SendAppointmentReminders extends Command
             ->get();
 
         $appointments = $candidates->filter(function (Appointment $a) use ($windowStart, $windowEnd) {
+            // appointment_time is cast to Carbon ('datetime:H:i'); take just
+            // the time portion so it pairs with the date cleanly.
+            $timeStr = $a->appointment_time instanceof \Carbon\Carbon
+                ? $a->appointment_time->format('H:i:s')
+                : (string) $a->appointment_time;
             $datetime = \Carbon\Carbon::parse(
-                $a->appointment_date->format('Y-m-d').' '.$a->appointment_time
+                $a->appointment_date->format('Y-m-d').' '.$timeStr
             );
 
             return $datetime->between($windowStart, $windowEnd);
@@ -61,13 +66,17 @@ class SendAppointmentReminders extends Command
                 continue;
             }
 
+            $timeStr = $appointment->appointment_time instanceof \Carbon\Carbon
+                ? $appointment->appointment_time->format('H:i')
+                : (string) $appointment->appointment_time;
+
             $this->line(sprintf(
                 '%s appointment #%d for %s @ %s %s',
                 $dry ? '[DRY]' : '[SEND]',
                 $appointment->id,
                 $patient->name,
                 $appointment->appointment_date->format('Y-m-d'),
-                $appointment->appointment_time
+                $timeStr
             ));
 
             if ($dry) {
@@ -82,7 +91,7 @@ class SendAppointmentReminders extends Command
                 $sms->sendAppointmentReminder(
                     $patient->phone,
                     $appointment->appointment_date->format('Y-m-d'),
-                    $appointment->appointment_time
+                    $timeStr
                 );
             }
 
@@ -92,7 +101,8 @@ class SendAppointmentReminders extends Command
             $sent++;
         }
 
-        $this->info("[reminders] {$sent} reminder(s) " . ($dry ? 'would be sent' : 'sent'));
+        $verb = $dry ? 'would be sent' : 'sent';
+        $this->info("[reminders] {$sent} reminder(s) {$verb}");
 
         return self::SUCCESS;
     }
