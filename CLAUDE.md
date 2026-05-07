@@ -63,7 +63,7 @@ php artisan test --filter=TestClassName::test_method_name  # Single test method
 
 Tests use **SQLite in-memory** (configured in `phpunit.xml`) — no MySQL needed to run tests locally.
 
-CI enforces **100% code coverage** (`--min=100`) and runs `./vendor/bin/pint --test` for style checks.
+CI enforces **80% code coverage** (`--min=80`) and runs `./vendor/bin/pint --test` for style checks. (Previously claimed 100%, but a broken MySQL migration was failing CI earlier in the pipeline and masking that actual coverage was ~84%. Threshold relaxed in closeout wave 1; plan is to re-raise toward 90% after a coverage audit.)
 
 ### Frontend
 ```bash
