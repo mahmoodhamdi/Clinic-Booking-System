@@ -15,7 +15,9 @@ class AuthenticateFromCookieTest extends TestCase
         return fn () => new Response('ok', 200);
     }
 
-    private function withCookie(string $value): Request
+    // Renamed from withCookie to avoid shadowing the parent TestCase's
+    // public withCookie() helper (LSP violation in PHP).
+    private function requestWithAuthCookie(string $value): Request
     {
         $request = Request::create('/api/x');
         $request->cookies->set('auth_token', $value);
@@ -26,7 +28,7 @@ class AuthenticateFromCookieTest extends TestCase
     /** @test */
     public function existing_authorization_header_is_left_alone(): void
     {
-        $request = $this->withCookie('cookie-token');
+        $request = $this->requestWithAuthCookie('cookie-token');
         $request->headers->set('Authorization', 'Bearer existing-header-token');
 
         (new AuthenticateFromCookie)->handle($request, $this->pass());
@@ -37,7 +39,7 @@ class AuthenticateFromCookieTest extends TestCase
     /** @test */
     public function valid_cookie_is_promoted_to_bearer_token(): void
     {
-        $request = $this->withCookie('1|abcDEF123');
+        $request = $this->requestWithAuthCookie('1|abcDEF123');
 
         (new AuthenticateFromCookie)->handle($request, $this->pass());
 
@@ -47,7 +49,7 @@ class AuthenticateFromCookieTest extends TestCase
     /** @test */
     public function cookie_with_invalid_characters_is_ignored(): void
     {
-        $request = $this->withCookie('not allowed; chars');
+        $request = $this->requestWithAuthCookie('not allowed; chars');
 
         (new AuthenticateFromCookie)->handle($request, $this->pass());
 
@@ -57,7 +59,7 @@ class AuthenticateFromCookieTest extends TestCase
     /** @test */
     public function oversized_cookie_is_ignored(): void
     {
-        $request = $this->withCookie(str_repeat('a', 513));
+        $request = $this->requestWithAuthCookie(str_repeat('a', 513));
 
         (new AuthenticateFromCookie)->handle($request, $this->pass());
 
@@ -77,7 +79,7 @@ class AuthenticateFromCookieTest extends TestCase
     /** @test */
     public function downstream_response_is_returned_unchanged(): void
     {
-        $request = $this->withCookie('1|tok');
+        $request = $this->requestWithAuthCookie('1|tok');
 
         $response = (new AuthenticateFromCookie)->handle($request, $this->pass());
 
