@@ -14,8 +14,28 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: 'Clinic Booking System',
+  title: {
+    default: 'Clinic Booking',
+    template: '%s | Clinic Booking',
+  },
   description: 'Book your medical appointments online',
+  applicationName: 'Clinic Booking',
+  formatDetection: {
+    telephone: true,
+    email: true,
+    address: true,
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'Clinic Booking',
+    title: 'Clinic Booking',
+    description: 'Book your medical appointments online',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Clinic Booking',
+    description: 'Book your medical appointments online',
+  },
 };
 
 export default async function RootLayout({

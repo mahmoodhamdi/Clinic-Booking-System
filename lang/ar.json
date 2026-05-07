@@ -5,6 +5,18 @@
         "description": "نظام شامل لإدارة العيادات الطبية الخاصة"
     },
 
+    "mail": {
+        "appointment_confirmed": {
+            "subject": "تأكيد موعدك يوم :date",
+            "greeting": "مرحباً :name،",
+            "intro": "تم تأكيد موعدك في :clinic مع :doctor.",
+            "date_line": "التاريخ: :date",
+            "time_line": "الوقت: :time",
+            "contact_line": "للاستفسار أو التعديل، اتصل بنا على :phone.",
+            "salutation": "في انتظارك،"
+        }
+    },
+
     "auth": {
         "login": "تسجيل الدخول",
         "logout": "تسجيل الخروج",

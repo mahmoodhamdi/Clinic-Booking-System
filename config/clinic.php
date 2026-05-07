@@ -44,6 +44,10 @@ return [
     'notifications' => [
         'reminder_hours' => env('CLINIC_REMINDER_HOURS', 24),
         'sms_enabled' => env('CLINIC_SMS_ENABLED', false),
+        // Master switch for outgoing email notifications. Defaults to false so
+        // that fresh installs don't blow up on a missing MAIL_FROM_ADDRESS or
+        // an unconfigured SMTP host. Flip to true once .env mail vars work.
+        'email_enabled' => env('EMAIL_NOTIFICATIONS_ENABLED', false),
     ],
 
     /*

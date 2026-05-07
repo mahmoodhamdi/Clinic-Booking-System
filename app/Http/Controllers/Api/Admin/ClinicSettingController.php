@@ -91,4 +91,49 @@ class ClinicSettingController extends Controller
             'data' => new ClinicSettingResource($settings->fresh()),
         ]);
     }
+
+    public function uploadHeroImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'hero_image' => [
+                'required',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'mimetypes:image/jpeg,image/png,image/webp',
+                'max:4096',
+                'dimensions:min_width=600,min_height=300,max_width=4000,max_height=3000',
+            ],
+        ]);
+
+        $settings = ClinicSetting::getInstance();
+
+        if ($settings->hero_image) {
+            Storage::disk('public')->delete($settings->hero_image);
+        }
+
+        $path = $request->file('hero_image')->store('hero', 'public');
+        $settings->update(['hero_image' => $path]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تحديث صورة الواجهة بنجاح.',
+            'data' => new ClinicSettingResource($settings->fresh()),
+        ]);
+    }
+
+    public function deleteHeroImage(): JsonResponse
+    {
+        $settings = ClinicSetting::getInstance();
+
+        if ($settings->hero_image) {
+            Storage::disk('public')->delete($settings->hero_image);
+            $settings->update(['hero_image' => null]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف صورة الواجهة بنجاح.',
+            'data' => new ClinicSettingResource($settings->fresh()),
+        ]);
+    }
 }

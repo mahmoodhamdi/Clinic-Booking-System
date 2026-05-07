@@ -5,6 +5,18 @@
         "description": "A comprehensive management system for private medical clinics"
     },
 
+    "mail": {
+        "appointment_confirmed": {
+            "subject": "Your appointment on :date is confirmed",
+            "greeting": "Hi :name,",
+            "intro": "Your appointment at :clinic with :doctor is confirmed.",
+            "date_line": "Date: :date",
+            "time_line": "Time: :time",
+            "contact_line": "To reschedule or for questions, call us on :phone.",
+            "salutation": "See you soon,"
+        }
+    },
+
     "auth": {
         "login": "Login",
         "logout": "Logout",
