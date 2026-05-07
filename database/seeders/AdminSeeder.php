@@ -23,6 +23,9 @@ class AdminSeeder extends Seeder
                 'password' => $password,
                 'phone' => '01000000000',
                 'phone_verified_at' => now(),
+                // Force the doctor to set their own password before using the system.
+                // Cleared by AuthController::changePassword() after a successful change.
+                'must_change_password' => true,
             ]);
             $admin->role = UserRole::ADMIN;
             $admin->is_active = true;

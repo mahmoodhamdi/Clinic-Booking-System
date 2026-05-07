@@ -186,10 +186,21 @@ api.interceptors.response.use(
 
       // Forbidden - insufficient permissions
       if (status === 403) {
+        const errorCode = (data?.error_code as string) || 'FORBIDDEN';
+
+        // The backend forces a password change for accounts that still hold a
+        // default/seeded password. Pull the user to /change-password so they
+        // can clear the flag before any other navigation.
+        if (errorCode === 'PASSWORD_CHANGE_REQUIRED' && typeof window !== 'undefined') {
+          if (window.location.pathname !== '/change-password') {
+            window.location.href = '/change-password';
+          }
+        }
+
         return Promise.reject(new ApiError(
           (data?.message as string) || 'You do not have permission to perform this action.',
           403,
-          'FORBIDDEN'
+          errorCode
         ));
       }
 

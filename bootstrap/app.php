@@ -42,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(append: [
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\EnforcePasswordChange::class,
             \App\Http\Middleware\AddRequestId::class,
             \App\Http\Middleware\SecurityHeaders::class,
         ]);

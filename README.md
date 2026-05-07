@@ -199,13 +199,11 @@ Access:
 - **Backend API**: http://localhost:8000
 - **Frontend**: http://localhost:3000
 
-## Default Credentials
+## First-time Login
 
-After running seeders:
+After running seeders, an admin account is created on the phone number `01000000000`. The first time you log in, the system will require you to change the password before you can access the dashboard.
 
-| Role | Phone | Password |
-|------|-------|----------|
-| Admin | 01000000000 | admin123 |
+For local development convenience, the initial password defaults to `admin123` and can be overridden by setting `ADMIN_DEFAULT_PASSWORD` in `.env` before running `php artisan migrate:fresh --seed`. **Production deployments should always set `ADMIN_DEFAULT_PASSWORD` to a one-time value and rely on the forced password-change flow.** Demo/seed data does not run in production unless `SEED_DEMO_DATA=true` is set explicitly.
 
 ## API Documentation
 

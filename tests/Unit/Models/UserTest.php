@@ -27,6 +27,7 @@ class UserTest extends TestCase
             'address',
             'avatar',
             'phone_verified_at',
+            'must_change_password',
         ], $user->getFillable());
     }
 

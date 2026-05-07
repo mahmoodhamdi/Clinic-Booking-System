@@ -47,10 +47,9 @@ echo "========================================"
 echo "  Application is ready!"
 echo "  Access at: http://localhost:${APP_PORT:-8000}"
 echo "========================================"
-echo ""
-echo "  Admin Credentials:"
-echo "  Phone: 01000000000"
-echo "  Password: admin123"
+echo "  First-time setup: log in with the admin"
+echo "  account configured during deployment, then"
+echo "  change the password. See DEPLOY.md."
 echo "========================================"
 
 # Execute the main command

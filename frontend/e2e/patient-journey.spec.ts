@@ -94,8 +94,9 @@ test.describe('Patient Dashboard UI', () => {
   test('login page has proper styling', async ({ page }) => {
     await page.goto('/login');
 
-    // Check for gradient background
-    const container = page.locator('.bg-gradient-to-br');
+    // AuthLayout uses .bg-gradient-subtle (renamed from .bg-gradient-to-br
+    // in the teal theme redesign). Check the wrapper renders.
+    const container = page.locator('.bg-gradient-subtle');
     await expect(container).toBeVisible();
   });
 
