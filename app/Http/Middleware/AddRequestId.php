@@ -24,11 +24,13 @@ class AddRequestId
         // Share into the log context so every log line emitted during this
         // request includes request_id (and optionally user_id) in the JSON
         // formatter's "extra" field. Used by config/logging.php "json" channel.
+        // shareContext (vs withContext) propagates across all channels so a
+        // log call routed through a non-default channel still gets the id.
         $context = ['request_id' => $requestId];
         if ($user = $request->user()) {
             $context['user_id'] = $user->id;
         }
-        Log::withContext($context);
+        Log::shareContext($context);
 
         $response = $next($request);
 
