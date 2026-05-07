@@ -27,30 +27,34 @@ class SendAppointmentReminders extends Command
         $windowStart = now()->addHours($hours - 1);
         $windowEnd = now()->addHours($hours + 1);
 
-        // Pre-filter by date in SQL (driver-agnostic), then narrow to the
-        // exact 2h window in PHP. The whereBetween covers the at-most-two
-        // calendar dates that intersect the window.
+        // Fetch all confirmed-and-unreminded appointments whose date is on
+        // either of the two calendar dates the ±1h window can intersect.
+        // Then narrow to the exact window in PHP — appointment_time has
+        // a TIME column + Carbon cast that doesn't survive cross-driver
+        // string concatenation, so PHP-side filtering is the safe path.
+        $dates = array_unique([
+            $windowStart->toDateString(),
+            $windowEnd->toDateString(),
+        ]);
+
         $candidates = Appointment::query()
             ->where('status', AppointmentStatus::CONFIRMED)
             ->whereNull('reminder_sent_at')
-            ->whereBetween('appointment_date', [
-                $windowStart->toDateString(),
-                $windowEnd->toDateString(),
-            ])
-            ->with('patient')
+            ->whereIn('appointment_date', $dates)
+            ->with('user')
             ->get();
 
         $appointments = $candidates->filter(function (Appointment $a) use ($windowStart, $windowEnd) {
-            // appointment_time is cast to Carbon ('datetime:H:i'); take just
-            // the time portion so it pairs with the date cleanly.
             $timeStr = $a->appointment_time instanceof \Carbon\Carbon
                 ? $a->appointment_time->format('H:i:s')
                 : (string) $a->appointment_time;
+
             $datetime = \Carbon\Carbon::parse(
                 $a->appointment_date->format('Y-m-d').' '.$timeStr
             );
 
-            return $datetime->between($windowStart, $windowEnd);
+            return $datetime->greaterThanOrEqualTo($windowStart)
+                && $datetime->lessThanOrEqualTo($windowEnd);
         });
 
         if ($appointments->isEmpty()) {
