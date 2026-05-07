@@ -14,6 +14,15 @@
             "time_line": "Time: :time",
             "contact_line": "To reschedule or for questions, call us on :phone.",
             "salutation": "See you soon,"
+        },
+        "appointment_reminder": {
+            "subject": "Reminder: your appointment tomorrow on :date",
+            "greeting": "Hi :name,",
+            "intro": "A friendly reminder of your appointment tomorrow at :clinic with :doctor.",
+            "date_line": "Date: :date",
+            "time_line": "Time: :time",
+            "contact_line": "If something came up and you need to reschedule, call us on :phone.",
+            "salutation": "See you tomorrow,"
         }
     },
 
