@@ -136,4 +136,40 @@ class ClinicSettingController extends Controller
             'data' => new ClinicSettingResource($settings->fresh()),
         ]);
     }
+
+    // Marks the first-run wizard complete. Required: clinic_name, doctor_name,
+    // and phone are non-empty AND not the seeded placeholder strings (to prevent
+    // accidentally marking complete on a fresh install). Frontend hits this once
+    // the doctor finishes the wizard; after this, /admin/setup redirects to
+    // the dashboard and admin pages stop nagging.
+    public function completeSetup(): JsonResponse
+    {
+        $settings = ClinicSetting::getInstance();
+
+        $placeholder = ['العيادة', 'الدكتور', 'Clinic', 'Doctor'];
+        $missing = [];
+        foreach (['clinic_name' => 'العيادة', 'doctor_name' => 'الدكتور', 'phone' => null] as $field => $defaultPlaceholder) {
+            $value = $settings->{$field};
+            if (blank($value) || in_array($value, $placeholder, true)) {
+                $missing[] = $field;
+            }
+        }
+
+        if (! empty($missing)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'يجب تعبئة بيانات العيادة قبل إكمال الإعداد.',
+                'error_code' => 'SETUP_INCOMPLETE',
+                'errors' => ['missing' => $missing],
+            ], 422);
+        }
+
+        $settings->update(['setup_completed_at' => now()]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إكمال إعداد العيادة بنجاح.',
+            'data' => new ClinicSettingResource($settings->fresh()),
+        ]);
+    }
 }

@@ -221,6 +221,14 @@
     }
   },
   "admin": {
+    "setup": {
+      "title": "Complete clinic setup",
+      "description": "Your account is live, but the public page still shows placeholder content. Fill in your clinic name, doctor info, contact details, and working hours so patients can book.",
+      "cta": "Open settings",
+      "completeButton": "Mark setup complete",
+      "completeSuccess": "Clinic setup complete. Your public page is live!",
+      "completeBlocked": "Set the clinic name, doctor name, and phone number before completing setup."
+    },
     "dashboard": {
       "title": "Dashboard",
       "totalPatients": "Total Patients",
