@@ -44,6 +44,15 @@ class SendAppointmentReminders extends Command
             ->with('user')
             ->get();
 
+        $this->line(sprintf(
+            '[reminders][debug] now=%s window=[%s, %s] dates=%s candidates=%d',
+            now()->toDateTimeString(),
+            $windowStart->toDateTimeString(),
+            $windowEnd->toDateTimeString(),
+            json_encode($dates),
+            $candidates->count()
+        ));
+
         $appointments = $candidates->filter(function (Appointment $a) use ($windowStart, $windowEnd) {
             $timeStr = $a->appointment_time instanceof \Carbon\Carbon
                 ? $a->appointment_time->format('H:i:s')
@@ -53,8 +62,19 @@ class SendAppointmentReminders extends Command
                 $a->appointment_date->format('Y-m-d').' '.$timeStr
             );
 
-            return $datetime->greaterThanOrEqualTo($windowStart)
+            $inWindow = $datetime->greaterThanOrEqualTo($windowStart)
                 && $datetime->lessThanOrEqualTo($windowEnd);
+
+            $this->line(sprintf(
+                '[reminders][debug] candidate id=%d date=%s time=%s parsed=%s inWindow=%s',
+                $a->id,
+                $a->appointment_date->format('Y-m-d'),
+                $timeStr,
+                $datetime->toDateTimeString(),
+                $inWindow ? 'yes' : 'no'
+            ));
+
+            return $inWindow;
         });
 
         if ($appointments->isEmpty()) {
