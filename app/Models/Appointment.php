@@ -30,6 +30,7 @@ class Appointment extends Model
         'cancelled_at',
         'confirmed_at',
         'completed_at',
+        'reminder_sent_at',
     ];
 
     protected $casts = [
@@ -40,6 +41,7 @@ class Appointment extends Model
         'cancelled_at' => 'datetime',
         'confirmed_at' => 'datetime',
         'completed_at' => 'datetime',
+        'reminder_sent_at' => 'datetime',
     ];
 
     // ==================== Relationships ====================

@@ -35,8 +35,40 @@ export default async function LandingPage() {
   const heroImageUrl = clinic?.hero_image_url;
   const logoUrl = clinic?.logo_url;
 
+  // Schema.org MedicalBusiness JSON-LD so Google Rich Results /
+  // Knowledge Panel pick up clinic info. Only emits real fields — avoids
+  // shipping placeholder strings to search.
+  const siteUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+  const jsonLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalBusiness',
+    name: clinicName,
+    url: siteUrl,
+    ...(specialization ? { medicalSpecialty: specialization } : {}),
+    ...(phone ? { telephone: phone } : {}),
+    ...(email ? { email } : {}),
+    ...(address ? { address: { '@type': 'PostalAddress', streetAddress: address, addressCountry: 'EG' } } : {}),
+    ...(logoUrl ? { logo: logoUrl } : {}),
+    ...(heroImageUrl ? { image: heroImageUrl } : {}),
+    ...(doctorName
+      ? {
+          employee: {
+            '@type': 'Physician',
+            name: doctorName,
+            ...(specialization ? { medicalSpecialty: specialization } : {}),
+          },
+        }
+      : {}),
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <script
+        type="application/ld+json"
+        // The JSON object never contains user input — only clinic_settings
+        // fields the doctor edits via /admin. Safe to dangerouslySetInnerHTML.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header */}
       <header className="px-4 sm:px-8 py-4 flex justify-between items-center border-b border-border/50">
         <Link href="/" className="flex items-center gap-2.5">

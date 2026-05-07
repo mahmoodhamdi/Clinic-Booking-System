@@ -14,6 +14,15 @@
             "time_line": "الوقت: :time",
             "contact_line": "للاستفسار أو التعديل، اتصل بنا على :phone.",
             "salutation": "في انتظارك،"
+        },
+        "appointment_reminder": {
+            "subject": "تذكير: موعدك غداً :date",
+            "greeting": "مرحباً :name،",
+            "intro": "تذكير لطيف بموعدك غداً في :clinic مع :doctor.",
+            "date_line": "التاريخ: :date",
+            "time_line": "الوقت: :time",
+            "contact_line": "لو حصل ظرف وعايز تأجل، اتصل بنا على :phone.",
+            "salutation": "نراك غداً،"
         }
     },
 
