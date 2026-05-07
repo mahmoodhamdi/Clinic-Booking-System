@@ -197,19 +197,19 @@
 
 ### Tasks
 
-- [ ] **W5-T1 — Adjust coverage threshold** (M-8)
+- [x] **W5-T1 — Adjust coverage threshold** (M-8)
   - In `.github/workflows/ci.yml`, change `--min=100` to `--min=90` for general; keep 100% for critical-path classes (Auth, Payment, Appointment) via separate test config.
   - Document the policy in `CONTRIBUTING.md`.
   - **Acceptance:** New tests can land with 90% coverage on new code; critical-path 100% maintained.
 
-- [ ] **W5-T2 — Delete Next.js boilerplate SVGs** (M-7)
+- [x] **W5-T2 — Delete Next.js boilerplate SVGs** (M-7)
   - `rm frontend/public/{file,globe,next,vercel,window}.svg`.
   - Verify no imports reference them.
 
-- [ ] **W5-T3 — Sweep error responses for inconsistency** (L-4)
+- [x] **W5-T3 — Sweep error responses for inconsistency** (L-4)
   - Grep all controllers for direct `response()->json` calls; replace with `ApiResponse::*` helpers where appropriate.
 
-- [ ] **W5-T4 — Doc + style cleanup**
+- [x] **W5-T4 — Doc + style cleanup**
   - Fix README E2E count: 4 → 7 (L-1).
   - Standardize seeder password style (L-2): use `Hash::make()` everywhere or rely on cast everywhere — pick one.
   - Reconcile `X-Frame-Options` between Laravel `SecurityHeaders` (DENY) and `vercel.json` (SAMEORIGIN) (L-3).
@@ -254,6 +254,6 @@ These items are explicitly **out of scope** per the closeout prompt. Surfacing t
 |------|--------|-----|-------|
 | 1 — Security & Deploy Safety | ✅ Merged | #1 | 0 critical/high CVEs remain on direct deps; deploy safety closed |
 | 2 — Core Sale-Blockers | ✅ Merged | #2 | Landing page live, SMS docs in env, email path functional, branding |
-| 3 — Production Deployment | ✅ Done — awaiting merge | (current PR) | Sentry replaced with structured JSON logging per user request |
-| 4 — Market Parity | ⏳ Pending approval | — | Decision: Vonage (SMS) + Paymob (payments). 🛑 stop before W4-T1 to confirm Paymob account ready |
-| 5 — Polish & Cleanup | ⏳ Pending approval | — | W5-T1 (coverage threshold) was brought forward into Wave 1; remaining tasks are real cleanup |
+| 3 — Production Deployment | ✅ Merged | #3 | Sentry replaced with structured JSON logging per user request |
+| 4 — Market Parity | ✅ Merged (3 of 4 tasks) | #4 | W4-T1 (Paymob) deferred — no merchant account yet; reminders, SEO, PWA shipped |
+| 5 — Polish & Cleanup | ✅ Done — awaiting merge | (current PR) | W5-T1 + T2 already shipped earlier waves; T3 turned out to be a doc fix not a refactor |

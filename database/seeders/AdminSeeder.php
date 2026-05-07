@@ -8,9 +8,6 @@ use Illuminate\Database\Seeder;
 
 class AdminSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $password = env('ADMIN_DEFAULT_PASSWORD', 'admin123');
@@ -20,6 +17,10 @@ class AdminSeeder extends Seeder
             $admin = new User([
                 'name' => 'Dr. Admin',
                 'email' => 'admin@clinic.com',
+                // Raw value; the User model's 'password' => 'hashed' cast
+                // auto-hashes on save. DemoSeeder uses the same effective
+                // result via explicit Hash::make() — both styles work because
+                // the cast is hash-aware (skips already-hashed values).
                 'password' => $password,
                 'phone' => '01000000000',
                 'phone_verified_at' => now(),

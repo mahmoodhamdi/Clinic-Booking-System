@@ -153,7 +153,7 @@ Registered in `AppServiceProvider::boot()`:
 - `AppointmentObserver`, `PaymentObserver`, `UserObserver`, `ScheduleObserver`, `VacationObserver`, `MedicalRecordObserver`
 
 ### ApiResponse Helper (app/Http/Helpers/ApiResponse.php)
-All controllers use `ApiResponse` for consistent JSON:
+Helper for consistent JSON output. **Not universally used in controllers** — most use `response()->json([...])` directly with the same `{success, message, data}` shape. The helper is preferred for new controllers but the existing pattern is acceptable; both produce identical contracts. Available methods:
 - `ApiResponse::success($data, $message, $code)`, `::created()`, `::error()`, `::paginated($paginator, $resourceClass)`
 - Shortcuts: `notFound()`, `unauthorized()`, `forbidden()`, `validationError()`, `tooManyRequests()`, `serverError()`
 - Paginated responses include `meta` (current_page, last_page, per_page, total) and `links` (first, last, prev, next)
