@@ -50,6 +50,17 @@ class SendAppointmentRemindersTest extends TestCase
             'appointment_time' => '10:00',
         ]);
 
+        // Sanity: confirm the row landed in the DB with the values we passed.
+        // If this fails the bug is in the factory/DB; if it passes, the bug
+        // is in the command's filter.
+        $stored = Appointment::find($appointment->id);
+        $this->assertNotNull($stored, 'appointment was not persisted');
+        $this->assertSame(
+            '2026-05-08',
+            $stored->appointment_date->format('Y-m-d'),
+            'appointment_date round-trip mismatch'
+        );
+
         $this->artisan('appointments:send-reminders --hours=24')->assertSuccessful();
 
         Notification::assertSentTo($patient, AppointmentReminder::class);

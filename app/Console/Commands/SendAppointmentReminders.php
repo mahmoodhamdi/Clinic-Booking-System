@@ -44,14 +44,20 @@ class SendAppointmentReminders extends Command
             ->with('user')
             ->get();
 
-        $this->line(sprintf(
-            '[reminders][debug] now=%s window=[%s, %s] dates=%s candidates=%d',
-            now()->toDateTimeString(),
-            $windowStart->toDateTimeString(),
-            $windowEnd->toDateTimeString(),
-            json_encode($dates),
-            $candidates->count()
-        ));
+        \Log::warning('[reminders][debug]', [
+            'now' => now()->toDateTimeString(),
+            'window_start' => $windowStart->toDateTimeString(),
+            'window_end' => $windowEnd->toDateTimeString(),
+            'dates_filter' => $dates,
+            'candidates_count' => $candidates->count(),
+            'all_appointments' => Appointment::all()->map(fn ($a) => [
+                'id' => $a->id,
+                'date' => (string) $a->appointment_date,
+                'time' => (string) $a->appointment_time,
+                'status' => $a->status?->value,
+                'reminder_sent_at' => $a->reminder_sent_at?->toDateTimeString(),
+            ])->toArray(),
+        ]);
 
         $appointments = $candidates->filter(function (Appointment $a) use ($windowStart, $windowEnd) {
             $timeStr = $a->appointment_time instanceof \Carbon\Carbon
