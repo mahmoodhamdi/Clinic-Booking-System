@@ -138,6 +138,7 @@ class AuthController extends Controller
     {
         $request->user()->update([
             'password' => $request->password,
+            'must_change_password' => false,
         ]);
 
         return response()->json([
@@ -407,9 +408,11 @@ class AuthController extends Controller
             ], 429);
         }
 
-        // Update password
+        // Update password and clear the forced-change flag — if the user
+        // got here via OTP reset, they've already chosen their own password.
         User::where('phone', $request->phone)->update([
             'password' => Hash::make($request->password),
+            'must_change_password' => false,
         ]);
 
         // Delete the reset token

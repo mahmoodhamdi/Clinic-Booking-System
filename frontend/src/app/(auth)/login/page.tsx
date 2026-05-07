@@ -42,9 +42,14 @@ export default function LoginPage() {
       await login(data);
       toast.success(t('loginSuccess'));
 
-      // Get user from store to check role
-      // Token is set via HttpOnly cookie by the server
+      // Get user from store to check role and forced password change.
+      // Token is set via HttpOnly cookie by the server.
       const user = useAuthStore.getState().user;
+
+      if (user?.must_change_password) {
+        router.push('/change-password');
+        return;
+      }
 
       // Redirect based on role
       if (user?.role === 'admin' || user?.role === 'secretary') {

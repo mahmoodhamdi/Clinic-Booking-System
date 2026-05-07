@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'address' => $this->address,
             'avatar' => $this->avatar_url,
             'is_active' => $this->is_active,
+            'must_change_password' => (bool) $this->must_change_password,
             'phone_verified_at' => $this->phone_verified_at?->toISOString(),
             'created_at' => $this->created_at?->toISOString(),
         ];

@@ -20,6 +20,7 @@ export interface User {
   avatar: string | null;
   avatar_url?: string | null;
   is_active: boolean;
+  must_change_password?: boolean;
   phone_verified_at: string | null;
   created_at: string;
   profile?: PatientProfile | null;

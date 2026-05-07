@@ -33,6 +33,7 @@ class User extends Authenticatable
         'address',
         'avatar',
         'phone_verified_at',
+        'must_change_password',
     ];
 
     /**
@@ -58,6 +59,7 @@ class User extends Authenticatable
             'date_of_birth' => 'date',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'must_change_password' => 'boolean',
             'role' => UserRole::class,
             'gender' => Gender::class,
         ];
