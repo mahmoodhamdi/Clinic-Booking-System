@@ -58,7 +58,7 @@
 
 ### Tasks
 
-- [ ] **W2-T1 — Build landing page at `/`** (C-4)
+- [x] **W2-T1 — Build landing page at `/`** (C-4)
   - Replace `frontend/src/app/page.tsx` with a real landing:
     - Hero: clinic name (from settings API) + doctor's name + photo + tagline
     - Services / specialties list (from clinic settings or hardcoded list — ask user)
@@ -69,7 +69,7 @@
   - SSR-friendly. Indexable. Responsive. RTL-aware.
   - **Acceptance:** Visitor sees clinic info on first paint; "Book Now" works; Lighthouse SEO ≥ 90.
 
-- [ ] **W2-T2 — Document SMS provider env in `.env.example`** (H-1)
+- [x] **W2-T2 — Document SMS provider env in `.env.example`** (H-1)
   - Add to `.env.example`:
     ```
     # SMS Provider (for OTP and reminders). Default 'log' writes to storage/logs.
@@ -85,7 +85,7 @@
   - Add a **Production Setup** section in `README.md` linking to a new `DEPLOY.md` (placeholder for Wave 3).
   - **Acceptance:** Following `.env.example` produces a working OTP send (test with Twilio trial).
 
-- [ ] **W2-T3 — Add EmailService and appointment confirmation email** (H-2)
+- [x] **W2-T3 — Add EmailService and appointment confirmation email** (H-2)
   - Document `MAIL_FROM_ADDRESS` and `MAIL_FROM_NAME` in `.env.example` with a sensible default.
   - Add `App\Notifications\AppointmentConfirmedMail` (Mailable). Wire to `AppointmentObserver` so confirmation triggers send.
   - Use Laravel queue (already on `database` driver).
@@ -93,7 +93,7 @@
   - Make sending optional via `EMAIL_NOTIFICATIONS_ENABLED=true` flag; default false for local.
   - **Acceptance:** Booking → confirm → email queued; queue worker sends; email contains correct details. Tests cover the notification.
 
-- [ ] **W2-T4 — Add favicon, manifest, OG tags via Next 16 metadata API** (H-3)
+- [x] **W2-T4 — Add favicon, manifest, OG tags via Next 16 metadata API** (H-3)
   - Delete Next.js boilerplate SVGs in `frontend/public/`.
   - Add `frontend/src/app/icon.tsx` (or `favicon.ico` from clinic logo).
   - Add `frontend/src/app/manifest.ts` (PWA basics: name, short_name, theme_color, icons).
@@ -115,29 +115,29 @@
 
 ### Tasks
 
-- [ ] **W3-T1 — Env-driven CSP in `next.config.ts`** (H-4)
+- [x] **W3-T1 — Env-driven CSP in `next.config.ts`** (H-4)
   - Replace hardcoded `localhost:8000/9000` with values derived from `NEXT_PUBLIC_API_URL`.
   - Default development to permissive; production to strict.
   - **Acceptance:** `NEXT_PUBLIC_API_URL=https://api.example.com npm run build` produces a CSP that allows `https://api.example.com` and nothing else.
 
-- [ ] **W3-T2 — Write `DEPLOY.md`** (H-5)
+- [x] **W3-T2 — Write `DEPLOY.md`** (H-5)
   - Sections: System requirements, Initial setup (Docker + non-Docker), Reverse proxy (nginx config snippet), SSL (Let's Encrypt), First-run admin setup, Email/SMS providers, Backups, Monitoring, Troubleshooting.
   - Include sample nginx config for frontend (reverse-proxy to Next standalone) and backend (php-fpm).
   - **Acceptance:** Person unfamiliar with the project can deploy following docs alone.
 
-- [ ] **W3-T3 — First-run setup wizard for admin** (H-6)
+- [x] **W3-T3 — First-run setup wizard for admin** (H-6)
   - After forced password change (W1-T4), if `clinic_settings` has empty `name`, redirect to `/admin/setup`.
   - Wizard steps: 1) Clinic info (name, phone, address, logo) → 2) Working hours (Schedule per day) → 3) Slot duration & cancellation policy → Done.
   - On completion, mark `setup_completed_at` in clinic_settings; subsequent admin logins skip wizard.
   - **Acceptance:** Fresh admin login → password change → setup wizard → admin dashboard. No way to skip.
 
-- [ ] **W3-T4 — Add Sentry (or self-hosted equivalent) for backend + frontend** (M-3)
+- [x] **W3-T4 — Add Sentry (or self-hosted equivalent) for backend + frontend** (M-3)
   - Backend: `sentry/sentry-laravel` package; configure DSN via env.
   - Frontend: `@sentry/nextjs`; configure DSN via env.
   - Both default to disabled if DSN is empty (no errors when not configured).
   - **Acceptance:** Forcing an error in dev with a real DSN produces an event in Sentry; without DSN, app doesn't crash.
 
-- [ ] **W3-T5 — Backup script + docs** (M-4)
+- [x] **W3-T5 — Backup script + docs** (M-4)
   - Add `scripts/backup.sh`: dumps MySQL + tarballs `storage/app/public` (medical attachments).
   - Add `scripts/restore.sh`.
   - Document in `DEPLOY.md` how to schedule via cron + how to restore.
@@ -252,8 +252,8 @@ These items are explicitly **out of scope** per the closeout prompt. Surfacing t
 
 | Wave | Status | PR | Notes |
 |------|--------|-----|-------|
-| 1 — Security & Deploy Safety | ✅ Done — awaiting merge | (see PR) | All 5 tasks complete; 0 critical/high CVEs remain on direct deps |
-| 2 — Core Sale-Blockers | ⏳ Pending Wave 1 merge | — | Decision: landing page reads from clinic_settings (Egypt-only market) |
-| 3 — Production Deployment | ⏳ Pending approval | — | — |
+| 1 — Security & Deploy Safety | ✅ Merged | #1 | 0 critical/high CVEs remain on direct deps; deploy safety closed |
+| 2 — Core Sale-Blockers | ✅ Merged | #2 | Landing page live, SMS docs in env, email path functional, branding |
+| 3 — Production Deployment | ✅ Done — awaiting merge | (current PR) | Sentry replaced with structured JSON logging per user request |
 | 4 — Market Parity | ⏳ Pending approval | — | Decision: Vonage (SMS) + Paymob (payments). 🛑 stop before W4-T1 to confirm Paymob account ready |
-| 5 — Polish & Cleanup | ⏳ Pending approval | — | — |
+| 5 — Polish & Cleanup | ⏳ Pending approval | — | W5-T1 (coverage threshold) was brought forward into Wave 1; remaining tasks are real cleanup |
