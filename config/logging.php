@@ -127,6 +127,28 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        // Structured JSON logger — pair with LOG_CHANNEL=json in production
+        // so log aggregators (Datadog, Loki, ELK) parse fields directly. The
+        // request_id added by AddRequestId middleware appears in the "extra"
+        // section of every record, enabling end-to-end request correlation.
+        'json' => [
+            'driver' => 'custom',
+            'via' => \App\Logging\JsonLogChannelFactory::class,
+            'level' => env('LOG_LEVEL', 'info'),
+            'stream' => env('LOG_JSON_STREAM', storage_path('logs/laravel.log')),
+            'name' => 'clinic',
+        ],
+
+        // JSON to stderr — useful for containerized deploys where the
+        // orchestrator collects stdout/stderr automatically.
+        'json-stderr' => [
+            'driver' => 'custom',
+            'via' => \App\Logging\JsonLogChannelFactory::class,
+            'level' => env('LOG_LEVEL', 'info'),
+            'stream' => 'php://stderr',
+            'name' => 'clinic',
+        ],
+
     ],
 
 ];
