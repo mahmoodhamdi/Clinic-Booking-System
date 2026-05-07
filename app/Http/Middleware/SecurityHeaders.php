@@ -18,8 +18,10 @@ class SecurityHeaders
         // Prevent MIME type sniffing
         $response->headers->set('X-Content-Type-Options', 'nosniff');
 
-        // Prevent clickjacking
-        $response->headers->set('X-Frame-Options', 'DENY');
+        // Prevent clickjacking. SAMEORIGIN (vs DENY) matches the frontend
+        // CSP frame-ancestors and the Vercel-served HTML headers, so the
+        // value is consistent across every response a browser sees.
+        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
 
         // Enable XSS filter in older browsers
         $response->headers->set('X-XSS-Protection', '1; mode=block');

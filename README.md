@@ -1,8 +1,8 @@
 # Clinic Booking System
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/mahmoodhamdi/Clinic-Booking-System/releases/tag/v1.0.0)
-[![Backend Tests](https://img.shields.io/badge/backend%20tests-791%20passing-brightgreen.svg)]()
-[![Frontend Tests](https://img.shields.io/badge/frontend%20tests-321%20passing-brightgreen.svg)]()
+[![Backend Tests](https://img.shields.io/badge/backend%20tests-900%2B%20passing-brightgreen.svg)]()
+[![Frontend Tests](https://img.shields.io/badge/frontend%20tests-500%2B%20passing-brightgreen.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 A comprehensive Clinic Booking System for private medical clinics built with **Laravel 12** backend and **Next.js 16** frontend. Supports three user types: Admin (Doctor), Secretary, and Patients.
@@ -122,7 +122,7 @@ A comprehensive Clinic Booking System for private medical clinics built with **L
 - **Database**: MySQL / SQLite
 - **PDF Generation**: DomPDF
 - **Queue**: Database driver
-- **Testing**: PHPUnit (791 tests)
+- **Testing**: PHPUnit (900+ tests)
 
 ### Frontend
 - **Framework**: Next.js 16 (App Router)
@@ -131,7 +131,7 @@ A comprehensive Clinic Booking System for private medical clinics built with **L
 - **Forms**: React Hook Form + Zod
 - **UI Components**: Radix UI + Tailwind CSS
 - **Internationalization**: next-intl
-- **Testing**: Jest (321 tests) + Playwright (E2E)
+- **Testing**: Jest (500+ tests) + Playwright (E2E)
 
 ### DevOps
 - **Containerization**: Docker + Docker Compose
@@ -293,9 +293,9 @@ npm run test:e2e
 
 | Component | Tests | Assertions |
 |-----------|-------|------------|
-| Backend | 791 | 1,972 |
-| Frontend | 321 | - |
-| E2E | 4 specs | - |
+| Backend | 900+ | 2,250+ |
+| Frontend | 500+ | - |
+| E2E | 7 specs | - |
 
 ## Project Structure
 
