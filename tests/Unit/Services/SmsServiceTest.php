@@ -219,17 +219,23 @@ class SmsServiceTest extends TestCase
     }
 
     /** @test */
-    public function phone_with_plus_prefix_passes_through(): void
+    public function phone_with_plus_egypt_country_code_passes_through(): void
     {
+        // formatPhone() strips non-digits first (so '+' is dropped), then
+        // checks the leading digits. '+201...' becomes '201...' which
+        // matches the str_starts_with('20') branch and gets a single '+'
+        // prepended back. This documents the Egypt-only contract:
+        // foreign-prefix numbers ('+1...') would be misformatted, but the
+        // single-clinic Egyptian target market doesn't expose them.
         config()->set('services.sms.provider', 'twilio');
         config()->set('services.twilio.sid', 'AC123');
         config()->set('services.twilio.token', 's');
         config()->set('services.twilio.from', 'F');
         Http::fake(['api.twilio.com/*' => Http::response(['sid' => 'SM'], 201)]);
 
-        (new SmsService)->send('+15551234567', 'msg');
+        (new SmsService)->send('+201012345678', 'msg');
 
-        Http::assertSent(fn ($r) => $r['To'] === '+15551234567');
+        Http::assertSent(fn ($r) => $r['To'] === '+201012345678');
     }
 
     // ==================== Provider introspection ====================

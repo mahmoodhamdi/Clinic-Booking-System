@@ -88,7 +88,11 @@ class PaymentServiceTest extends TestCase
                 $this->service->createPayment($appointment, $bad);
                 $this->fail("amount $bad should have thrown");
             } catch (PaymentException $e) {
-                $this->assertSame('invalid_amount', $e->getErrorCode());
+                // PaymentException hardcodes errorCode='PAYMENT_ERROR' for
+                // every reason; the per-reason discriminator lives in
+                // context['reason'].
+                $this->assertSame('PAYMENT_ERROR', $e->getErrorCode());
+                $this->assertSame('invalid_amount', $e->getContext()['reason']);
                 $this->assertSame($appointment->id, $e->getAppointmentId());
                 $this->assertSame($bad, $e->getAmount());
             }
@@ -110,6 +114,11 @@ class PaymentServiceTest extends TestCase
         $appointment = $this->appointment();
         $existing = $this->service->createPayment($appointment, 200.0);
         $this->service->markAsPaid($existing);
+
+        // The service reads $appointment->payment, which is cached on the
+        // model instance from earlier access. Re-fetch so the relation
+        // reflects the just-paid payment.
+        $appointment = $appointment->fresh();
 
         $this->expectException(PaymentException::class);
         $this->service->createPayment($appointment, 50.0);
