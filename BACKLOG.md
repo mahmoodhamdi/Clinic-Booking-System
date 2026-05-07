@@ -15,30 +15,30 @@
 
 ### Tasks
 
-- [ ] **W1-T1 — `npm audit fix` and verify no breaking changes** (C-1)
+- [x] **W1-T1 — `npm audit fix` and verify no breaking changes** (C-1)
   - Run `cd frontend && npm audit fix`. Re-run `npm audit` until 0 high/critical.
   - If `next-intl` requires major version bump → flag for user (🛑 major version).
   - Run `npm test` and `npm run build` to confirm nothing breaks.
   - **Acceptance:** `npm audit` shows 0 high/critical; tests pass; build succeeds.
 
-- [ ] **W1-T2 — Gate `DemoSeeder` on non-production env** (C-2)
+- [x] **W1-T2 — Gate `DemoSeeder` on non-production env** (C-2)
   - Edit `database/seeders/DatabaseSeeder.php` to call `DemoSeeder` only when `app()->environment(['local', 'testing'])` is true OR when `SEED_DEMO_DATA=true` env is set.
   - Edit `docker/entrypoint.sh:34` to either skip seeders in production or pass `--class=ProductionSeeder`.
   - Add a `ProductionSeeder` that runs only `AdminSeeder` + `ClinicSettingSeeder` + `ScheduleSeeder` (no demo data).
   - **Acceptance:** `APP_ENV=production php artisan db:seed --force` does not create demo patients; tests still pass.
 
-- [ ] **W1-T3 — Remove default credentials echo from entrypoint** (C-3)
+- [x] **W1-T3 — Remove default credentials echo from entrypoint** (C-3)
   - Delete the `Admin Credentials` echo block in `docker/entrypoint.sh:50-53`.
   - Replace with `echo "First-time setup: log in and change the admin password — see DEPLOY.md"`.
   - **Acceptance:** Container start logs do not contain plaintext credentials.
 
-- [ ] **W1-T4 — Force password change on first admin login** (H-7)
+- [x] **W1-T4 — Force password change on first admin login** (H-7)
   - Add a `must_change_password` boolean to `users` table (migration). Default `true` for the seeded admin.
   - On login, if `must_change_password` is true, return a flag in the auth response; frontend redirects to a forced-change-password screen before granting access to admin pages.
   - On change, clear the flag.
   - **Acceptance:** Fresh seed → login as admin → forced to change password → cannot access `/admin/*` until done.
 
-- [ ] **W1-T5 — Remove default credentials from `README.md`** (H-7)
+- [x] **W1-T5 — Remove default credentials from `README.md`** (H-7)
   - Replace the credentials table with: "After deployment, you'll be prompted to set the admin password on first login. See DEPLOY.md."
   - **Acceptance:** No `admin123` substring anywhere in `README.md`.
 
@@ -252,8 +252,8 @@ These items are explicitly **out of scope** per the closeout prompt. Surfacing t
 
 | Wave | Status | PR | Notes |
 |------|--------|-----|-------|
-| 1 — Security & Deploy Safety | ⏳ Pending approval | — | — |
-| 2 — Core Sale-Blockers | ⏳ Pending approval | — | — |
+| 1 — Security & Deploy Safety | ✅ Done — awaiting merge | (see PR) | All 5 tasks complete; 0 critical/high CVEs remain on direct deps |
+| 2 — Core Sale-Blockers | ⏳ Pending Wave 1 merge | — | Decision: landing page reads from clinic_settings (Egypt-only market) |
 | 3 — Production Deployment | ⏳ Pending approval | — | — |
-| 4 — Market Parity | ⏳ Pending approval | — | Has 🛑 decision (W4-T1) |
+| 4 — Market Parity | ⏳ Pending approval | — | Decision: Vonage (SMS) + Paymob (payments). 🛑 stop before W4-T1 to confirm Paymob account ready |
 | 5 — Polish & Cleanup | ⏳ Pending approval | — | — |
