@@ -50,15 +50,39 @@ class SendAppointmentRemindersTest extends TestCase
             'appointment_time' => '10:00',
         ]);
 
-        // Sanity: confirm the row landed in the DB with the values we passed.
-        // If this fails the bug is in the factory/DB; if it passes, the bug
-        // is in the command's filter.
+        // Reproduce the command's candidate query inline so a failure here
+        // tells us *which* condition excludes the appointment instead of
+        // just "no notification sent".
         $stored = Appointment::find($appointment->id);
         $this->assertNotNull($stored, 'appointment was not persisted');
         $this->assertSame(
             '2026-05-08',
             $stored->appointment_date->format('Y-m-d'),
             'appointment_date round-trip mismatch'
+        );
+        $this->assertSame(AppointmentStatus::CONFIRMED, $stored->status, 'status round-trip mismatch');
+        $this->assertNull($stored->reminder_sent_at, 'reminder_sent_at should be null');
+
+        $windowStart = now()->addHours(23);
+        $windowEnd = now()->addHours(25);
+        $datesFilter = array_unique([$windowStart->toDateString(), $windowEnd->toDateString()]);
+        $this->assertContains('2026-05-08', $datesFilter, 'window did not include 2026-05-08');
+
+        $candidates = Appointment::query()
+            ->where('status', AppointmentStatus::CONFIRMED)
+            ->whereNull('reminder_sent_at')
+            ->whereIn('appointment_date', $datesFilter)
+            ->get();
+
+        $this->assertCount(
+            1,
+            $candidates,
+            sprintf(
+                'candidate query returned %d rows; expected 1. dates=%s, all rows=%s',
+                $candidates->count(),
+                json_encode($datesFilter),
+                Appointment::all()->toJson()
+            )
         );
 
         $this->artisan('appointments:send-reminders --hours=24')->assertSuccessful();
