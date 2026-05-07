@@ -37,6 +37,7 @@ class ClinicSetting extends Model
         'max_patients_per_slot',
         'advance_booking_days',
         'cancellation_hours',
+        'setup_completed_at',
     ];
 
     protected $casts = [
@@ -45,6 +46,7 @@ class ClinicSetting extends Model
         'advance_booking_days' => 'integer',
         'cancellation_hours' => 'integer',
         'services' => 'array',
+        'setup_completed_at' => 'datetime',
     ];
 
     /**

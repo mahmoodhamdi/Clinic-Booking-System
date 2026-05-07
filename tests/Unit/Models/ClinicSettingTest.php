@@ -30,6 +30,7 @@ class ClinicSettingTest extends TestCase
             'max_patients_per_slot',
             'advance_booking_days',
             'cancellation_hours',
+            'setup_completed_at',
         ];
 
         $setting = new ClinicSetting;

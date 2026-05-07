@@ -38,6 +38,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { SetupBanner } from '@/components/admin/SetupBanner';
 import { useAuthStore } from '@/lib/stores/auth';
 import { patientApi } from '@/lib/api/patient';
 import { cn } from '@/lib/utils';
@@ -353,6 +354,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </div>
         </header>
+
+        <SetupBanner />
 
         {/* Page Content */}
         <main className="p-4 sm:p-6">{children}</main>

@@ -137,6 +137,7 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->prefix('admin')->g
     Route::delete('/settings/logo', [ClinicSettingController::class, 'deleteLogo']);
     Route::post('/settings/hero-image', [ClinicSettingController::class, 'uploadHeroImage']);
     Route::delete('/settings/hero-image', [ClinicSettingController::class, 'deleteHeroImage']);
+    Route::post('/settings/complete-setup', [ClinicSettingController::class, 'completeSetup']);
 
     // Schedules
     Route::get('/schedules', [ScheduleController::class, 'index']);

@@ -480,6 +480,11 @@ export const adminApi = {
     return response.data;
   },
 
+  completeClinicSetup: async (): Promise<ApiResponse<ClinicSettings>> => {
+    const response = await api.post<ApiResponse<ClinicSettings>>('/admin/settings/complete-setup');
+    return response.data;
+  },
+
   // Schedules
   getSchedules: async (): Promise<ApiResponse<Schedule[]>> => {
     const response = await api.get<ApiResponse<Schedule[]>>('/admin/schedules');

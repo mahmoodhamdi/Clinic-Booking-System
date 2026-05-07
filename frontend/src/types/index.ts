@@ -245,6 +245,8 @@ export interface ClinicSettings {
   advance_booking_days: number;
   cancellation_hours: number;
   consultation_fee: number;
+  setup_completed_at?: string | null;
+  is_setup_complete?: boolean;
 }
 
 // Schedule types

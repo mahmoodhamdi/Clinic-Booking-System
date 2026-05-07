@@ -28,6 +28,8 @@ class ClinicSettingResource extends JsonResource
             'max_patients_per_slot' => $this->max_patients_per_slot,
             'advance_booking_days' => $this->advance_booking_days,
             'cancellation_hours' => $this->cancellation_hours,
+            'setup_completed_at' => $this->setup_completed_at?->toIso8601String(),
+            'is_setup_complete' => $this->setup_completed_at !== null,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];
