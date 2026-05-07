@@ -25,10 +25,14 @@ class ClinicSetting extends Model
         'clinic_name',
         'doctor_name',
         'specialization',
+        'tagline',
         'phone',
         'email',
         'address',
         'logo',
+        'hero_image',
+        'services',
+        'about_text',
         'slot_duration',
         'max_patients_per_slot',
         'advance_booking_days',
@@ -40,6 +44,7 @@ class ClinicSetting extends Model
         'max_patients_per_slot' => 'integer',
         'advance_booking_days' => 'integer',
         'cancellation_hours' => 'integer',
+        'services' => 'array',
     ];
 
     /**
@@ -109,6 +114,15 @@ class ClinicSetting extends Model
         }
 
         return Storage::disk('public')->url($this->logo);
+    }
+
+    public function getHeroImageUrlAttribute(): ?string
+    {
+        if (! $this->hero_image) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->hero_image);
     }
 
     /**

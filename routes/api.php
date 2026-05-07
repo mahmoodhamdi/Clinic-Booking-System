@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\MedicalRecordController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PatientController;
 use App\Http\Controllers\Api\PrescriptionController;
+use App\Http\Controllers\Api\PublicClinicController;
 use App\Http\Controllers\Api\SlotController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,11 @@ Route::get('/health', function () {
         'version' => config('app.version', '1.0.0'),
     ]);
 });
+
+// Public clinic info for the landing page. Throttled with the slots
+// limiter (30/min) since it's the same shape: unauthenticated, idempotent.
+Route::get('/public/clinic-info', [PublicClinicController::class, 'info'])
+    ->middleware('throttle:slots');
 
 // Public auth routes with strict rate limiting
 Route::prefix('auth')->middleware('throttle:auth')->group(function () {
@@ -129,6 +135,8 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:api'])->prefix('admin')->g
     Route::put('/settings', [ClinicSettingController::class, 'update']);
     Route::post('/settings/logo', [ClinicSettingController::class, 'uploadLogo']);
     Route::delete('/settings/logo', [ClinicSettingController::class, 'deleteLogo']);
+    Route::post('/settings/hero-image', [ClinicSettingController::class, 'uploadHeroImage']);
+    Route::delete('/settings/hero-image', [ClinicSettingController::class, 'deleteHeroImage']);
 
     // Schedules
     Route::get('/schedules', [ScheduleController::class, 'index']);

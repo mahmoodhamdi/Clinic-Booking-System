@@ -1,3 +1,24 @@
+// ============ Public Clinic Info (landing page) ============
+
+export interface ClinicService {
+  title: string;
+  description?: string | null;
+}
+
+export interface PublicClinicInfo {
+  clinic_name: string;
+  doctor_name: string;
+  specialization: string | null;
+  tagline: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  logo_url: string | null;
+  hero_image_url: string | null;
+  services: ClinicService[];
+  about_text: string | null;
+}
+
 // ============ Base Enums & Types ============
 
 export type UserRole = 'admin' | 'secretary' | 'patient';
