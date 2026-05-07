@@ -264,7 +264,7 @@ Header: `Accept-Language: ar|en` or query: `?lang=ar`
 Default: Arabic (ar), Fallback: English (en)
 
 ### Default Admin (after seeding)
-Phone: 01000000000, Password: admin123
+Phone: `01000000000`. Initial password defaults to `admin123` for local dev; override via `ADMIN_DEFAULT_PASSWORD` env. The seeded admin has `must_change_password=true`, so the first login forces a password change before any other endpoint is reachable. Demo data only seeds in `local`/`testing` (or with `SEED_DEMO_DATA=true`).
 
 ## Environment
 - PHP 8.2+, MySQL 8.0+ or SQLite, Node.js 18+
