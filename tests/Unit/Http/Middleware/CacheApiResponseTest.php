@@ -21,24 +21,26 @@ class CacheApiResponseTest extends TestCase
     }
 
     /** @test */
-    public function non_get_methods_pass_through_without_cache_headers(): void
+    public function non_get_methods_pass_through_without_etag(): void
     {
+        // Symfony Response auto-adds 'no-cache, private' to any response that
+        // hasn't explicitly set Cache-Control, so we can't assert null on
+        // that header — only that ETag (the middleware's own addition) is absent.
         $request = Request::create('/x', 'POST');
 
         $response = (new CacheApiResponse)->handle($request, $this->passWith('{"a":1}'));
 
-        $this->assertNull($response->headers->get('Cache-Control'));
         $this->assertNull($response->headers->get('ETag'));
     }
 
     /** @test */
-    public function non_2xx_responses_pass_through_without_cache_headers(): void
+    public function non_2xx_responses_pass_through_without_etag(): void
     {
         $request = Request::create('/x');
 
         $response = (new CacheApiResponse)->handle($request, $this->passWith('{"err":1}', 500));
 
-        $this->assertNull($response->headers->get('Cache-Control'));
+        $this->assertNull($response->headers->get('ETag'));
     }
 
     /** @test */
@@ -49,7 +51,11 @@ class CacheApiResponseTest extends TestCase
 
         $response = (new CacheApiResponse)->handle($request, $this->passWith('{"a":1}'));
 
-        $this->assertSame('private, no-cache', $response->headers->get('Cache-Control'));
+        // Symfony reorders Cache-Control directives alphabetically — assert
+        // both directives are present rather than a specific ordering.
+        $cc = $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('private', $cc);
+        $this->assertStringContainsString('no-cache', $cc);
         $this->assertNull($response->headers->get('ETag')); // no etag for personalised content
     }
 
@@ -60,7 +66,9 @@ class CacheApiResponseTest extends TestCase
 
         $response = (new CacheApiResponse)->handle($request, $this->passWith('{"a":1}'));
 
-        $this->assertSame('public, max-age=60', $response->headers->get('Cache-Control'));
+        $cc = $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('public', $cc);
+        $this->assertStringContainsString('max-age=60', $cc);
         $this->assertNotNull($response->headers->get('ETag'));
     }
 
@@ -71,7 +79,9 @@ class CacheApiResponseTest extends TestCase
 
         $response = (new CacheApiResponse)->handle($request, $this->passWith('{"a":1}'), 300);
 
-        $this->assertSame('public, max-age=300', $response->headers->get('Cache-Control'));
+        $cc = $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('public', $cc);
+        $this->assertStringContainsString('max-age=300', $cc);
     }
 
     /** @test */
