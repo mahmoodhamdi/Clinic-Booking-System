@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use Carbon\Carbon;
+
 enum DayOfWeek: int
 {
     case SUNDAY = 0;
@@ -56,7 +58,7 @@ enum DayOfWeek: int
         return array_column(self::cases(), 'value');
     }
 
-    public static function fromDate(\Carbon\Carbon $date): self
+    public static function fromDate(Carbon $date): self
     {
         return self::from($date->dayOfWeek);
     }

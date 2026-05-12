@@ -7,6 +7,7 @@ use App\Http\Middleware\SecretaryMiddleware;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class SecretaryMiddlewareTest extends TestCase
@@ -70,10 +71,10 @@ class SecretaryMiddlewareTest extends TestCase
         $request = Request::create('/x');
         // No Accept: application/json — falls through to abort()
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
         try {
             (new SecretaryMiddleware)->handle($request, $this->pass());
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        } catch (HttpException $e) {
             $this->assertSame(403, $e->getStatusCode());
             throw $e;
         }

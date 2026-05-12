@@ -1,5 +1,6 @@
 <?php
 
+use App\Logging\JsonLogChannelFactory;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -133,7 +134,7 @@ return [
         // section of every record, enabling end-to-end request correlation.
         'json' => [
             'driver' => 'custom',
-            'via' => \App\Logging\JsonLogChannelFactory::class,
+            'via' => JsonLogChannelFactory::class,
             'level' => env('LOG_LEVEL', 'info'),
             'stream' => env('LOG_JSON_STREAM', storage_path('logs/laravel.log')),
             'name' => 'clinic',
@@ -143,7 +144,7 @@ return [
         // orchestrator collects stdout/stderr automatically.
         'json-stderr' => [
             'driver' => 'custom',
-            'via' => \App\Logging\JsonLogChannelFactory::class,
+            'via' => JsonLogChannelFactory::class,
             'level' => env('LOG_LEVEL', 'info'),
             'stream' => 'php://stderr',
             'name' => 'clinic',

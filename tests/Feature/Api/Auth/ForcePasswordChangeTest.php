@@ -4,6 +4,7 @@ namespace Tests\Feature\Api\Auth;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use Database\Seeders\AdminSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -162,7 +163,7 @@ class ForcePasswordChangeTest extends TestCase
     /** @test */
     public function admin_seeded_account_has_must_change_password_set(): void
     {
-        $this->seed(\Database\Seeders\AdminSeeder::class);
+        $this->seed(AdminSeeder::class);
 
         $admin = User::where('phone', '01000000000')->first();
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
+use App\Services\SmsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -121,7 +122,7 @@ class AuthController extends Controller
         );
 
         // Send OTP via SMS service (logs in development when no provider configured)
-        app(\App\Services\SmsService::class)->sendOtp($request->phone, $token);
+        app(SmsService::class)->sendOtp($request->phone, $token);
 
         return redirect()->route('password.verify.form', ['phone' => $request->phone])
             ->with('success', 'تم إرسال رمز التحقق إلى هاتفك.');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Enums\AppointmentStatus;
 use App\Enums\CancelledBy;
 use App\Exceptions\BusinessLogicException;
+use App\Exceptions\SlotNotAvailableException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ListAppointmentsRequest;
 use App\Http\Requests\Admin\UpdateAppointmentNotesRequest;
@@ -218,14 +219,14 @@ class AppointmentController extends Controller
                 'message' => __('تم إعادة جدولة الحجز بنجاح'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
-        } catch (\App\Exceptions\SlotNotAvailableException $e) {
+        } catch (SlotNotAvailableException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
                 'error_code' => $e->getErrorCode(),
                 'reason' => $e->getContext()['reason'] ?? null,
             ], 422);
-        } catch (\App\Exceptions\BusinessLogicException $e) {
+        } catch (BusinessLogicException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),

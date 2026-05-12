@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Appointment;
 use App\Models\ClinicSetting;
+use App\Models\MedicalRecord;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -193,7 +194,7 @@ class PerformanceTest extends TestCase
         ]);
 
         foreach ($appointments as $appointment) {
-            \App\Models\MedicalRecord::factory()->create([
+            MedicalRecord::factory()->create([
                 'patient_id' => $this->patient->id,
                 'appointment_id' => $appointment->id,
             ]);

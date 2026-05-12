@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Api\Admin;
 
+use App\Enums\DayOfWeek;
 use App\Models\Appointment;
 use App\Models\ClinicSetting;
+use App\Models\Schedule;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -18,7 +21,7 @@ class AppointmentApiTest extends TestCase
         parent::setUp();
 
         // Clear any cached schedules from other tests
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         ClinicSetting::factory()->create();
     }
 
@@ -374,8 +377,8 @@ class AppointmentApiTest extends TestCase
         Sanctum::actingAs($admin);
 
         // Ensure known clinic settings with slot_duration=30
-        \App\Models\ClinicSetting::query()->delete();
-        \App\Models\ClinicSetting::factory()->default()->create();
+        ClinicSetting::query()->delete();
+        ClinicSetting::factory()->default()->create();
 
         $appointment = Appointment::factory()->pending()->create([
             'appointment_date' => now()->addDays(2)->toDateString(),
@@ -383,16 +386,16 @@ class AppointmentApiTest extends TestCase
         ]);
 
         $newDate = now()->addDays(5)->startOfDay();
-        $dayOfWeek = \App\Enums\DayOfWeek::fromDate($newDate);
+        $dayOfWeek = DayOfWeek::fromDate($newDate);
 
-        \App\Models\Schedule::factory()->forDay($dayOfWeek)->create([
+        Schedule::factory()->forDay($dayOfWeek)->create([
             'start_time' => '09:00',
             'end_time' => '17:00',
             'is_active' => true,
         ]);
 
         // Flush ALL cache to ensure fresh state
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
 
         $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
             'date' => $newDate->toDateString(),
@@ -416,8 +419,8 @@ class AppointmentApiTest extends TestCase
         Sanctum::actingAs($admin);
 
         // Ensure known clinic settings with slot_duration=30
-        \App\Models\ClinicSetting::query()->delete();
-        \App\Models\ClinicSetting::factory()->default()->create();
+        ClinicSetting::query()->delete();
+        ClinicSetting::factory()->default()->create();
 
         $appointment = Appointment::factory()->confirmed()->create([
             'appointment_date' => now()->addDays(2)->toDateString(),
@@ -425,16 +428,16 @@ class AppointmentApiTest extends TestCase
         ]);
 
         $newDate = now()->addDays(6)->startOfDay();
-        $dayOfWeek = \App\Enums\DayOfWeek::fromDate($newDate);
+        $dayOfWeek = DayOfWeek::fromDate($newDate);
 
-        \App\Models\Schedule::factory()->forDay($dayOfWeek)->create([
+        Schedule::factory()->forDay($dayOfWeek)->create([
             'start_time' => '09:00',
             'end_time' => '17:00',
             'is_active' => true,
         ]);
 
         // Flush ALL cache to ensure fresh state
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
 
         $response = $this->postJson("/api/admin/appointments/{$appointment->id}/reschedule", [
             'date' => $newDate->toDateString(),
@@ -458,7 +461,7 @@ class AppointmentApiTest extends TestCase
         $appointment = Appointment::factory()->completed()->create();
 
         $newDate = now()->addDays(3);
-        \App\Models\Schedule::factory()->forDay(\App\Enums\DayOfWeek::fromDate($newDate))->create([
+        Schedule::factory()->forDay(DayOfWeek::fromDate($newDate))->create([
             'start_time' => '09:00',
             'end_time' => '17:00',
             'is_active' => true,
@@ -497,7 +500,7 @@ class AppointmentApiTest extends TestCase
         Sanctum::actingAs($admin);
 
         $newDate = now()->addDays(3);
-        \App\Models\Schedule::factory()->forDay(\App\Enums\DayOfWeek::fromDate($newDate))->create([
+        Schedule::factory()->forDay(DayOfWeek::fromDate($newDate))->create([
             'start_time' => '09:00',
             'end_time' => '17:00',
             'is_active' => true,

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Prescription extends Model
 {
@@ -127,7 +128,7 @@ class Prescription extends Model
 
     public static function generateNumber(): string
     {
-        return \Illuminate\Support\Facades\DB::transaction(function () {
+        return DB::transaction(function () {
             $year = now()->year;
             $lastPrescription = self::whereYear('created_at', $year)
                 ->lockForUpdate()
