@@ -1,6 +1,16 @@
 <?php
 
+use App\Exceptions\BusinessLogicException;
+use App\Exceptions\PaymentException;
 use App\Http\Helpers\ApiResponse;
+use App\Http\Middleware\AddRequestId;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\AuthenticateFromCookie;
+use App\Http\Middleware\CacheApiResponse;
+use App\Http\Middleware\EnforcePasswordChange;
+use App\Http\Middleware\SecretaryMiddleware;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -30,21 +40,21 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'secretary' => \App\Http\Middleware\SecretaryMiddleware::class,
-            'cache.api' => \App\Http\Middleware\CacheApiResponse::class,
+            'admin' => AdminMiddleware::class,
+            'secretary' => SecretaryMiddleware::class,
+            'cache.api' => CacheApiResponse::class,
         ]);
 
         // Add cookie authentication, security headers and request ID to all API responses
         $middleware->api(prepend: [
-            \App\Http\Middleware\AuthenticateFromCookie::class,
+            AuthenticateFromCookie::class,
         ]);
 
         $middleware->api(append: [
-            \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\EnforcePasswordChange::class,
-            \App\Http\Middleware\AddRequestId::class,
-            \App\Http\Middleware\SecurityHeaders::class,
+            SetLocale::class,
+            EnforcePasswordChange::class,
+            AddRequestId::class,
+            SecurityHeaders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) use ($setLocaleFromRequest): void {
@@ -94,7 +104,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Handle business logic exceptions
-        $exceptions->render(function (\App\Exceptions\BusinessLogicException $e, Request $request) {
+        $exceptions->render(function (BusinessLogicException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 $response = [
                     'success' => false,
@@ -111,7 +121,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Handle payment exceptions
-        $exceptions->render(function (\App\Exceptions\PaymentException $e, Request $request) {
+        $exceptions->render(function (PaymentException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,

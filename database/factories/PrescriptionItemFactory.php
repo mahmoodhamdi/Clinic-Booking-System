@@ -7,7 +7,7 @@ use App\Models\PrescriptionItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PrescriptionItem>
+ * @extends Factory<PrescriptionItem>
  */
 class PrescriptionItemFactory extends Factory
 {

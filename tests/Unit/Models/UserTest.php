@@ -6,6 +6,8 @@ use App\Enums\Gender;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class UserTest extends TestCase
@@ -74,7 +76,7 @@ class UserTest extends TestCase
     {
         $user = User::factory()->create(['date_of_birth' => '1990-01-15']);
 
-        $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $user->date_of_birth);
+        $this->assertInstanceOf(Carbon::class, $user->date_of_birth);
         $this->assertEquals('1990-01-15', $user->date_of_birth->format('Y-m-d'));
     }
 
@@ -219,7 +221,7 @@ class UserTest extends TestCase
         $user = User::factory()->create(['password' => 'plainpassword']);
 
         $this->assertNotEquals('plainpassword', $user->password);
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('plainpassword', $user->password));
+        $this->assertTrue(Hash::check('plainpassword', $user->password));
     }
 
     /** @test */

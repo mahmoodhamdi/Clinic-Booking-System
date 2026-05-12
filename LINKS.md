@@ -284,11 +284,15 @@
 
 | Description | Path |
 |-------------|------|
-| **API Documentation** | `docs/API.md` |
-| **OpenAPI Specification** | `docs/openapi.yaml` |
-| **Docker Guide** | `DOCKER.md` |
-| **Progress Tracker** | `PROGRESS.md` |
 | **Main README** | `README.md` |
+| **API Reference** | `API.md` |
+| **Deployment Guide** | `DEPLOY.md` |
+| **Docker Guide** | `DOCKER.md` |
+| **Design System** | `docs/DESIGN_SYSTEM.md` |
+| **Sales Pitch (AR)** | `SALES.md` |
+| **Support Plans** | `SUPPORT-PLANS.md` |
+| **Handover Checklist** | `HANDOVER-CHECKLIST.md` |
+| **Frontend README** | `frontend/README.md` |
 
 ---
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\MedicalRecord;
 use App\Models\Payment;
@@ -289,13 +290,13 @@ class NotificationTest extends TestCase
         $tomorrow = now()->addDay()->toDateString();
         Appointment::factory()->count(3)->create([
             'appointment_date' => $tomorrow,
-            'status' => \App\Enums\AppointmentStatus::CONFIRMED,
+            'status' => AppointmentStatus::CONFIRMED,
         ]);
 
         // Create appointment for today (should not get reminder)
         Appointment::factory()->create([
             'appointment_date' => now()->toDateString(),
-            'status' => \App\Enums\AppointmentStatus::CONFIRMED,
+            'status' => AppointmentStatus::CONFIRMED,
         ]);
 
         $count = $this->notificationService->sendAppointmentReminders();

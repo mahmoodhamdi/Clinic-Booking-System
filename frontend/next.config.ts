@@ -101,15 +101,19 @@ const nextConfig: NextConfig = {
             value: 'camera=(), microphone=(), geolocation=()',
           },
           {
+            // Next.js 16 emits inline <script> tags for hydration and route
+            // streaming; under a strict 'script-src self' those get blocked
+            // and the app falls back to native form posts. We allow
+            // 'unsafe-inline' for scripts (and styles, which the Tailwind
+            // styled-jsx runtime needs) to keep the app functional. A future
+            // wave can swap this for nonce-based CSP via middleware.
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
               process.env.NODE_ENV === 'production'
-                ? "script-src 'self'"
+                ? "script-src 'self' 'unsafe-inline'"
                 : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              process.env.NODE_ENV === 'production'
-                ? "style-src 'self' fonts.googleapis.com"
-                : "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
+              "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
               "font-src 'self' fonts.gstatic.com",
               `img-src ${imgSources}`,
               `connect-src ${connectSources}`,

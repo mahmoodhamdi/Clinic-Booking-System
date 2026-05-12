@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\DayOfWeek;
 use App\Http\Controllers\Controller;
 use App\Services\SlotGeneratorService;
 use Carbon\Carbon;
@@ -71,7 +72,7 @@ class SlotController extends Controller
             'success' => true,
             'data' => [
                 'date' => $dateObj->toDateString(),
-                'day_name' => \App\Enums\DayOfWeek::fromDate($dateObj)->labelAr(),
+                'day_name' => DayOfWeek::fromDate($dateObj)->labelAr(),
                 'slots' => $slots,
                 'slots_count' => $slots->count(),
                 'is_available' => $slots->isNotEmpty(),

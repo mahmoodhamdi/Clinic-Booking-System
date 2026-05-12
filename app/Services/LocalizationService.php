@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 
 class LocalizationService
@@ -74,7 +75,7 @@ class LocalizationService
         }
 
         if (is_string($date)) {
-            $date = \Carbon\Carbon::parse($date);
+            $date = Carbon::parse($date);
         }
 
         $format = $format ?? $this->getLocaleInfo()['date_format'] ?? 'Y-m-d';
@@ -92,7 +93,7 @@ class LocalizationService
         }
 
         if (is_string($time)) {
-            $time = \Carbon\Carbon::parse($time);
+            $time = Carbon::parse($time);
         }
 
         $format = $format ?? $this->getLocaleInfo()['time_format'] ?? 'H:i';
@@ -110,7 +111,7 @@ class LocalizationService
         }
 
         if (is_string($datetime)) {
-            $datetime = \Carbon\Carbon::parse($datetime);
+            $datetime = Carbon::parse($datetime);
         }
 
         $format = $format ?? $this->getLocaleInfo()['datetime_format'] ?? 'Y-m-d H:i';

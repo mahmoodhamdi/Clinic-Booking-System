@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -130,7 +131,7 @@ class ClinicSetting extends Model
     /**
      * Get the maximum booking date based on advance_booking_days.
      */
-    public function getMaxBookingDate(): \Carbon\Carbon
+    public function getMaxBookingDate(): Carbon
     {
         return now()->addDays($this->advance_booking_days);
     }
@@ -138,7 +139,7 @@ class ClinicSetting extends Model
     /**
      * Get the cancellation deadline for an appointment.
      */
-    public function getCancellationDeadline(\Carbon\Carbon $appointmentTime): \Carbon\Carbon
+    public function getCancellationDeadline(Carbon $appointmentTime): Carbon
     {
         return $appointmentTime->copy()->subHours($this->cancellation_hours);
     }
@@ -146,7 +147,7 @@ class ClinicSetting extends Model
     /**
      * Check if an appointment can be cancelled.
      */
-    public function canCancelAppointment(\Carbon\Carbon $appointmentTime): bool
+    public function canCancelAppointment(Carbon $appointmentTime): bool
     {
         return now()->lt($this->getCancellationDeadline($appointmentTime));
     }

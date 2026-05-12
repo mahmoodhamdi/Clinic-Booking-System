@@ -25,12 +25,18 @@ Thumbs.db
 
 # Firebase credentials
 *-firebase-adminsdk-*.json
-
-# Prompt files (development only)
-clinic-booking-prompt.md
-
 # Google OAuth credentials
 client_secret_*.json
 
-# Audit state (development only)
+# Local prompt / planning files (development only)
+clinic-booking-prompt.md
+INTERNAL_AUDIT.md
+.internal/
 .audit/
+.redesign/
+/AUDIT*.md
+/BACKLOG.md
+/COVERAGE_AUDIT.md
+/PROGRESS.md
+/QA_*.md
+/review-plan/

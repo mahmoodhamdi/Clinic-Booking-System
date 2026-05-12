@@ -13,6 +13,7 @@ use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\SmsService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Cookie;
 
 class AuthController extends Controller
 {
@@ -297,7 +299,7 @@ class AuthController extends Controller
         }
 
         // Check if token is expired (15 minutes)
-        $createdAt = \Carbon\Carbon::parse($record->created_at);
+        $createdAt = Carbon::parse($record->created_at);
         if ($createdAt->addMinutes(15)->isPast()) {
             return response()->json([
                 'success' => false,
@@ -372,7 +374,7 @@ class AuthController extends Controller
         }
 
         // Check if token is expired (15 minutes)
-        $createdAt = \Carbon\Carbon::parse($record->created_at);
+        $createdAt = Carbon::parse($record->created_at);
         if ($createdAt->addMinutes(15)->isPast()) {
             return response()->json([
                 'success' => false,
@@ -461,7 +463,7 @@ class AuthController extends Controller
     /**
      * Create HttpOnly auth cookie.
      */
-    protected function createAuthCookie(string $token): \Symfony\Component\HttpFoundation\Cookie
+    protected function createAuthCookie(string $token): Cookie
     {
         $secure = app()->environment('production');
         $expiration = $this->getCookieExpiration();
@@ -482,7 +484,7 @@ class AuthController extends Controller
     /**
      * Create user info cookie (readable by JavaScript for UI purposes).
      */
-    protected function createUserCookie(User $user): \Symfony\Component\HttpFoundation\Cookie
+    protected function createUserCookie(User $user): Cookie
     {
         $secure = app()->environment('production');
         $expiration = $this->getCookieExpiration();

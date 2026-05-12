@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\Auth;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -125,7 +126,7 @@ class ProfileTest extends TestCase
             ]);
 
         // Verify new password works
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NewCl1n1cT3st!2026#', $user->fresh()->password));
+        $this->assertTrue(Hash::check('NewCl1n1cT3st!2026#', $user->fresh()->password));
     }
 
     /** @test */

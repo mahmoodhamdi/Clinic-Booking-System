@@ -6,6 +6,7 @@ use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Notifications\AppointmentReminder;
 use App\Services\SmsService;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class SendAppointmentReminders extends Command
@@ -44,11 +45,11 @@ class SendAppointmentReminders extends Command
         // column with a 'datetime:H:i' Carbon cast; format('H:i:s') gives a
         // clean time fragment we can safely concatenate with the date.
         $appointments = $candidates->filter(function (Appointment $a) use ($windowStart, $windowEnd) {
-            $timeStr = $a->appointment_time instanceof \Carbon\Carbon
+            $timeStr = $a->appointment_time instanceof Carbon
                 ? $a->appointment_time->format('H:i:s')
                 : (string) $a->appointment_time;
 
-            $datetime = \Carbon\Carbon::parse(
+            $datetime = Carbon::parse(
                 $a->appointment_date->format('Y-m-d').' '.$timeStr
             );
 
@@ -69,7 +70,7 @@ class SendAppointmentReminders extends Command
                 continue;
             }
 
-            $timeStr = $appointment->appointment_time instanceof \Carbon\Carbon
+            $timeStr = $appointment->appointment_time instanceof Carbon
                 ? $appointment->appointment_time->format('H:i')
                 : (string) $appointment->appointment_time;
 
