@@ -43,9 +43,9 @@ class ResetPasswordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'otp.required' => 'رمز التحقق مطلوب.',
-            'otp.size' => 'رمز التحقق يجب أن يكون 6 أرقام.',
-            'password.confirmed' => 'كلمة المرور غير متطابقة.',
+            'otp.required' => __('validation_messages.otp_required'),
+            'otp.size' => __('validation_messages.otp_size'),
+            'password.confirmed' => __('validation_messages.password_confirmed'),
         ];
     }
 }

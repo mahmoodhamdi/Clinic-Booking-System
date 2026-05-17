@@ -81,7 +81,7 @@ class AppointmentController extends Controller
             'data' => AppointmentResource::collection($appointments),
             'summary' => [
                 'date' => $date->toDateString(),
-                'day_name' => $date->locale('ar')->dayName,
+                'day_name' => $date->locale(app()->getLocale())->dayName,
                 'total' => $appointments->count(),
             ],
         ]);
@@ -115,7 +115,7 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('تم تأكيد الحجز بنجاح'),
+                'message' => __('messages.appointments.confirmed'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
         } catch (BusinessLogicException $e) {
@@ -136,7 +136,7 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('تم إتمام الحجز بنجاح'),
+                'message' => __('messages.appointments.completed'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
         } catch (BusinessLogicException $e) {
@@ -159,7 +159,7 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('تم إلغاء الحجز بنجاح'),
+                'message' => __('messages.appointments.cancelled'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
         } catch (BusinessLogicException $e) {
@@ -178,7 +178,7 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('تم تسجيل عدم الحضور'),
+                'message' => __('messages.appointments.marked_no_show'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
         } catch (BusinessLogicException $e) {
@@ -198,7 +198,7 @@ class AppointmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => __('تم تحديث الملاحظات بنجاح'),
+            'message' => __('messages.appointments.notes_updated'),
             'data' => new AppointmentResource($appointment->load('patient')),
         ]);
     }
@@ -216,7 +216,7 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('تم إعادة جدولة الحجز بنجاح'),
+                'message' => __('messages.appointments.rescheduled'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
         } catch (SlotNotAvailableException $e) {

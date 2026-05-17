@@ -21,8 +21,8 @@ class CancelAppointmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'reason.required' => 'يرجى إدخال سبب الإلغاء',
-            'reason.max' => 'سبب الإلغاء يجب ألا يتجاوز 500 حرف',
+            'reason.required' => __('validation_messages.cancel_reason_required'),
+            'reason.max' => __('validation_messages.cancel_reason_max'),
         ];
     }
 }

@@ -30,14 +30,14 @@ class ListAppointmentsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'status.enum' => 'حالة الحجز غير صحيحة',
-            'date.date' => 'صيغة التاريخ غير صحيحة',
-            'from_date.date' => 'صيغة تاريخ البداية غير صحيحة',
-            'to_date.date' => 'صيغة تاريخ النهاية غير صحيحة',
-            'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو يساوي تاريخ البداية',
-            'patient_id.exists' => 'المريض غير موجود',
-            'per_page.min' => 'عدد النتائج يجب أن يكون على الأقل 1',
-            'per_page.max' => 'عدد النتائج يجب ألا يتجاوز 100',
+            'status.enum' => __('validation_messages.report_status_invalid'),
+            'date.date' => __('validation_messages.report_date_invalid'),
+            'from_date.date' => __('validation_messages.report_from_date_invalid'),
+            'to_date.date' => __('validation_messages.report_to_date_invalid'),
+            'to_date.after_or_equal' => __('validation_messages.report_to_after_from'),
+            'patient_id.exists' => __('validation_messages.report_patient_id_exists'),
+            'per_page.min' => __('validation_messages.report_per_page_min'),
+            'per_page.max' => __('validation_messages.report_per_page_max'),
         ];
     }
 }

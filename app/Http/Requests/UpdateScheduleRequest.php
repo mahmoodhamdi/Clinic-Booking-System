@@ -33,10 +33,10 @@ class UpdateScheduleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'day_of_week.unique' => 'يوجد جدول لهذا اليوم بالفعل.',
-            'end_time.after' => 'وقت النهاية يجب أن يكون بعد وقت البداية.',
-            'break_start.required_with' => 'وقت بداية الاستراحة مطلوب عند تحديد وقت النهاية.',
-            'break_end.required_with' => 'وقت نهاية الاستراحة مطلوب عند تحديد وقت البداية.',
+            'day_of_week.unique' => __('validation_messages.schedule_day_unique'),
+            'end_time.after' => __('validation_messages.schedule_end_after_start'),
+            'break_start.required_with' => __('validation_messages.schedule_break_start_required_with'),
+            'break_end.required_with' => __('validation_messages.schedule_break_end_required_with'),
         ];
     }
 }

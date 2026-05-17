@@ -358,7 +358,7 @@ class PaymentApiTest extends TestCase
 
         $response->assertOk()
             ->assertJson([
-                'message' => 'تم تأكيد الدفع بنجاح',
+                'message' => __('messages.payments.confirmed'),
             ]);
 
         $this->assertEquals(PaymentStatus::PAID, $payment->fresh()->status);

@@ -34,12 +34,12 @@ class CreatePatientProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'blood_type.enum' => 'فصيلة الدم غير صحيحة',
-            'emergency_contact_name.max' => 'اسم جهة الاتصال يجب ألا يتجاوز 100 حرف',
-            'emergency_contact_phone.regex' => 'رقم هاتف جهة الاتصال غير صحيح',
-            'medical_notes.max' => 'الملاحظات الطبية يجب ألا تتجاوز 2000 حرف',
-            'insurance_provider.max' => 'اسم شركة التأمين يجب ألا يتجاوز 100 حرف',
-            'insurance_number.max' => 'رقم التأمين يجب ألا يتجاوز 50 حرف',
+            'blood_type.enum' => __('validation_messages.patient_blood_type_invalid'),
+            'emergency_contact_name.max' => __('validation_messages.patient_emergency_name_max'),
+            'emergency_contact_phone.regex' => __('validation_messages.patient_emergency_phone_regex'),
+            'medical_notes.max' => __('validation_messages.patient_medical_notes_max'),
+            'insurance_provider.max' => __('validation_messages.patient_insurance_provider_max'),
+            'insurance_number.max' => __('validation_messages.patient_insurance_number_max'),
         ];
     }
 }

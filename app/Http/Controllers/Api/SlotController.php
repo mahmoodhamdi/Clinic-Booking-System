@@ -45,7 +45,7 @@ class SlotController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'تنسيق التاريخ غير صحيح.',
+                'message' => __('messages.slots.invalid_date_format'),
             ], 422);
         }
 
@@ -53,7 +53,7 @@ class SlotController extends Controller
         if ($dateObj->lt(now()->startOfDay())) {
             return response()->json([
                 'success' => false,
-                'message' => 'لا يمكن الحجز في تاريخ سابق.',
+                'message' => __('messages.slots.past_date'),
             ], 422);
         }
 
@@ -62,7 +62,7 @@ class SlotController extends Controller
         if ($dateObj->gt($settings->getMaxBookingDate())) {
             return response()->json([
                 'success' => false,
-                'message' => "لا يمكن الحجز لأكثر من {$settings->advance_booking_days} يوم مقدماً.",
+                'message' => __('messages.slots.too_far_in_future', ['days' => $settings->advance_booking_days]),
             ], 422);
         }
 
@@ -72,7 +72,7 @@ class SlotController extends Controller
             'success' => true,
             'data' => [
                 'date' => $dateObj->toDateString(),
-                'day_name' => DayOfWeek::fromDate($dateObj)->labelAr(),
+                'day_name' => DayOfWeek::fromDate($dateObj)->localizedLabel(),
                 'slots' => $slots,
                 'slots_count' => $slots->count(),
                 'is_available' => $slots->isNotEmpty(),
@@ -94,7 +94,7 @@ class SlotController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'تنسيق التاريخ والوقت غير صحيح.',
+                'message' => __('messages.slots.invalid_datetime_format'),
             ], 422);
         }
 
@@ -119,7 +119,7 @@ class SlotController extends Controller
         if (! $nextSlot) {
             return response()->json([
                 'success' => false,
-                'message' => 'لا توجد مواعيد متاحة حالياً.',
+                'message' => __('messages.slots.no_slots_available'),
             ], 404);
         }
 

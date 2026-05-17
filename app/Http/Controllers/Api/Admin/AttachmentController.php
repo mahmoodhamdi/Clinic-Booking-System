@@ -45,14 +45,14 @@ class AttachmentController extends Controller
 
         $attachment->load('uploader');
 
-        return ApiResponse::created(new AttachmentResource($attachment), 'تم رفع الملف بنجاح');
+        return ApiResponse::created(new AttachmentResource($attachment), __('messages.attachments.uploaded'));
     }
 
     public function show(MedicalRecord $medicalRecord, Attachment $attachment): JsonResponse
     {
         // Ensure attachment belongs to the medical record
         if ($attachment->attachable_id !== $medicalRecord->id || $attachment->attachable_type !== MedicalRecord::class) {
-            abort(404, 'الملف غير موجود');
+            abort(404, __('messages.attachments.not_found'));
         }
 
         $attachment->load('uploader');
@@ -64,7 +64,7 @@ class AttachmentController extends Controller
     {
         // Ensure attachment belongs to the medical record
         if ($attachment->attachable_id !== $medicalRecord->id || $attachment->attachable_type !== MedicalRecord::class) {
-            abort(404, 'الملف غير موجود');
+            abort(404, __('messages.attachments.not_found'));
         }
 
         // Delete the file from storage
@@ -72,18 +72,18 @@ class AttachmentController extends Controller
 
         $attachment->delete();
 
-        return ApiResponse::success(null, 'تم حذف الملف بنجاح');
+        return ApiResponse::success(null, __('messages.attachments.deleted'));
     }
 
     public function download(MedicalRecord $medicalRecord, Attachment $attachment)
     {
         // Ensure attachment belongs to the medical record
         if ($attachment->attachable_id !== $medicalRecord->id || $attachment->attachable_type !== MedicalRecord::class) {
-            abort(404, 'الملف غير موجود');
+            abort(404, __('messages.attachments.not_found'));
         }
 
         if (! Storage::disk('public')->exists($attachment->file_path)) {
-            abort(404, 'الملف غير موجود في التخزين');
+            abort(404, __('messages.attachments.missing_in_storage'));
         }
 
         return Storage::disk('public')->download($attachment->file_path, $attachment->file_name);

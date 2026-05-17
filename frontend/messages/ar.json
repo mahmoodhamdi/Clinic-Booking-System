@@ -74,7 +74,8 @@
     "status": "الحالة",
     "time": "الوقت",
     "reason": "السبب",
-    "createdAt": "تاريخ الإنشاء"
+    "createdAt": "تاريخ الإنشاء",
+    "login": "تسجيل الدخول"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -104,7 +105,14 @@
     "phoneRequired": "رقم الهاتف مطلوب",
     "passwordRequired": "كلمة المرور مطلوبة",
     "nameRequired": "الاسم مطلوب",
-    "passwordMinLength": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+    "passwordMinLength": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+    "passwordRequirements": "8 أحرف على الأقل، وتشمل حرف كبير، حرف صغير، رقم، ورمز خاص. تجنّب الكلمات الشائعة والمسرّبة.",
+    "nameMinLength": "الاسم يجب أن يكون حرفين على الأقل",
+    "phoneInvalid": "رقم الهاتف غير صالح",
+    "emailInvalid": "البريد الإلكتروني غير صالح",
+    "confirmPasswordRequired": "تأكيد كلمة المرور مطلوب",
+    "currentPasswordRequired": "كلمة المرور الحالية مطلوبة",
+    "otpDigits": "رمز التحقق يجب أن يكون 6 أرقام",
     "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
     "verifyOtp": "التحقق من الرمز",
     "otpSent": "تم إرسال رمز التحقق إلى هاتفك",

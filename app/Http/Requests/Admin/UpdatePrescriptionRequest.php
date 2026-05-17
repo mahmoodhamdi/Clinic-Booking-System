@@ -30,11 +30,11 @@ class UpdatePrescriptionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'items.min' => 'يجب إضافة دواء واحد على الأقل',
-            'items.*.medication_name.required' => 'اسم الدواء مطلوب',
-            'items.*.dosage.required' => 'الجرعة مطلوبة',
-            'items.*.frequency.required' => 'عدد المرات مطلوب',
-            'items.*.duration.required' => 'المدة مطلوبة',
+            'items.min' => __('validation_messages.prescription_items_required'),
+            'items.*.medication_name.required' => __('validation_messages.prescription_medication_required'),
+            'items.*.dosage.required' => __('validation_messages.prescription_dosage_required'),
+            'items.*.frequency.required' => __('validation_messages.prescription_frequency_required'),
+            'items.*.duration.required' => __('validation_messages.prescription_duration_required'),
         ];
     }
 }

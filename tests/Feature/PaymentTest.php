@@ -189,7 +189,7 @@ class PaymentTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonPath('message', 'لا يمكن تعديل دفعة تمت بالفعل');
+            ->assertJsonPath('message', __('messages.payments.cannot_update_paid'));
     }
 
     public function test_admin_can_mark_payment_as_paid(): void

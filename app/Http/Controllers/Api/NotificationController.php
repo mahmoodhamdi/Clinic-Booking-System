@@ -48,14 +48,14 @@ class NotificationController extends Controller
 
         $this->notificationService->markAsRead($notification);
 
-        return ApiResponse::success(null, 'تم تحديد الإشعار كمقروء');
+        return ApiResponse::success(null, __('messages.notifications.marked_read'));
     }
 
     public function markAllAsRead(Request $request): JsonResponse
     {
         $this->notificationService->markAllAsRead($request->user());
 
-        return ApiResponse::success(null, 'تم تحديد جميع الإشعارات كمقروءة');
+        return ApiResponse::success(null, __('messages.notifications.all_marked_read'));
     }
 
     public function destroy(Request $request, string $id): JsonResponse
@@ -66,6 +66,6 @@ class NotificationController extends Controller
 
         $this->notificationService->deleteNotification($notification);
 
-        return ApiResponse::success(null, 'تم حذف الإشعار بنجاح');
+        return ApiResponse::success(null, __('messages.notifications.deleted'));
     }
 }

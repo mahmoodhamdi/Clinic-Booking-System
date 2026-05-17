@@ -60,7 +60,7 @@ class PrescriptionController extends Controller
 
         $prescription->load(['medicalRecord.patient', 'items']);
 
-        return ApiResponse::created(new PrescriptionResource($prescription), 'تم إنشاء الوصفة الطبية بنجاح');
+        return ApiResponse::created(new PrescriptionResource($prescription), __('messages.prescriptions.created'));
     }
 
     public function show(Prescription $prescription): JsonResponse
@@ -117,7 +117,7 @@ class PrescriptionController extends Controller
 
         $prescription->load(['medicalRecord.patient', 'items']);
 
-        return ApiResponse::success(new PrescriptionResource($prescription), 'تم تحديث الوصفة الطبية بنجاح');
+        return ApiResponse::success(new PrescriptionResource($prescription), __('messages.prescriptions.updated'));
     }
 
     public function destroy(Prescription $prescription): JsonResponse
@@ -127,7 +127,7 @@ class PrescriptionController extends Controller
 
         $prescription->delete();
 
-        return ApiResponse::success(null, 'تم حذف الوصفة الطبية بنجاح');
+        return ApiResponse::success(null, __('messages.prescriptions.deleted'));
     }
 
     public function markAsDispensed(Prescription $prescription): JsonResponse
@@ -136,7 +136,7 @@ class PrescriptionController extends Controller
 
         $prescription->load(['medicalRecord.patient', 'items']);
 
-        return ApiResponse::success(new PrescriptionResource($prescription), 'تم تحديث حالة الصرف بنجاح');
+        return ApiResponse::success(new PrescriptionResource($prescription), __('messages.prescriptions.dispensed_status_updated'));
     }
 
     public function byPatient(int $patientId): JsonResponse

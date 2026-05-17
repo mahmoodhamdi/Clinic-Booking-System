@@ -29,11 +29,11 @@ class ListPatientsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'search.max' => 'نص البحث يجب ألا يتجاوز 100 حرف',
-            'status.in' => 'حالة المريض غير صحيحة',
-            'blood_type.enum' => 'فصيلة الدم غير صحيحة',
-            'per_page.min' => 'عدد النتائج يجب أن يكون على الأقل 1',
-            'per_page.max' => 'عدد النتائج يجب ألا يتجاوز 100',
+            'search.max' => __('validation_messages.list_search_max'),
+            'status.in' => __('validation_messages.list_status_invalid'),
+            'blood_type.enum' => __('validation_messages.patient_blood_type_invalid'),
+            'per_page.min' => __('validation_messages.report_per_page_min'),
+            'per_page.max' => __('validation_messages.report_per_page_max'),
         ];
     }
 }

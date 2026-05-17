@@ -34,11 +34,11 @@ class AuthController extends Controller
         $user = User::where('phone', $request->phone)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            return back()->withInput()->with('error', 'بيانات الدخول غير صحيحة.');
+            return back()->withInput()->with('error', __('messages.auth.invalid_credentials'));
         }
 
         if (! $user->is_active) {
-            return back()->withInput()->with('error', 'الحساب غير مفعل. يرجى التواصل مع الإدارة.');
+            return back()->withInput()->with('error', __('messages.auth.account_inactive'));
         }
 
         Auth::login($user);
@@ -75,7 +75,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect('/patient/dashboard')->with('success', 'تم التسجيل بنجاح!');
+        return redirect('/patient/dashboard')->with('success', __('messages.auth.register_success'));
     }
 
     /**
@@ -106,7 +106,7 @@ class AuthController extends Controller
         $request->validate([
             'phone' => ['required', 'string', 'exists:users,phone'],
         ], [
-            'phone.exists' => 'رقم الهاتف غير مسجل.',
+            'phone.exists' => __('messages.auth.phone_not_registered'),
         ]);
 
         $token = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
@@ -125,7 +125,7 @@ class AuthController extends Controller
         app(SmsService::class)->sendOtp($request->phone, $token);
 
         return redirect()->route('password.verify.form', ['phone' => $request->phone])
-            ->with('success', 'تم إرسال رمز التحقق إلى هاتفك.');
+            ->with('success', __('messages.auth.otp_sent_to_phone'));
     }
 
     /**
@@ -151,16 +151,16 @@ class AuthController extends Controller
             ->first();
 
         if (! $record) {
-            return back()->with('error', 'رمز التحقق غير صحيح.');
+            return back()->with('error', __('messages.auth.otp_invalid'));
         }
 
         // Check lockout
         if ($record->locked_until && now()->lessThan($record->locked_until)) {
-            return back()->with('error', 'تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة لاحقاً.');
+            return back()->with('error', __('messages.auth.otp_locked_try_later'));
         }
 
         if (now()->diffInMinutes($record->created_at) > 15) {
-            return back()->with('error', 'رمز التحقق منتهي الصلاحية.');
+            return back()->with('error', __('messages.auth.otp_expired'));
         }
 
         if (! Hash::check($request->token, $record->token)) {
@@ -175,7 +175,7 @@ class AuthController extends Controller
                 ->where('phone', $request->phone)
                 ->update($updateData);
 
-            return back()->with('error', 'رمز التحقق غير صحيح.');
+            return back()->with('error', __('messages.auth.otp_invalid'));
         }
 
         // Reset attempts on success
@@ -210,8 +210,8 @@ class AuthController extends Controller
             'token' => ['required', 'string'],
             'password' => ['required', 'string', 'confirmed', Password::min(8)->mixedCase()->numbers()],
         ], [
-            'password.min' => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.',
-            'password.confirmed' => 'كلمة المرور غير متطابقة.',
+            'password.min' => __('validation_messages.password_min'),
+            'password.confirmed' => __('validation_messages.password_confirmed'),
         ]);
 
         $record = DB::table('password_reset_tokens')
@@ -219,7 +219,7 @@ class AuthController extends Controller
             ->first();
 
         if (! $record || ! Hash::check($request->token, $record->token)) {
-            return back()->with('error', 'رمز التحقق غير صحيح.');
+            return back()->with('error', __('messages.auth.otp_invalid'));
         }
 
         User::where('phone', $request->phone)->update([
@@ -228,6 +228,6 @@ class AuthController extends Controller
 
         DB::table('password_reset_tokens')->where('phone', $request->phone)->delete();
 
-        return redirect()->route('login')->with('success', 'تم تغيير كلمة المرور بنجاح.');
+        return redirect()->route('login')->with('success', __('messages.auth.password_changed'));
     }
 }

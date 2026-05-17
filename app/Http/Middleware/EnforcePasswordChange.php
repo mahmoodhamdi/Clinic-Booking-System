@@ -25,7 +25,7 @@ class EnforcePasswordChange
         if ($user && $user->must_change_password && ! $this->isAllowed($request)) {
             return response()->json([
                 'success' => false,
-                'message' => __('يجب تغيير كلمة المرور قبل المتابعة.'),
+                'message' => __('messages.auth.password_change_required'),
                 'error_code' => 'PASSWORD_CHANGE_REQUIRED',
             ], 403);
         }

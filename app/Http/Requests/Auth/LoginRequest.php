@@ -44,10 +44,10 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.required' => __('رقم الهاتف مطلوب.'),
-            'phone.regex' => __('يرجى إدخال رقم هاتف مصري صحيح.'),
-            'password.required' => __('كلمة المرور مطلوبة.'),
-            'password.min' => __('كلمة المرور يجب أن تكون 8 أحرف على الأقل.'),
+            'phone.required' => __('validation_messages.phone_required'),
+            'phone.regex' => __('validation_messages.phone_invalid_egyptian'),
+            'password.required' => __('validation_messages.password_required'),
+            'password.min' => __('validation_messages.password_min'),
         ];
     }
 

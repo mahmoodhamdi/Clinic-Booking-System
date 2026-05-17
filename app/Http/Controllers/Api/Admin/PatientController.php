@@ -96,7 +96,7 @@ class PatientController extends Controller
         if ($patient->role !== UserRole::PATIENT) {
             return response()->json([
                 'success' => false,
-                'message' => __('هذا المستخدم ليس مريضاً'),
+                'message' => __('messages.patients.not_a_patient'),
             ], 404);
         }
 
@@ -116,7 +116,7 @@ class PatientController extends Controller
         if ($patient->role !== UserRole::PATIENT) {
             return response()->json([
                 'success' => false,
-                'message' => __('هذا المستخدم ليس مريضاً'),
+                'message' => __('messages.patients.not_a_patient'),
             ], 404);
         }
 
@@ -151,7 +151,7 @@ class PatientController extends Controller
         if ($patient->role !== UserRole::PATIENT) {
             return response()->json([
                 'success' => false,
-                'message' => __('هذا المستخدم ليس مريضاً'),
+                'message' => __('messages.patients.not_a_patient'),
             ], 404);
         }
 
@@ -177,7 +177,7 @@ class PatientController extends Controller
         if ($patient->role !== UserRole::PATIENT) {
             return response()->json([
                 'success' => false,
-                'message' => __('هذا المستخدم ليس مريضاً'),
+                'message' => __('messages.patients.not_a_patient'),
             ], 404);
         }
 
@@ -191,7 +191,7 @@ class PatientController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => __('تم تحديث الملف الشخصي بنجاح'),
+            'message' => __('messages.patients.profile_updated'),
             'data' => new PatientResource($patient->load('profile')),
         ]);
     }
@@ -201,7 +201,7 @@ class PatientController extends Controller
         if ($patient->role !== UserRole::PATIENT) {
             return response()->json([
                 'success' => false,
-                'message' => __('هذا المستخدم ليس مريضاً'),
+                'message' => __('messages.patients.not_a_patient'),
             ], 404);
         }
 
@@ -209,8 +209,8 @@ class PatientController extends Controller
         $patient->save();
 
         $statusMessage = $patient->is_active
-            ? __('تم تفعيل حساب المريض')
-            : __('تم تعطيل حساب المريض');
+            ? __('messages.patients.account_activated')
+            : __('messages.patients.account_deactivated');
 
         return response()->json([
             'success' => true,
@@ -224,7 +224,7 @@ class PatientController extends Controller
         if ($patient->role !== UserRole::PATIENT) {
             return response()->json([
                 'success' => false,
-                'message' => __('هذا المستخدم ليس مريضاً'),
+                'message' => __('messages.patients.not_a_patient'),
             ], 404);
         }
 
@@ -249,7 +249,7 @@ class PatientController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => __('تم إضافة الملاحظات بنجاح'),
+            'message' => __('messages.patients.notes_added'),
             'data' => new PatientResource($patient->load('profile')),
         ]);
     }

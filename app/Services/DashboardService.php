@@ -134,7 +134,7 @@ class DashboardService
         // Validate month
         if ($month < 1 || $month > 12) {
             throw new BusinessLogicException(
-                __('الشهر غير صالح'),
+                __('messages.reports.invalid_month'),
                 'INVALID_MONTH',
                 ['month' => $month]
             );
@@ -144,7 +144,7 @@ class DashboardService
         $currentYear = now()->year;
         if ($year < $currentYear - 10 || $year > $currentYear + 1) {
             throw new BusinessLogicException(
-                __('السنة غير صالحة'),
+                __('messages.reports.invalid_year'),
                 'INVALID_YEAR',
                 ['year' => $year]
             );
@@ -180,7 +180,7 @@ class DashboardService
         $validPeriods = ['week', 'month'];
         if (! in_array($period, $validPeriods)) {
             throw new BusinessLogicException(
-                __('الفترة غير صالحة'),
+                __('messages.reports.invalid_period'),
                 'INVALID_PERIOD',
                 ['period' => $period, 'valid_values' => $validPeriods]
             );
@@ -343,7 +343,9 @@ class DashboardService
             ->map(fn ($apt) => [
                 'type' => 'appointment',
                 'id' => $apt->id,
-                'description' => 'موعد جديد: '.($apt->patient?->name ?? 'مريض محذوف'),
+                'description' => __('messages.dashboard.new_appointment', [
+                    'name' => $apt->patient?->name ?? __('messages.dashboard.deleted_patient'),
+                ]),
                 'status' => $apt->status->value,
                 'date' => $apt->created_at->format('Y-m-d H:i'),
                 'timestamp' => $apt->created_at->timestamp,
@@ -357,7 +359,10 @@ class DashboardService
             ->map(fn ($payment) => [
                 'type' => 'payment',
                 'id' => $payment->id,
-                'description' => "دفعة: {$payment->formatted_total} - {$payment->appointment?->patient?->name}",
+                'description' => __('messages.dashboard.payment_activity', [
+                    'amount' => $payment->formatted_total,
+                    'name' => $payment->appointment?->patient?->name ?? __('messages.dashboard.deleted_patient'),
+                ]),
                 'status' => $payment->status->value,
                 'date' => $payment->paid_at->format('Y-m-d H:i'),
                 'timestamp' => $payment->paid_at->timestamp,
@@ -370,7 +375,9 @@ class DashboardService
             ->map(fn ($record) => [
                 'type' => 'medical_record',
                 'id' => $record->id,
-                'description' => 'سجل طبي: '.($record->patient?->name ?? 'مريض محذوف'),
+                'description' => __('messages.dashboard.medical_record_activity', [
+                    'name' => $record->patient?->name ?? __('messages.dashboard.deleted_patient'),
+                ]),
                 'status' => 'created',
                 'date' => $record->created_at->format('Y-m-d H:i'),
                 'timestamp' => $record->created_at->timestamp,

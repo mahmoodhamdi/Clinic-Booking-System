@@ -74,7 +74,8 @@
     "status": "Status",
     "time": "Time",
     "reason": "Reason",
-    "createdAt": "Created At"
+    "createdAt": "Created At",
+    "login": "Login"
   },
   "auth": {
     "login": "Login",
@@ -104,7 +105,14 @@
     "phoneRequired": "Phone number is required",
     "passwordRequired": "Password is required",
     "nameRequired": "Name is required",
-    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordRequirements": "At least 8 characters with uppercase, lowercase, a number, and a symbol. Avoid common or leaked passwords.",
+    "nameMinLength": "Name must be at least 2 characters",
+    "phoneInvalid": "Invalid phone number format",
+    "emailInvalid": "Invalid email",
+    "confirmPasswordRequired": "Please confirm your password",
+    "currentPasswordRequired": "Current password is required",
+    "otpDigits": "OTP must be 6 digits",
     "passwordsDoNotMatch": "Passwords do not match",
     "verifyOtp": "Verify OTP",
     "otpSent": "Verification code sent to your phone",

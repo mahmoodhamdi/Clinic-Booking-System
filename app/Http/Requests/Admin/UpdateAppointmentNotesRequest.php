@@ -21,8 +21,8 @@ class UpdateAppointmentNotesRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'admin_notes.required' => 'يرجى إدخال الملاحظات',
-            'admin_notes.max' => 'الملاحظات يجب ألا تتجاوز 1000 حرف',
+            'admin_notes.required' => __('validation_messages.admin_notes_required'),
+            'admin_notes.max' => __('validation_messages.admin_notes_max'),
         ];
     }
 }
