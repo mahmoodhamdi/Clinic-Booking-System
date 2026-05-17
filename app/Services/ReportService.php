@@ -32,7 +32,7 @@ class ReportService
         // Validate from is before to
         if ($from->gt($to)) {
             throw new BusinessLogicException(
-                __('تاريخ البداية يجب أن يكون قبل تاريخ النهاية'),
+                __('messages.reports.invalid_date_range'),
                 'INVALID_DATE_RANGE',
                 ['from' => $fromDate, 'to' => $toDate]
             );
@@ -41,7 +41,7 @@ class ReportService
         // Validate range is not too large
         if ($from->diffInDays($to) > $this->maxReportDays) {
             throw new BusinessLogicException(
-                __('نطاق التقرير لا يمكن أن يتجاوز :days يوم', ['days' => $this->maxReportDays]),
+                __('messages.reports.date_range_too_large', ['days' => $this->maxReportDays]),
                 'DATE_RANGE_TOO_LARGE',
                 ['from' => $fromDate, 'to' => $toDate, 'max_days' => $this->maxReportDays]
             );
@@ -153,7 +153,7 @@ class ReportService
         $validGroupBy = ['day', 'week', 'month'];
         if (! in_array($groupBy, $validGroupBy)) {
             throw new BusinessLogicException(
-                __('نوع التجميع غير صالح'),
+                __('messages.reports.invalid_group_by'),
                 'INVALID_GROUP_BY',
                 ['group_by' => $groupBy, 'valid_values' => $validGroupBy]
             );
@@ -243,7 +243,7 @@ class ReportService
         // Validate from is before to
         if ($from->gt($to)) {
             throw new BusinessLogicException(
-                __('تاريخ البداية يجب أن يكون قبل تاريخ النهاية'),
+                __('messages.reports.invalid_date_range'),
                 'INVALID_DATE_RANGE',
                 ['from' => $fromDate, 'to' => $toDate]
             );

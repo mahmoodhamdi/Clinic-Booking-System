@@ -30,14 +30,14 @@ class StorePrescriptionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'medical_record_id.required' => 'السجل الطبي مطلوب',
-            'medical_record_id.exists' => 'السجل الطبي غير موجود',
-            'items.required' => 'يجب إضافة دواء واحد على الأقل',
-            'items.min' => 'يجب إضافة دواء واحد على الأقل',
-            'items.*.medication_name.required' => 'اسم الدواء مطلوب',
-            'items.*.dosage.required' => 'الجرعة مطلوبة',
-            'items.*.frequency.required' => 'عدد المرات مطلوب',
-            'items.*.duration.required' => 'المدة مطلوبة',
+            'medical_record_id.required' => __('validation_messages.prescription_medical_record_required'),
+            'medical_record_id.exists' => __('validation_messages.prescription_medical_record_exists'),
+            'items.required' => __('validation_messages.prescription_items_required'),
+            'items.min' => __('validation_messages.prescription_items_required'),
+            'items.*.medication_name.required' => __('validation_messages.prescription_medication_required'),
+            'items.*.dosage.required' => __('validation_messages.prescription_dosage_required'),
+            'items.*.frequency.required' => __('validation_messages.prescription_frequency_required'),
+            'items.*.duration.required' => __('validation_messages.prescription_duration_required'),
         ];
     }
 }

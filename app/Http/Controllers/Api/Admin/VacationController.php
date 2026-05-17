@@ -59,7 +59,7 @@ class VacationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إنشاء الإجازة بنجاح.',
+            'message' => __('messages.vacations.created'),
             'data' => new VacationResource($vacation),
         ], 201);
     }
@@ -87,7 +87,7 @@ class VacationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث الإجازة بنجاح.',
+            'message' => __('messages.vacations.updated'),
             'data' => new VacationResource($vacation->fresh()),
         ]);
     }
@@ -104,7 +104,7 @@ class VacationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف الإجازة بنجاح.',
+            'message' => __('messages.vacations.deleted'),
         ]);
     }
 }

@@ -33,12 +33,12 @@ class StoreMedicalRecordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'appointment_id.required' => 'الموعد مطلوب',
-            'appointment_id.exists' => 'الموعد غير موجود',
-            'appointment_id.unique' => 'يوجد سجل طبي لهذا الموعد بالفعل',
-            'diagnosis.required' => 'التشخيص مطلوب',
-            'diagnosis.max' => 'التشخيص يجب أن لا يتجاوز 5000 حرف',
-            'follow_up_date.after' => 'تاريخ المتابعة يجب أن يكون بعد اليوم',
+            'appointment_id.required' => __('validation_messages.appointment_id_required'),
+            'appointment_id.exists' => __('validation_messages.appointment_id_exists'),
+            'appointment_id.unique' => __('validation_messages.appointment_id_unique'),
+            'diagnosis.required' => __('validation_messages.diagnosis_required'),
+            'diagnosis.max' => __('validation_messages.diagnosis_max'),
+            'follow_up_date.after' => __('validation_messages.follow_up_after_today'),
         ];
     }
 }

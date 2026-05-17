@@ -99,7 +99,7 @@ class AppointmentService
         $maxNoShows = config('clinic.appointments.max_no_shows', 3);
         if ($noShowCount >= $maxNoShows) {
             throw new BusinessLogicException(
-                __('لا يمكنك الحجز بسبب عدم الحضور المتكرر'),
+                __('messages.appointments.too_many_no_shows'),
                 'TOO_MANY_NO_SHOWS',
                 ['no_show_count' => $noShowCount, 'max_allowed' => $maxNoShows]
             );
@@ -114,7 +114,7 @@ class AppointmentService
 
         if ($hasConflict) {
             throw new BusinessLogicException(
-                __('لديك حجز بالفعل في هذا الموعد'),
+                __('messages.appointments.duplicate_booking'),
                 'DUPLICATE_BOOKING',
                 ['patient_id' => $patient->id, 'date' => $date->toDateString(), 'time' => $time]
             );
@@ -140,7 +140,7 @@ class AppointmentService
     {
         if (! $appointment->isPending()) {
             throw new BusinessLogicException(
-                __('لا يمكن تأكيد هذا الحجز'),
+                __('messages.appointments.cannot_confirm'),
                 'INVALID_STATUS_TRANSITION',
                 ['current_status' => $appointment->status->value, 'expected' => 'pending']
             );
@@ -158,7 +158,7 @@ class AppointmentService
     {
         if (! $appointment->isConfirmed()) {
             throw new BusinessLogicException(
-                __('لا يمكن إتمام هذا الحجز'),
+                __('messages.appointments.cannot_complete'),
                 'INVALID_STATUS_TRANSITION',
                 ['current_status' => $appointment->status->value, 'expected' => 'confirmed']
             );
@@ -176,7 +176,7 @@ class AppointmentService
     {
         if (! $appointment->isActive()) {
             throw new BusinessLogicException(
-                __('لا يمكن إلغاء هذا الحجز'),
+                __('messages.appointments.cannot_cancel'),
                 'INVALID_STATUS_TRANSITION',
                 ['current_status' => $appointment->status->value, 'expected' => 'active']
             );
@@ -198,7 +198,7 @@ class AppointmentService
     {
         if (! $appointment->isConfirmed()) {
             throw new BusinessLogicException(
-                __('لا يمكن تسجيل عدم الحضور لهذا الحجز'),
+                __('messages.appointments.cannot_mark_no_show'),
                 'INVALID_STATUS_TRANSITION',
                 ['current_status' => $appointment->status->value, 'expected' => 'confirmed']
             );
@@ -216,7 +216,7 @@ class AppointmentService
     {
         if (! $appointment->isActive()) {
             throw new BusinessLogicException(
-                __('لا يمكن إعادة جدولة هذا الحجز'),
+                __('messages.appointments.cannot_reschedule'),
                 'INVALID_STATUS_TRANSITION',
                 ['current_status' => $appointment->status->value, 'expected' => 'active']
             );
@@ -268,16 +268,16 @@ class AppointmentService
     public function canCancel(Appointment $appointment, User $user): array
     {
         if (! $appointment->isActive()) {
-            return ['can_cancel' => false, 'reason' => __('لا يمكن إلغاء هذا الحجز')];
+            return ['can_cancel' => false, 'reason' => __('messages.appointments.cannot_cancel')];
         }
 
         if ($appointment->datetime->isPast()) {
-            return ['can_cancel' => false, 'reason' => __('لا يمكن إلغاء موعد في الماضي')];
+            return ['can_cancel' => false, 'reason' => __('messages.appointments.cannot_cancel_past')];
         }
 
         // If patient, check ownership
         if ($user->isPatient() && $appointment->user_id !== $user->id) {
-            return ['can_cancel' => false, 'reason' => __('غير مصرح لك بإلغاء هذا الحجز')];
+            return ['can_cancel' => false, 'reason' => __('messages.appointments.not_authorized_to_cancel')];
         }
 
         return ['can_cancel' => true, 'reason' => null];
@@ -499,7 +499,7 @@ class AppointmentService
 
             $stats->push([
                 'date' => $dateString,
-                'day_name' => $current->locale('ar')->dayName,
+                'day_name' => $current->locale(app()->getLocale())->dayName,
                 'total' => (int) ($dayStats->total ?? 0),
                 'completed' => (int) ($dayStats->completed ?? 0),
                 'cancelled' => (int) ($dayStats->cancelled ?? 0),

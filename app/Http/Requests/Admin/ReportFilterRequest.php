@@ -26,11 +26,11 @@ class ReportFilterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'from_date.date' => 'صيغة تاريخ البداية غير صحيحة',
-            'to_date.date' => 'صيغة تاريخ النهاية غير صحيحة',
-            'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو يساوي تاريخ البداية',
-            'status.enum' => 'حالة الحجز غير صحيحة',
-            'group_by.in' => 'قيمة التجميع غير صحيحة',
+            'from_date.date' => __('validation_messages.report_from_date_invalid'),
+            'to_date.date' => __('validation_messages.report_to_date_invalid'),
+            'to_date.after_or_equal' => __('validation_messages.report_to_after_from'),
+            'status.enum' => __('validation_messages.report_status_invalid'),
+            'group_by.in' => __('validation_messages.report_group_by_invalid'),
         ];
     }
 }

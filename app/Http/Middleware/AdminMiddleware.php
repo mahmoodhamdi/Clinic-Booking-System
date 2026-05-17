@@ -20,11 +20,11 @@ class AdminMiddleware
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'غير مصرح لك بالوصول إلى هذه الصفحة.',
+                    'message' => __('messages.auth.forbidden_access'),
                 ], 403);
             }
 
-            abort(403, 'غير مصرح لك بالوصول إلى هذه الصفحة.');
+            abort(403, __('messages.auth.forbidden_access'));
         }
 
         return $next($request);

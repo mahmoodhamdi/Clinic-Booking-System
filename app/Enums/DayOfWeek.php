@@ -40,6 +40,24 @@ enum DayOfWeek: int
         };
     }
 
+    /**
+     * Locale-aware day name (uses current app locale).
+     */
+    public function localizedLabel(): string
+    {
+        $key = match ($this) {
+            self::SUNDAY => 'sunday',
+            self::MONDAY => 'monday',
+            self::TUESDAY => 'tuesday',
+            self::WEDNESDAY => 'wednesday',
+            self::THURSDAY => 'thursday',
+            self::FRIDAY => 'friday',
+            self::SATURDAY => 'saturday',
+        };
+
+        return __('schedules.days.'.$key);
+    }
+
     public function shortLabel(): string
     {
         return match ($this) {

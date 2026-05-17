@@ -132,7 +132,7 @@ class TokenRefreshTest extends TestCase
         $response->assertOk()
             ->assertJson([
                 'success' => true,
-                'message' => 'تم تحديث التوكن بنجاح.',
+                'message' => __('messages.auth.token_refreshed'),
             ]);
     }
 }

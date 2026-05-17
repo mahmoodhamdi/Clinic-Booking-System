@@ -35,7 +35,7 @@ class ForgotPasswordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.required' => 'رقم الهاتف مطلوب.',
+            'phone.required' => __('validation_messages.phone_required'),
         ];
     }
 }

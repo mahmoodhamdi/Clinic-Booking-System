@@ -46,8 +46,8 @@ class ChangePasswordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'current_password.current_password' => 'كلمة المرور الحالية غير صحيحة.',
-            'password.confirmed' => 'كلمة المرور غير متطابقة.',
+            'current_password.current_password' => __('validation_messages.current_password_wrong'),
+            'password.confirmed' => __('validation_messages.password_confirmed'),
         ];
     }
 }

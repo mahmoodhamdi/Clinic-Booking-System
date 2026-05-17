@@ -48,7 +48,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم التسجيل بنجاح.',
+            'message' => __('messages.auth.registered'),
             'data' => [
                 'user' => new UserResource($user),
                 'token' => $token, // Still returned for mobile apps
@@ -66,14 +66,14 @@ class AuthController extends Controller
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'بيانات الدخول غير صحيحة.',
+                'message' => __('messages.auth.invalid_credentials'),
             ], 401);
         }
 
         if (! $user->is_active) {
             return response()->json([
                 'success' => false,
-                'message' => 'الحساب غير مفعل. يرجى التواصل مع الإدارة.',
+                'message' => __('messages.auth.account_inactive'),
             ], 403);
         }
 
@@ -85,7 +85,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تسجيل الدخول بنجاح.',
+            'message' => __('messages.auth.logged_in'),
             'data' => [
                 'user' => new UserResource($user),
                 'token' => $token, // Still returned for mobile apps
@@ -102,7 +102,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تسجيل الخروج بنجاح.',
+            'message' => __('messages.auth.logged_out'),
         ])->withCookie(cookie()->forget('auth_token'))
             ->withCookie(cookie()->forget('user'));
     }
@@ -128,7 +128,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث الملف الشخصي بنجاح.',
+            'message' => __('messages.auth.profile_updated'),
             'data' => new UserResource($user->fresh()),
         ]);
     }
@@ -145,7 +145,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تغيير كلمة المرور بنجاح.',
+            'message' => __('messages.auth.password_changed'),
         ]);
     }
 
@@ -181,7 +181,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث الصورة الشخصية بنجاح.',
+            'message' => __('messages.auth.avatar_updated'),
             'data' => new UserResource($user->fresh()),
         ]);
     }
@@ -201,7 +201,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف الحساب بنجاح.',
+            'message' => __('messages.auth.account_deleted'),
         ]);
     }
 
@@ -216,7 +216,7 @@ class AuthController extends Controller
         if (! $user) {
             return response()->json([
                 'success' => true,
-                'message' => 'إذا كان الرقم مسجلاً، سيتم إرسال رمز التحقق إليه.',
+                'message' => __('messages.auth.otp_dispatched'),
             ]);
         }
 
@@ -240,7 +240,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'فشل إرسال رمز التحقق. يرجى المحاولة مرة أخرى.',
+                'message' => __('messages.auth.otp_failed'),
             ], 500);
         }
 
@@ -253,7 +253,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'إذا كان الرقم مسجلاً، سيتم إرسال رمز التحقق إليه.',
+            'message' => __('messages.auth.otp_dispatched'),
         ]);
     }
 
@@ -284,7 +284,7 @@ class AuthController extends Controller
         if (! $record) {
             return response()->json([
                 'success' => false,
-                'message' => 'رمز التحقق غير صحيح.',
+                'message' => __('messages.auth.otp_invalid'),
             ], 422);
         }
 
@@ -294,7 +294,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => "تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد {$remainingMinutes} دقيقة.",
+                'message' => __('messages.auth.otp_locked_minutes', ['minutes' => $remainingMinutes]),
             ], 429);
         }
 
@@ -303,7 +303,7 @@ class AuthController extends Controller
         if ($createdAt->addMinutes(15)->isPast()) {
             return response()->json([
                 'success' => false,
-                'message' => 'رمز التحقق منتهي الصلاحية.',
+                'message' => __('messages.auth.otp_expired'),
             ], 422);
         }
 
@@ -325,13 +325,13 @@ class AuthController extends Controller
             if ($remainingAttempts > 0) {
                 return response()->json([
                     'success' => false,
-                    'message' => "رمز التحقق غير صحيح. المحاولات المتبقية: {$remainingAttempts}",
+                    'message' => __('messages.auth.otp_invalid_with_attempts', ['attempts' => $remainingAttempts]),
                 ], 422);
             }
 
             return response()->json([
                 'success' => false,
-                'message' => 'تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد 30 دقيقة.',
+                'message' => __('messages.auth.otp_locked_default'),
             ], 429);
         }
 
@@ -342,7 +342,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'رمز التحقق صحيح.',
+            'message' => __('messages.auth.otp_valid'),
             'data' => ['verified' => true],
         ]);
     }
@@ -359,7 +359,7 @@ class AuthController extends Controller
         if (! $record) {
             return response()->json([
                 'success' => false,
-                'message' => 'رمز التحقق غير صحيح.',
+                'message' => __('messages.auth.otp_invalid'),
             ], 422);
         }
 
@@ -369,7 +369,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => "تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد {$remainingMinutes} دقيقة.",
+                'message' => __('messages.auth.otp_locked_minutes', ['minutes' => $remainingMinutes]),
             ], 429);
         }
 
@@ -378,7 +378,7 @@ class AuthController extends Controller
         if ($createdAt->addMinutes(15)->isPast()) {
             return response()->json([
                 'success' => false,
-                'message' => 'رمز التحقق منتهي الصلاحية.',
+                'message' => __('messages.auth.otp_expired'),
             ], 422);
         }
 
@@ -400,13 +400,13 @@ class AuthController extends Controller
             if ($remainingAttempts > 0) {
                 return response()->json([
                     'success' => false,
-                    'message' => "رمز التحقق غير صحيح. المحاولات المتبقية: {$remainingAttempts}",
+                    'message' => __('messages.auth.otp_invalid_with_attempts', ['attempts' => $remainingAttempts]),
                 ], 422);
             }
 
             return response()->json([
                 'success' => false,
-                'message' => 'تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة بعد 30 دقيقة.',
+                'message' => __('messages.auth.otp_locked_default'),
             ], 429);
         }
 
@@ -422,7 +422,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إعادة تعيين كلمة المرور بنجاح.',
+            'message' => __('messages.auth.password_reset'),
         ]);
     }
 
@@ -445,7 +445,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث التوكن بنجاح.',
+            'message' => __('messages.auth.token_refreshed'),
             'data' => [
                 'token' => $token,
             ],

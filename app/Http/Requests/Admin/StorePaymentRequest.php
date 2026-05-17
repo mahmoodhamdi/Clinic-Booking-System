@@ -29,14 +29,14 @@ class StorePaymentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'appointment_id.required' => 'الموعد مطلوب',
-            'appointment_id.exists' => 'الموعد غير موجود',
-            'amount.required' => 'المبلغ مطلوب',
-            'amount.numeric' => 'المبلغ يجب أن يكون رقماً',
-            'amount.min' => 'المبلغ يجب أن يكون أكبر من صفر',
-            'discount.lte' => 'الخصم لا يمكن أن يتجاوز المبلغ',
-            'method.required' => 'طريقة الدفع مطلوبة',
-            'method.enum' => 'طريقة الدفع غير صالحة',
+            'appointment_id.required' => __('validation_messages.appointment_id_required'),
+            'appointment_id.exists' => __('validation_messages.appointment_id_exists'),
+            'amount.required' => __('validation_messages.amount_required'),
+            'amount.numeric' => __('validation_messages.amount_numeric'),
+            'amount.min' => __('validation_messages.amount_min'),
+            'discount.lte' => __('validation_messages.discount_lte'),
+            'method.required' => __('validation_messages.method_required'),
+            'method.enum' => __('validation_messages.method_invalid'),
         ];
     }
 }

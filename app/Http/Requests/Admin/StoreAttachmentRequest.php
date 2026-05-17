@@ -59,14 +59,14 @@ class StoreAttachmentRequest extends FormRequest
         $extension = strtolower($file->getClientOriginalExtension());
 
         if (in_array($extension, self::BLOCKED_EXTENSIONS, true)) {
-            $fail('نوع الملف غير مسموح به لأسباب أمنية.');
+            $fail(__('messages.attachments.type_blocked'));
         }
 
         // Check for double extensions (e.g., file.php.jpg)
         $filename = $file->getClientOriginalName();
         foreach (self::BLOCKED_EXTENSIONS as $blockedExt) {
             if (preg_match('/\.'.preg_quote($blockedExt, '/').'\./i', $filename)) {
-                $fail('اسم الملف يحتوي على امتداد غير مسموح به.');
+                $fail(__('messages.attachments.filename_blocked'));
             }
         }
     }
@@ -92,7 +92,7 @@ class StoreAttachmentRequest extends FormRequest
 
         foreach ($dangerousPatterns as $pattern) {
             if (preg_match($pattern, $content)) {
-                $fail('الملف يحتوي على محتوى غير آمن.');
+                $fail(__('messages.attachments.unsafe_content'));
 
                 return;
             }
@@ -102,8 +102,8 @@ class StoreAttachmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'file.required' => 'الملف مطلوب',
-            'file.max' => 'حجم الملف يجب أن لا يتجاوز 10 ميجابايت',
+            'file.required' => __('validation_messages.attachment_file_required'),
+            'file.max' => __('validation_messages.attachment_file_max'),
         ];
     }
 }

@@ -49,7 +49,7 @@ class PatientController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => null,
-                'message' => __('لم يتم إنشاء الملف الشخصي بعد'),
+                'message' => __('messages.patients.profile_not_created'),
             ]);
         }
 
@@ -66,7 +66,7 @@ class PatientController extends Controller
         if ($user->profile) {
             return response()->json([
                 'success' => false,
-                'message' => __('الملف الشخصي موجود بالفعل'),
+                'message' => __('messages.patients.profile_already_exists'),
             ], 422);
         }
 
@@ -77,7 +77,7 @@ class PatientController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => __('تم إنشاء الملف الشخصي بنجاح'),
+            'message' => __('messages.patients.profile_created'),
             'data' => new PatientProfileResource($profile),
         ], 201);
     }
@@ -96,7 +96,7 @@ class PatientController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('تم إنشاء الملف الشخصي بنجاح'),
+                'message' => __('messages.patients.profile_created'),
                 'data' => new PatientProfileResource($profile),
             ], 201);
         }
@@ -105,7 +105,7 @@ class PatientController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => __('تم تحديث الملف الشخصي بنجاح'),
+            'message' => __('messages.patients.profile_updated'),
             'data' => new PatientProfileResource($profile->fresh()),
         ]);
     }

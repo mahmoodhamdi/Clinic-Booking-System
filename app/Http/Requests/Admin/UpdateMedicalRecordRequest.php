@@ -32,9 +32,9 @@ class UpdateMedicalRecordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'diagnosis.required' => 'التشخيص مطلوب',
-            'diagnosis.max' => 'التشخيص يجب أن لا يتجاوز 5000 حرف',
-            'follow_up_date.after' => 'تاريخ المتابعة يجب أن يكون بعد اليوم',
+            'diagnosis.required' => __('validation_messages.diagnosis_required'),
+            'diagnosis.max' => __('validation_messages.diagnosis_max'),
+            'follow_up_date.after' => __('validation_messages.follow_up_after_today'),
         ];
     }
 }

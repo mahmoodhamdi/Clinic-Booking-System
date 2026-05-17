@@ -41,9 +41,9 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.unique' => 'البريد الإلكتروني مسجل بالفعل.',
-            'date_of_birth.before' => 'تاريخ الميلاد يجب أن يكون قبل اليوم.',
-            'gender.enum' => 'النوع غير صالح.',
+            'email.unique' => __('validation_messages.email_taken'),
+            'date_of_birth.before' => __('validation_messages.dob_before_today'),
+            'gender.enum' => __('validation_messages.gender_invalid'),
         ];
     }
 }

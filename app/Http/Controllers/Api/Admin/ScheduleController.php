@@ -41,7 +41,7 @@ class ScheduleController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إنشاء الجدول بنجاح.',
+            'message' => __('messages.schedules.created'),
             'data' => new ScheduleResource($schedule),
         ], 201);
     }
@@ -69,7 +69,7 @@ class ScheduleController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث الجدول بنجاح.',
+            'message' => __('messages.schedules.updated'),
             'data' => new ScheduleResource($schedule->fresh()),
         ]);
     }
@@ -86,7 +86,7 @@ class ScheduleController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف الجدول بنجاح.',
+            'message' => __('messages.schedules.deleted'),
         ]);
     }
 
@@ -100,11 +100,13 @@ class ScheduleController extends Controller
         // Invalidate slot cache when schedule changes
         $this->slotService->invalidateCache();
 
-        $status = $schedule->is_active ? 'تفعيل' : 'تعطيل';
+        $message = $schedule->is_active
+            ? __('messages.schedules.toggled_active')
+            : __('messages.schedules.toggled_inactive');
 
         return response()->json([
             'success' => true,
-            'message' => "تم {$status} الجدول بنجاح.",
+            'message' => $message,
             'data' => new ScheduleResource($schedule->fresh()),
         ]);
     }

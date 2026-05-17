@@ -32,7 +32,7 @@ class ApiResponse
      */
     public static function created(mixed $data = null, ?string $message = null): JsonResponse
     {
-        return self::success($data, $message ?? __('تم الإنشاء بنجاح.'), 201);
+        return self::success($data, $message ?? __('messages.common.created_period'), 201);
     }
 
     /**
@@ -57,7 +57,7 @@ class ApiResponse
      */
     public static function notFound(?string $message = null): JsonResponse
     {
-        return self::error($message ?? __('لم يتم العثور على المورد.'), 404);
+        return self::error($message ?? __('messages.common.resource_not_found'), 404);
     }
 
     /**
@@ -65,7 +65,7 @@ class ApiResponse
      */
     public static function unauthorized(?string $message = null): JsonResponse
     {
-        return self::error($message ?? __('غير مصرح.'), 401);
+        return self::error($message ?? __('messages.common.unauthorized_period'), 401);
     }
 
     /**
@@ -73,7 +73,7 @@ class ApiResponse
      */
     public static function forbidden(?string $message = null): JsonResponse
     {
-        return self::error($message ?? __('الوصول مرفوض.'), 403);
+        return self::error($message ?? __('messages.common.access_denied'), 403);
     }
 
     /**
@@ -81,7 +81,7 @@ class ApiResponse
      */
     public static function validationError(array $errors, ?string $message = null): JsonResponse
     {
-        return self::error($message ?? __('فشل التحقق من صحة البيانات.'), 422, $errors);
+        return self::error($message ?? __('messages.common.validation_failed'), 422, $errors);
     }
 
     /**
@@ -89,7 +89,7 @@ class ApiResponse
      */
     public static function tooManyRequests(?string $message = null): JsonResponse
     {
-        return self::error($message ?? __('طلبات كثيرة جداً. يرجى المحاولة لاحقاً.'), 429);
+        return self::error($message ?? __('messages.common.too_many_requests'), 429);
     }
 
     /**
@@ -97,7 +97,7 @@ class ApiResponse
      */
     public static function serverError(?string $message = null): JsonResponse
     {
-        return self::error($message ?? __('حدث خطأ غير متوقع.'), 500);
+        return self::error($message ?? __('messages.common.server_error'), 500);
     }
 
     /**

@@ -26,9 +26,9 @@ class UpdatePaymentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'amount.numeric' => 'المبلغ يجب أن يكون رقماً',
-            'amount.min' => 'المبلغ يجب أن يكون أكبر من صفر',
-            'method.enum' => 'طريقة الدفع غير صالحة',
+            'amount.numeric' => __('validation_messages.amount_numeric'),
+            'amount.min' => __('validation_messages.amount_min'),
+            'method.enum' => __('validation_messages.method_invalid'),
         ];
     }
 }

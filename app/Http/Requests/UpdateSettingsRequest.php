@@ -35,14 +35,14 @@ class UpdateSettingsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'clinic_name.required' => 'اسم العيادة مطلوب.',
-            'doctor_name.required' => 'اسم الطبيب مطلوب.',
-            'slot_duration.required' => 'مدة الموعد مطلوبة.',
-            'slot_duration.min' => 'مدة الموعد يجب أن تكون 10 دقائق على الأقل.',
-            'slot_duration.max' => 'مدة الموعد يجب ألا تتجاوز 120 دقيقة.',
-            'max_patients_per_slot.required' => 'عدد المرضى لكل موعد مطلوب.',
-            'advance_booking_days.required' => 'عدد أيام الحجز المسبق مطلوب.',
-            'cancellation_hours.required' => 'ساعات الإلغاء مطلوبة.',
+            'clinic_name.required' => __('validation_messages.settings_clinic_name_required'),
+            'doctor_name.required' => __('validation_messages.settings_doctor_name_required'),
+            'slot_duration.required' => __('validation_messages.settings_slot_duration_required'),
+            'slot_duration.min' => __('validation_messages.settings_slot_duration_min'),
+            'slot_duration.max' => __('validation_messages.settings_slot_duration_max'),
+            'max_patients_per_slot.required' => __('validation_messages.settings_max_patients_required'),
+            'advance_booking_days.required' => __('validation_messages.settings_advance_days_required'),
+            'cancellation_hours.required' => __('validation_messages.settings_cancellation_hours_required'),
         ];
     }
 }

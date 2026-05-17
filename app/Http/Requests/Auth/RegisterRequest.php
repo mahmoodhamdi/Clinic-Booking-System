@@ -48,10 +48,10 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.phone' => 'رقم الهاتف غير صالح. يجب أن يكون رقم هاتف مصري.',
-            'phone.unique' => 'رقم الهاتف مسجل بالفعل.',
-            'email.unique' => 'البريد الإلكتروني مسجل بالفعل.',
-            'password.confirmed' => 'كلمة المرور غير متطابقة.',
+            'phone.phone' => __('validation_messages.phone_invalid'),
+            'phone.unique' => __('validation_messages.phone_taken'),
+            'email.unique' => __('validation_messages.email_taken'),
+            'password.confirmed' => __('validation_messages.password_confirmed'),
         ];
     }
 }

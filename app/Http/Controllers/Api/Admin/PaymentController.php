@@ -66,7 +66,7 @@ class PaymentController extends Controller
         // Check if appointment already has a payment
         $existingPayment = $appointment->payment;
         if ($existingPayment) {
-            return ApiResponse::error('يوجد دفعة مسجلة لهذا الموعد بالفعل', 422);
+            return ApiResponse::error(__('messages.payments.already_recorded'), 422);
         }
 
         $payment = $this->paymentService->createPayment(
@@ -84,7 +84,7 @@ class PaymentController extends Controller
 
         $payment->load(['appointment.patient']);
 
-        return ApiResponse::created(new PaymentResource($payment), 'تم تسجيل الدفعة بنجاح');
+        return ApiResponse::created(new PaymentResource($payment), __('messages.payments.created'));
     }
 
     public function show(Payment $payment): JsonResponse
@@ -97,18 +97,18 @@ class PaymentController extends Controller
     public function update(UpdatePaymentRequest $request, Payment $payment): JsonResponse
     {
         if ($payment->isPaid()) {
-            return ApiResponse::error('لا يمكن تعديل دفعة تمت بالفعل', 422);
+            return ApiResponse::error(__('messages.payments.cannot_update_paid'), 422);
         }
 
         if ($payment->isRefunded()) {
-            return ApiResponse::error('لا يمكن تعديل دفعة مستردة', 422);
+            return ApiResponse::error(__('messages.payments.cannot_update_refunded'), 422);
         }
 
         $payment = $this->paymentService->updatePayment($payment, $request->validated());
 
         $payment->load(['appointment.patient']);
 
-        return ApiResponse::success(new PaymentResource($payment), 'تم تحديث الدفعة بنجاح');
+        return ApiResponse::success(new PaymentResource($payment), __('messages.payments.updated'));
     }
 
     public function markAsPaid(Request $request, Payment $payment): JsonResponse
@@ -118,18 +118,18 @@ class PaymentController extends Controller
         ]);
 
         if ($payment->isPaid()) {
-            return ApiResponse::error('الدفعة مدفوعة بالفعل', 422);
+            return ApiResponse::error(__('messages.payments.already_paid'), 422);
         }
 
         if ($payment->isRefunded()) {
-            return ApiResponse::error('لا يمكن تعديل دفعة مستردة', 422);
+            return ApiResponse::error(__('messages.payments.cannot_update_refunded'), 422);
         }
 
         $this->paymentService->markAsPaid($payment, $request->transaction_id);
 
         $payment->load(['appointment.patient']);
 
-        return ApiResponse::success(new PaymentResource($payment), 'تم تأكيد الدفع بنجاح');
+        return ApiResponse::success(new PaymentResource($payment), __('messages.payments.confirmed'));
     }
 
     public function refund(Request $request, Payment $payment): JsonResponse
@@ -142,14 +142,14 @@ class PaymentController extends Controller
         ]);
 
         if (! $payment->isPaid()) {
-            return ApiResponse::error('لا يمكن استرداد دفعة غير مدفوعة', 422);
+            return ApiResponse::error(__('messages.payments.cannot_refund_unpaid'), 422);
         }
 
         $this->paymentService->refund($payment, $request->reason);
 
         $payment->load(['appointment.patient']);
 
-        return ApiResponse::success(new PaymentResource($payment), 'تم استرداد الدفعة بنجاح');
+        return ApiResponse::success(new PaymentResource($payment), __('messages.payments.refunded'));
     }
 
     public function statistics(Request $request): JsonResponse
@@ -194,7 +194,7 @@ class PaymentController extends Controller
         $payment = $appointment->payment;
 
         if (! $payment) {
-            return ApiResponse::notFound('لا توجد دفعة لهذا الموعد');
+            return ApiResponse::notFound(__('messages.payments.none_for_appointment'));
         }
 
         $payment->load(['appointment.patient']);
@@ -220,6 +220,6 @@ class PaymentController extends Controller
             'notes' => $request->notes,
         ]);
 
-        return ApiResponse::created(new PaymentResource($payment), 'تم تسجيل الدفعة بنجاح');
+        return ApiResponse::created(new PaymentResource($payment), __('messages.payments.created'));
     }
 }

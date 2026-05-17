@@ -24,11 +24,11 @@ class UpdateVacationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'عنوان الإجازة مطلوب.',
-            'start_date.required' => 'تاريخ البداية مطلوب.',
-            'start_date.after_or_equal' => 'تاريخ البداية يجب أن يكون اليوم أو بعده.',
-            'end_date.required' => 'تاريخ النهاية مطلوب.',
-            'end_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون مساوياً أو بعد تاريخ البداية.',
+            'title.required' => __('validation_messages.vacation_title_required'),
+            'start_date.required' => __('validation_messages.vacation_start_required'),
+            'start_date.after_or_equal' => __('validation_messages.vacation_start_after_today'),
+            'end_date.required' => __('validation_messages.vacation_end_required'),
+            'end_date.after_or_equal' => __('validation_messages.vacation_end_after_start'),
         ];
     }
 }

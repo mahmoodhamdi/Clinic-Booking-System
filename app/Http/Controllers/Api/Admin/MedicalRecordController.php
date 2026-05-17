@@ -55,7 +55,7 @@ class MedicalRecordController extends Controller
 
         $medicalRecord->load(['patient', 'appointment']);
 
-        return ApiResponse::created(new MedicalRecordResource($medicalRecord), 'تم إنشاء السجل الطبي بنجاح');
+        return ApiResponse::created(new MedicalRecordResource($medicalRecord), __('messages.medical_records.created'));
     }
 
     public function show(MedicalRecord $medicalRecord): JsonResponse
@@ -71,7 +71,7 @@ class MedicalRecordController extends Controller
 
         $medicalRecord->load(['patient', 'appointment']);
 
-        return ApiResponse::success(new MedicalRecordResource($medicalRecord), 'تم تحديث السجل الطبي بنجاح');
+        return ApiResponse::success(new MedicalRecordResource($medicalRecord), __('messages.medical_records.updated'));
     }
 
     public function destroy(MedicalRecord $medicalRecord): JsonResponse
@@ -86,7 +86,7 @@ class MedicalRecordController extends Controller
 
         $medicalRecord->delete();
 
-        return ApiResponse::success(null, 'تم حذف السجل الطبي بنجاح');
+        return ApiResponse::success(null, __('messages.medical_records.deleted'));
     }
 
     public function byPatient(int $patientId): JsonResponse

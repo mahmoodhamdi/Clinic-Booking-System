@@ -33,11 +33,11 @@ class BookAppointmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'datetime.required' => 'يرجى تحديد موعد الحجز',
-            'datetime.date' => 'صيغة التاريخ غير صحيحة',
-            'datetime.after' => 'لا يمكن الحجز في الماضي',
-            'datetime.before_or_equal' => 'لا يمكن الحجز بعد الحد الأقصى للحجز المسبق',
-            'notes.max' => 'الملاحظات يجب ألا تتجاوز 500 حرف',
+            'datetime.required' => __('validation_messages.appointment_datetime_required'),
+            'datetime.date' => __('validation_messages.appointment_datetime_invalid'),
+            'datetime.after' => __('validation_messages.appointment_date_past'),
+            'datetime.before_or_equal' => __('validation_messages.appointment_date_too_far'),
+            'notes.max' => __('validation_messages.appointment_notes_max'),
         ];
     }
 }

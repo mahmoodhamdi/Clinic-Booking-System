@@ -57,7 +57,7 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('تم حجز الموعد بنجاح'),
+                'message' => __('messages.appointments.booked'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ], 201);
         } catch (BusinessLogicException $e) {
@@ -107,7 +107,7 @@ class AppointmentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => __('تم إلغاء الحجز بنجاح'),
+                'message' => __('messages.appointments.cancelled'),
                 'data' => new AppointmentResource($appointment->load('patient')),
             ]);
         } catch (BusinessLogicException $e) {

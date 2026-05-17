@@ -48,7 +48,7 @@ trait ApiResponses
      */
     protected function created($data = null, ?string $message = null): JsonResponse
     {
-        return $this->success($data, $message ?? __('تم الإنشاء بنجاح'), 201);
+        return $this->success($data, $message ?? __('messages.common.created'), 201);
     }
 
     /**
@@ -56,7 +56,7 @@ trait ApiResponses
      */
     protected function deleted(?string $message = null): JsonResponse
     {
-        return $this->success(null, $message ?? __('تم الحذف بنجاح'));
+        return $this->success(null, $message ?? __('messages.common.deleted'));
     }
 
     /**
@@ -64,7 +64,7 @@ trait ApiResponses
      */
     protected function notFound(?string $message = null): JsonResponse
     {
-        return $this->error($message ?? __('العنصر غير موجود'), null, 404);
+        return $this->error($message ?? __('messages.common.not_found'), null, 404);
     }
 
     /**
@@ -72,7 +72,7 @@ trait ApiResponses
      */
     protected function unauthorized(?string $message = null): JsonResponse
     {
-        return $this->error($message ?? __('غير مصرح'), null, 401);
+        return $this->error($message ?? __('messages.common.unauthorized'), null, 401);
     }
 
     /**
@@ -80,7 +80,7 @@ trait ApiResponses
      */
     protected function forbidden(?string $message = null): JsonResponse
     {
-        return $this->error($message ?? __('غير مسموح'), null, 403);
+        return $this->error($message ?? __('messages.common.forbidden'), null, 403);
     }
 
     /**
@@ -88,6 +88,6 @@ trait ApiResponses
      */
     protected function validationError($errors): JsonResponse
     {
-        return $this->error(__('بيانات غير صالحة'), $errors, 422);
+        return $this->error(__('messages.common.invalid_data'), $errors, 422);
     }
 }

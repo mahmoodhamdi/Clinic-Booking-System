@@ -35,7 +35,7 @@ class ClinicSettingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث إعدادات العيادة بنجاح.',
+            'message' => __('messages.settings.updated'),
             'data' => new ClinicSettingResource($settings->fresh()),
         ]);
     }
@@ -68,7 +68,7 @@ class ClinicSettingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث شعار العيادة بنجاح.',
+            'message' => __('messages.settings.logo_uploaded'),
             'data' => new ClinicSettingResource($settings->fresh()),
         ]);
     }
@@ -87,7 +87,7 @@ class ClinicSettingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف شعار العيادة بنجاح.',
+            'message' => __('messages.settings.logo_deleted'),
             'data' => new ClinicSettingResource($settings->fresh()),
         ]);
     }
@@ -116,7 +116,7 @@ class ClinicSettingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث صورة الواجهة بنجاح.',
+            'message' => __('messages.settings.hero_uploaded'),
             'data' => new ClinicSettingResource($settings->fresh()),
         ]);
     }
@@ -132,7 +132,7 @@ class ClinicSettingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف صورة الواجهة بنجاح.',
+            'message' => __('messages.settings.hero_deleted'),
             'data' => new ClinicSettingResource($settings->fresh()),
         ]);
     }
@@ -158,7 +158,7 @@ class ClinicSettingController extends Controller
         if (! empty($missing)) {
             return response()->json([
                 'success' => false,
-                'message' => 'يجب تعبئة بيانات العيادة قبل إكمال الإعداد.',
+                'message' => __('messages.settings.setup_incomplete'),
                 'error_code' => 'SETUP_INCOMPLETE',
                 'errors' => ['missing' => $missing],
             ], 422);
@@ -168,7 +168,7 @@ class ClinicSettingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إكمال إعداد العيادة بنجاح.',
+            'message' => __('messages.settings.setup_completed'),
             'data' => new ClinicSettingResource($settings->fresh()),
         ]);
     }

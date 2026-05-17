@@ -107,7 +107,7 @@ class NotificationTest extends TestCase
         $response = $this->postJson("/api/notifications/{$notification->id}/read");
 
         $response->assertOk()
-            ->assertJsonPath('message', 'تم تحديد الإشعار كمقروء');
+            ->assertJsonPath('message', __('messages.notifications.marked_read'));
 
         $notification->refresh();
         $this->assertNotNull($notification->read_at);
@@ -128,7 +128,7 @@ class NotificationTest extends TestCase
         $response = $this->postJson('/api/notifications/read-all');
 
         $response->assertOk()
-            ->assertJsonPath('message', 'تم تحديد جميع الإشعارات كمقروءة');
+            ->assertJsonPath('message', __('messages.notifications.all_marked_read'));
 
         $this->patient->refresh();
         $this->assertEquals(0, $this->patient->unreadNotifications()->count());
@@ -147,7 +147,7 @@ class NotificationTest extends TestCase
         $response = $this->deleteJson("/api/notifications/{$notificationId}");
 
         $response->assertOk()
-            ->assertJsonPath('message', 'تم حذف الإشعار بنجاح');
+            ->assertJsonPath('message', __('messages.notifications.deleted'));
 
         $this->assertDatabaseMissing('notifications', ['id' => $notificationId]);
     }
