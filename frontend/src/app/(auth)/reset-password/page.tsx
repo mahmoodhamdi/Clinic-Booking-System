@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent } from '@/components/ui/card';
-import { resetPasswordSchema, ResetPasswordFormData } from '@/lib/validations/auth';
+import { createResetPasswordSchema, ResetPasswordFormData } from '@/lib/validations/auth';
 import { authApi } from '@/lib/api/auth';
 
 interface PasswordRequirement {
@@ -124,7 +124,7 @@ export default function ResetPasswordPage() {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(createResetPasswordSchema(t)),
     defaultValues: {
       phone: '',
       otp: '',

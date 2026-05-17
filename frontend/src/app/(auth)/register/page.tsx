@@ -20,18 +20,20 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { registerSchema, RegisterFormData } from '@/lib/validations/auth';
+import { createRegisterSchema, RegisterFormData } from '@/lib/validations/auth';
 import { useAuthStore } from '@/lib/stores/auth';
+import { isApiError, getValidationErrors } from '@/lib/api/client';
 
 export default function RegisterPage() {
   const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register, isLoading } = useAuthStore();
 
   const form = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(createRegisterSchema(t)),
     defaultValues: {
       name: '',
       phone: '',
@@ -47,8 +49,26 @@ export default function RegisterPage() {
       toast.success(t('registerSuccess'));
       // Token is set via HttpOnly cookie by the server
       router.push('/dashboard');
-    } catch {
-      // Error is handled by the store
+    } catch (error) {
+      const fieldErrors = getValidationErrors(error);
+      if (fieldErrors) {
+        const formFields: Array<keyof RegisterFormData> = [
+          'name',
+          'phone',
+          'email',
+          'password',
+          'password_confirmation',
+        ];
+        for (const field of formFields) {
+          const messages = fieldErrors[field];
+          if (messages?.length) {
+            form.setError(field, { type: 'server', message: messages[0] });
+          }
+        }
+        toast.error(isApiError(error) ? error.message : t('error'));
+      } else {
+        toast.error(isApiError(error) ? error.message : t('error'));
+      }
     }
   };
 
@@ -104,7 +124,7 @@ export default function RegisterPage() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  {t('email')} <span className="text-muted-foreground">(optional)</span>
+                  {t('email')} <span className="text-muted-foreground">({tCommon('optional')})</span>
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -150,6 +170,9 @@ export default function RegisterPage() {
                     </button>
                   </div>
                 </FormControl>
+                <p className="text-xs text-muted-foreground">
+                  {t('passwordRequirements')}
+                </p>
                 <FormMessage />
               </FormItem>
             )}

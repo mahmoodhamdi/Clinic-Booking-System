@@ -20,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { forgotPasswordSchema, ForgotPasswordFormData } from '@/lib/validations/auth';
+import { createForgotPasswordSchema, ForgotPasswordFormData } from '@/lib/validations/auth';
 import { authApi } from '@/lib/api/auth';
 
 export default function ForgotPasswordPage() {
@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
+    resolver: zodResolver(createForgotPasswordSchema(t)),
     defaultValues: {
       phone: '',
     },

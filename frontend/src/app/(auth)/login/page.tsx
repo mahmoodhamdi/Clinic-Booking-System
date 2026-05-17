@@ -20,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { loginSchema, LoginFormData } from '@/lib/validations/auth';
+import { createLoginSchema, LoginFormData } from '@/lib/validations/auth';
 import { useAuthStore } from '@/lib/stores/auth';
 
 export default function LoginPage() {
@@ -30,7 +30,7 @@ export default function LoginPage() {
   const { login, isLoading } = useAuthStore();
 
   const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(t)),
     defaultValues: {
       phone: '',
       password: '',

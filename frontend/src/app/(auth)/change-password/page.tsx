@@ -20,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { changePasswordSchema, ChangePasswordFormData } from '@/lib/validations/auth';
+import { createChangePasswordSchema, ChangePasswordFormData } from '@/lib/validations/auth';
 import { authApi } from '@/lib/api/auth';
 import { getErrorMessage } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/stores/auth';
@@ -43,7 +43,7 @@ export default function ChangePasswordPage() {
   }, [user, isForced, router]);
 
   const form = useForm<ChangePasswordFormData>({
-    resolver: zodResolver(changePasswordSchema),
+    resolver: zodResolver(createChangePasswordSchema(t)),
     defaultValues: {
       current_password: '',
       password: '',
