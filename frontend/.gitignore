@@ -44,3 +44,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright demo run output (videos, traces, html report, screenshots)
+demo-artifacts/
+demo-report/
+demo-videos/
+demo-screenshots/
