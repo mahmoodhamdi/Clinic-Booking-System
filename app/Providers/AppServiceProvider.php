@@ -66,29 +66,32 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting(): void
     {
-        // API rate limiter for authenticated users (60 requests/minute)
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        $isLocal = app()->environment(['local', 'testing']);
+
+        // API rate limiter for authenticated users
+        RateLimiter::for('api', function (Request $request) use ($isLocal) {
+            return Limit::perMinute($isLocal ? 600 : 60)->by($request->user()?->id ?: $request->ip());
         });
 
-        // Stricter rate limiter for public endpoints (30 requests/minute)
-        RateLimiter::for('public', function (Request $request) {
-            return Limit::perMinute(30)->by($request->ip());
+        // Stricter rate limiter for public endpoints
+        RateLimiter::for('public', function (Request $request) use ($isLocal) {
+            return Limit::perMinute($isLocal ? 300 : 30)->by($request->ip());
         });
 
-        // Very strict rate limiter for auth endpoints (5 requests/minute)
-        RateLimiter::for('auth', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip());
+        // Strict rate limiter for auth endpoints (relaxed in local/testing to
+        // keep e2e suites and demo recordings from tripping the throttle).
+        RateLimiter::for('auth', function (Request $request) use ($isLocal) {
+            return Limit::perMinute($isLocal ? 120 : 5)->by($request->ip());
         });
 
-        // Rate limiter for slots (20 requests/minute)
-        RateLimiter::for('slots', function (Request $request) {
-            return Limit::perMinute(20)->by($request->ip());
+        // Rate limiter for slots
+        RateLimiter::for('slots', function (Request $request) use ($isLocal) {
+            return Limit::perMinute($isLocal ? 200 : 20)->by($request->ip());
         });
 
-        // Rate limiter for booking (3 requests/minute to prevent spam)
-        RateLimiter::for('booking', function (Request $request) {
-            return Limit::perMinute(3)->by($request->user()?->id ?: $request->ip());
+        // Rate limiter for booking
+        RateLimiter::for('booking', function (Request $request) use ($isLocal) {
+            return Limit::perMinute($isLocal ? 60 : 3)->by($request->user()?->id ?: $request->ip());
         });
     }
 }
